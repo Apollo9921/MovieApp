@@ -2,7 +2,6 @@ package com.example.movieapp.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,8 +25,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import coil3.compose.AsyncImage
-import coil3.compose.LocalPlatformContext
 import com.example.movieapp.R
+import com.example.movieapp.utils.Background
 import com.example.movieapp.utils.CircleIndicator
 import com.example.movieapp.utils.TopBarBackground
 import com.example.movieapp.utils.Typography
@@ -38,40 +37,43 @@ fun HomeScreen(backStack: NavBackStack?) {
         modifier = Modifier
             .fillMaxSize(),
         topBar = { HomeTopBar() },
-        content = { it -> MoviesList(it) }
+        content = { MoviesList(it) }
     )
 }
 
 @Composable
 fun MoviesList(pv: PaddingValues) {
-    val context = LocalPlatformContext.current
-    Box(
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(3),
         modifier = Modifier
             .fillMaxSize()
+            .background(Background)
             .padding(pv)
     ) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3)
-        ) {
-            items(5) {
-                var loading = remember { mutableStateOf(false) }
-                if (loading.value) {
-                    CircularProgressIndicator(color = CircleIndicator)
-                } else {
-                    AsyncImage(
-                        model = "https://cdn.pixabay.com/photo/2024/12/28/03/20/parrot-9295172_1280.jpg",
-                        onLoading = { loading.value = true },
-                        onError = { loading.value = false },
-                        onSuccess = { loading.value = false },
-                        error = painterResource(R.drawable.ic_launcher_background),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(width = 75.dp, height = 250.dp)
-                            .padding(5.dp)
-                    )
-                }
+        items(3) {
+            val loading = remember { mutableStateOf(false) }
+            if (loading.value) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(75.dp),
+                    color = CircleIndicator,
+                    strokeWidth = 2.dp
+                )
+                return@items
             }
+            AsyncImage(
+                model = "https://cdn.pixabay.com/photo/2024/12/28/03/20/parrot-9295172_1280.jpg",
+                onLoading = { loading.value = true },
+                onError = { loading.value = false },
+                onSuccess = { loading.value = false },
+                placeholder = painterResource(R.drawable.ic_launcher_background),
+                error = painterResource(R.drawable.ic_launcher_background),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(width = 75.dp, height = 250.dp)
+                    .padding(5.dp)
+            )
         }
     }
 }
@@ -89,7 +91,7 @@ private fun HomeTopBar() {
     ) {
         Text(
             style = Typography.titleLarge,
-            text = "Movie App"
+            text = "Home"
         )
     }
 }
