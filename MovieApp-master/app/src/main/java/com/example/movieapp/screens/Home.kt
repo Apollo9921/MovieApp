@@ -1,6 +1,5 @@
 package com.example.movieapp.screens
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -19,18 +18,24 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import com.example.movieapp.core.TopBarBackground
 import com.example.movieapp.core.Typography
-import com.example.movieapp.networking.model.Movies
+import com.example.movieapp.networking.model.genres.GenresList
+import com.example.movieapp.networking.model.movies.Movies
 import com.example.movieapp.networking.viewModel.MoviesViewModel
+import com.example.movieapp.status
+import com.example.movieapp.utils.ErrorScreen
 import com.example.movieapp.utils.MoviesList
+import com.example.movieapp.utils.network.ConnectivityObserver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 private var moviesViewModel: MoviesViewModel = MoviesViewModel()
 private var moviesList: Movies? = null
+private var genresList: GenresList? = null
 private var isLoading = mutableStateOf(false)
-private var errorMessage = mutableStateOf("")
 private var isSuccess = mutableStateOf(false)
+private var isError = mutableStateOf(false)
+private var errorMessage = mutableStateOf("")
 
 @Composable
 fun HomeScreen(backStack: NavBackStack?) {
@@ -41,9 +46,12 @@ fun HomeScreen(backStack: NavBackStack?) {
         topBar = { HomeTopBar() },
         content = {
             if (isLoading.value || isSuccess.value) {
-                MoviesList(it, moviesList)
+                MoviesList(it, moviesList, genresList)
             } else {
-                Log.e("HomeScreen", "Error: ${errorMessage.value}")
+                ErrorScreen()
+                if (status == ConnectivityObserver.Status.Available) {
+                    fetchMovies()
+                }
             }
         }
     )
@@ -61,14 +69,20 @@ private suspend fun observeMovies() {
         when (it) {
             is MoviesViewModel.MoviesState.Error -> {
                 errorMessage.value = it.message
+                isError.value = true
                 isLoading.value = false
             }
+
             is MoviesViewModel.MoviesState.Loading -> {
                 isLoading.value = true
+                isError.value = false
             }
+
             is MoviesViewModel.MoviesState.Success -> {
                 moviesList = it.movies
+                genresList = it.genres
                 isLoading.value = false
+                isError.value = false
                 isSuccess.value = true
             }
         }

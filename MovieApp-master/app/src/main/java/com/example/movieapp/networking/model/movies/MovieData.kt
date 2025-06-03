@@ -1,4 +1,4 @@
-package com.example.movieapp.networking.model
+package com.example.movieapp.networking.model.movies
 
 data class MovieData(
     val adult: Boolean,

@@ -3,7 +3,10 @@ package com.example.movieapp.networking.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieapp.networking.instance.MovieInstance
-import com.example.movieapp.networking.model.Movies
+import com.example.movieapp.networking.model.genres.GenresList
+import com.example.movieapp.networking.model.movies.Movies
+import com.example.movieapp.status
+import com.example.movieapp.utils.network.ConnectivityObserver
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +21,7 @@ class MoviesViewModel : ViewModel() {
 
     sealed class MoviesState {
         data object Loading : MoviesState()
-        data class Success(val movies: Movies) : MoviesState()
+        data class Success(val movies: Movies, val genres: GenresList) : MoviesState()
         data class Error(val message: String) : MoviesState()
     }
 
@@ -26,11 +29,20 @@ class MoviesViewModel : ViewModel() {
         _moviesState.value = MoviesState.Loading
         viewModelScope.launch {
             try {
-                val response = apiService.getMovies()
-                if (response.isSuccessful && response.body() != null) {
-                    _moviesState.value = MoviesState.Success(response.body()!!)
+                if (status == ConnectivityObserver.Status.Unavailable) {
+                    _moviesState.value = MoviesState.Error("No Internet Connection")
+                    return@launch
+                }
+                val responseMovies = apiService.getMovies()
+                if (responseMovies.isSuccessful && responseMovies.body() != null) {
+                    val responseGenres = apiService.getGenres()
+                    if (responseGenres.isSuccessful && responseGenres.body() != null) {
+                        _moviesState.value = MoviesState.Success(responseMovies.body()!!, responseGenres.body()!!)
+                    } else {
+                        _moviesState.value = MoviesState.Error("Error: ${responseGenres.code()} ${responseGenres.message()}")
+                    }
                 } else {
-                    _moviesState.value = MoviesState.Error("Error: ${response.code()} ${response.message()}")
+                    _moviesState.value = MoviesState.Error("Error: ${responseMovies.code()} ${responseMovies.message()}")
                 }
             } catch (e: Exception) {
                 _moviesState.value = MoviesState.Error("Exception: ${e.message ?: "Unknown error"}")
