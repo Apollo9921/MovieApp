@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,9 +29,12 @@ import com.example.movieapp.utils.network.ConnectivityObserver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.example.movieapp.networking.model.movies.MovieData
+import androidx.compose.runtime.collectAsState
 
 private var moviesViewModel: MoviesViewModel = MoviesViewModel()
 private var moviesList: Movies? = null
+private var filteredMovies: List<MovieData> = emptyList()
 private var genresList: GenresList? = null
 private var isLoading = mutableStateOf(false)
 private var isSuccess = mutableStateOf(false)
@@ -46,7 +50,7 @@ fun HomeScreen(backStack: NavBackStack?) {
         topBar = { HomeTopBar() },
         content = {
             if (isLoading.value || isSuccess.value) {
-                MoviesList(it, moviesList, genresList)
+                MoviesList(it, moviesList, genresList, filteredMovies, moviesViewModel)
             } else {
                 ErrorScreen()
                 if (status == ConnectivityObserver.Status.Available) {
@@ -55,6 +59,10 @@ fun HomeScreen(backStack: NavBackStack?) {
             }
         }
     )
+
+    LaunchedEffect(moviesViewModel.genreTypeSelected.collectAsState().value) {
+        observeGenres()
+    }
 }
 
 private fun fetchMovies() {
@@ -84,6 +92,24 @@ private suspend fun observeMovies() {
                 isLoading.value = false
                 isError.value = false
                 isSuccess.value = true
+            }
+        }
+    }
+}
+
+private suspend fun observeGenres() {
+    moviesViewModel.genreTypeSelected.collect { it ->
+        when (it) {
+            is MoviesViewModel.GenresState.NotSelected -> {
+                filteredMovies = emptyList()
+            }
+            is MoviesViewModel.GenresState.Selected -> {
+                val genreType = it.genresType
+                if (moviesList != null) {
+                    filteredMovies = moviesList?.results?.filter {
+                        it.genre_ids.contains(genreType)
+                    }!!
+                }
             }
         }
     }

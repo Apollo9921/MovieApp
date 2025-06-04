@@ -21,11 +21,19 @@ import com.example.movieapp.R
 import com.example.movieapp.core.Background
 import com.example.movieapp.core.CircleIndicator
 import com.example.movieapp.networking.model.genres.GenresList
+import com.example.movieapp.networking.model.movies.MovieData
 import com.example.movieapp.networking.model.movies.Movies
+import com.example.movieapp.networking.viewModel.MoviesViewModel
 import com.example.movieapp.utils.topBar.GenresListScreen
 
 @Composable
-fun MoviesList(pv: PaddingValues, movies: Movies?, genresList: GenresList?) {
+fun MoviesList(
+    pv: PaddingValues,
+    movies: Movies?,
+    genresList: GenresList?,
+    filteredMovies: List<MovieData>,
+    moviesViewModel: MoviesViewModel
+) {
     if (movies == null) {
         Box(
             modifier = Modifier
@@ -43,13 +51,14 @@ fun MoviesList(pv: PaddingValues, movies: Movies?, genresList: GenresList?) {
             .background(Background)
             .padding(pv)
     ) {
-        GenresListScreen(genresList)
+        GenresListScreen(genresList, moviesViewModel)
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
         ) {
-            items(movies.results.size) { index ->
+            items(if (filteredMovies.isNotEmpty()) filteredMovies.size else movies.results.size) { index ->
+                val movie = if (filteredMovies.isNotEmpty()) filteredMovies[index] else movies.results[index]
                 AsyncImage(
-                    model = "https://image.tmdb.org/t/p/w500/${movies.results[index].poster_path}",
+                    model = "https://image.tmdb.org/t/p/w500/${movie.poster_path}",
                     placeholder = painterResource(R.drawable.ic_launcher_background),
                     error = painterResource(R.drawable.ic_launcher_background),
                     contentDescription = null,

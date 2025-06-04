@@ -1,6 +1,7 @@
 package com.example.movieapp.utils.topBar
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,10 +19,14 @@ import androidx.compose.ui.unit.dp
 import com.example.movieapp.core.Black
 import com.example.movieapp.core.TopBarBackground
 import com.example.movieapp.core.Typography
+import com.example.movieapp.interfaces.GenreTypeSelected
 import com.example.movieapp.networking.model.genres.GenresList
 
 @Composable
-fun GenresListScreen(genresList: GenresList?) {
+fun GenresListScreen(
+    genresList: GenresList?,
+    genreTypeSelectedListener: GenreTypeSelected
+) {
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -33,7 +38,10 @@ fun GenresListScreen(genresList: GenresList?) {
             Card(
                 modifier = Modifier
                     .wrapContentSize()
-                    .padding(horizontal = 10.dp),
+                    .padding(horizontal = 10.dp)
+                    .clickable {
+                        genreTypeSelectedListener.onGenreTypeSelected(genresList?.genres?.get(it)?.id ?: 0)
+                    },
                 colors = CardDefaults.cardColors(
                     containerColor = TopBarBackground,
                 ),
@@ -56,5 +64,8 @@ fun GenresListScreen(genresList: GenresList?) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun GenresListPreview() {
-    GenresListScreen(GenresList(emptyList()))
+    val previewListener = object : GenreTypeSelected {
+        override fun onGenreTypeSelected(genreId: Int) {}
+    }
+    GenresListScreen(GenresList(emptyList()), previewListener)
 }

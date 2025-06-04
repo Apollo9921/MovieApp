@@ -2,6 +2,7 @@ package com.example.movieapp.networking.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.movieapp.interfaces.GenreTypeSelected
 import com.example.movieapp.networking.instance.MovieInstance
 import com.example.movieapp.networking.model.genres.GenresList
 import com.example.movieapp.networking.model.movies.Movies
@@ -12,10 +13,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class MoviesViewModel : ViewModel() {
+class MoviesViewModel : ViewModel(), GenreTypeSelected {
 
     private val _moviesState = MutableStateFlow<MoviesState>(MoviesState.Loading)
     val moviesState: StateFlow<MoviesState> = _moviesState.asStateFlow()
+
+    private val _genreTypeSelected = MutableStateFlow<GenresState>(GenresState.NotSelected)
+    val genreTypeSelected: StateFlow<GenresState> = _genreTypeSelected.asStateFlow()
 
     private val apiService = MovieInstance.api
 
@@ -23,6 +27,11 @@ class MoviesViewModel : ViewModel() {
         data object Loading : MoviesState()
         data class Success(val movies: Movies, val genres: GenresList) : MoviesState()
         data class Error(val message: String) : MoviesState()
+    }
+
+    sealed class GenresState {
+        data object NotSelected : GenresState()
+        data class Selected(val genresType: Int) : GenresState()
     }
 
     fun fetchMovies() {
@@ -48,5 +57,9 @@ class MoviesViewModel : ViewModel() {
                 _moviesState.value = MoviesState.Error("Exception: ${e.message ?: "Unknown error"}")
             }
         }
+    }
+
+    override fun onGenreTypeSelected(genreId: Int) {
+        _genreTypeSelected.value = GenresState.Selected(genreId)
     }
 }
