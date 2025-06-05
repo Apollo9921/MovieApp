@@ -3,7 +3,7 @@ package com.example.movieapp.networking.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieapp.interfaces.GenreTypeSelected
-import com.example.movieapp.networking.instance.MovieInstance
+import com.example.movieapp.koin.MoviesRepository
 import com.example.movieapp.networking.model.genres.GenresList
 import com.example.movieapp.networking.model.movies.Movies
 import com.example.movieapp.status
@@ -13,15 +13,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class MoviesViewModel : ViewModel(), GenreTypeSelected {
+class MoviesViewModel(private val repository: MoviesRepository) : ViewModel(), GenreTypeSelected {
 
     private val _moviesState = MutableStateFlow<MoviesState>(MoviesState.Loading)
     val moviesState: StateFlow<MoviesState> = _moviesState.asStateFlow()
 
     private val _genreTypeSelected = MutableStateFlow<GenresState>(GenresState.NotSelected)
     val genreTypeSelected: StateFlow<GenresState> = _genreTypeSelected.asStateFlow()
-
-    private val apiService = MovieInstance.api
 
     sealed class MoviesState {
         data object Loading : MoviesState()
@@ -42,9 +40,9 @@ class MoviesViewModel : ViewModel(), GenreTypeSelected {
                     _moviesState.value = MoviesState.Error("No Internet Connection")
                     return@launch
                 }
-                val responseMovies = apiService.getMovies()
+                val responseMovies = repository.fetchMovies()
                 if (responseMovies.isSuccessful && responseMovies.body() != null) {
-                    val responseGenres = apiService.getGenres()
+                    val responseGenres = repository.fetchGenres()
                     if (responseGenres.isSuccessful && responseGenres.body() != null) {
                         _moviesState.value = MoviesState.Success(responseMovies.body()!!, responseGenres.body()!!)
                     } else {

@@ -1,0 +1,19 @@
+package com.example.movieapp.koin
+
+import com.example.movieapp.networking.model.genres.GenresList
+import com.example.movieapp.networking.model.movies.Movies
+import com.example.movieapp.networking.requests.MovieService
+import retrofit2.Response
+
+class MovieRepositoryImpl(
+    private val movieService: MovieService
+): MoviesRepository {
+    override suspend fun fetchMovies(): Response<Movies> {
+        return movieService.getMovies()
+    }
+
+    override suspend fun fetchGenres(): Response<GenresList> {
+        return movieService.getGenres()
+    }
+
+}

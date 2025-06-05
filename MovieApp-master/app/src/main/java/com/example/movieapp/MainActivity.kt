@@ -10,20 +10,25 @@ import com.example.movieapp.navigation.BasicNavigation
 import com.example.movieapp.core.MovieAppTheme
 import com.example.movieapp.utils.network.ConnectivityObserver
 import com.example.movieapp.utils.network.NetworkConnectivityObserver
+import org.koin.androidx.compose.KoinAndroidContext
+import org.koin.core.annotation.KoinExperimentalAPI
 
 private lateinit var connectivityObserver: ConnectivityObserver
 lateinit var status: ConnectivityObserver.Status
 
 class MainActivity : ComponentActivity() {
+    @OptIn(KoinExperimentalAPI::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MovieAppTheme {
-                connectivityObserver = NetworkConnectivityObserver(LocalContext.current)
-                status = connectivityObserver.observe()
-                    .collectAsState(initial = ConnectivityObserver.Status.Unavailable).value
-                BasicNavigation()
+            KoinAndroidContext {
+                MovieAppTheme {
+                    connectivityObserver = NetworkConnectivityObserver(LocalContext.current)
+                    status = connectivityObserver.observe()
+                        .collectAsState(initial = ConnectivityObserver.Status.Unavailable).value
+                    BasicNavigation()
+                }
             }
         }
     }

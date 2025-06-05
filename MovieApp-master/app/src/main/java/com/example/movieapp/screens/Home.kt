@@ -31,8 +31,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.example.movieapp.networking.model.movies.MovieData
 import androidx.compose.runtime.collectAsState
+import org.koin.androidx.compose.koinViewModel
 
-private var moviesViewModel: MoviesViewModel = MoviesViewModel()
+private var moviesViewModel: MoviesViewModel? = null
 private var moviesList: Movies? = null
 private var filteredMovies: List<MovieData> = emptyList()
 private var genresList: GenresList? = null
@@ -43,6 +44,7 @@ private var errorMessage = mutableStateOf("")
 
 @Composable
 fun HomeScreen(backStack: NavBackStack?) {
+    moviesViewModel = koinViewModel<MoviesViewModel>()
     fetchMovies()
     Scaffold(
         modifier = Modifier
@@ -50,7 +52,7 @@ fun HomeScreen(backStack: NavBackStack?) {
         topBar = { HomeTopBar() },
         content = {
             if (isLoading.value || isSuccess.value) {
-                MoviesList(it, moviesList, genresList, filteredMovies, moviesViewModel)
+                MoviesList(it, moviesList, genresList, filteredMovies, moviesViewModel!!)
             } else {
                 ErrorScreen()
                 if (status == ConnectivityObserver.Status.Available) {
@@ -60,20 +62,20 @@ fun HomeScreen(backStack: NavBackStack?) {
         }
     )
 
-    LaunchedEffect(moviesViewModel.genreTypeSelected.collectAsState().value) {
+    LaunchedEffect(moviesViewModel?.genreTypeSelected?.collectAsState()?.value) {
         observeGenres()
     }
 }
 
 private fun fetchMovies() {
     CoroutineScope(Dispatchers.IO).launch {
-        moviesViewModel.fetchMovies()
+        moviesViewModel?.fetchMovies()
         observeMovies()
     }
 }
 
 private suspend fun observeMovies() {
-    moviesViewModel.moviesState.collect {
+    moviesViewModel?.moviesState?.collect {
         when (it) {
             is MoviesViewModel.MoviesState.Error -> {
                 errorMessage.value = it.message
@@ -98,7 +100,7 @@ private suspend fun observeMovies() {
 }
 
 private suspend fun observeGenres() {
-    moviesViewModel.genreTypeSelected.collect { it ->
+    moviesViewModel?.genreTypeSelected?.collect { it ->
         when (it) {
             is MoviesViewModel.GenresState.NotSelected -> {
                 filteredMovies = emptyList()
