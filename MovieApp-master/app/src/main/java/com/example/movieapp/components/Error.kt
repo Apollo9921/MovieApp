@@ -1,4 +1,4 @@
-package com.example.movieapp.utils
+package com.example.movieapp.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -9,6 +9,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import com.example.movieapp.core.Typography
+import com.example.movieapp.core.Background
 import com.example.movieapp.utils.size.ScreenSizeUtils
 
 @Preview(showBackground = true, showSystemUi = true)

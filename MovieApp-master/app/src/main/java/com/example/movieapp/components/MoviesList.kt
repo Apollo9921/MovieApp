@@ -1,4 +1,4 @@
-package com.example.movieapp.utils
+package com.example.movieapp.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -20,18 +20,18 @@ import coil3.compose.AsyncImage
 import com.example.movieapp.R
 import com.example.movieapp.core.Background
 import com.example.movieapp.core.CircleIndicator
-import com.example.movieapp.networking.model.genres.GenresList
+import com.example.movieapp.networking.model.genres.Genre
 import com.example.movieapp.networking.model.movies.MovieData
 import com.example.movieapp.networking.model.movies.Movies
 import com.example.movieapp.networking.viewModel.MoviesViewModel
-import com.example.movieapp.utils.topBar.GenresListScreen
 
 @Composable
 fun MoviesList(
     pv: PaddingValues,
     movies: Movies?,
-    genresList: GenresList?,
+    genresList: ArrayList<Genre>?,
     filteredMovies: List<MovieData>,
+    genreSelected: Int,
     moviesViewModel: MoviesViewModel
 ) {
     if (movies == null) {
@@ -51,7 +51,7 @@ fun MoviesList(
             .background(Background)
             .padding(pv)
     ) {
-        GenresListScreen(genresList, moviesViewModel)
+        GenresListScreen(genresList, genreSelected, moviesViewModel)
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
         ) {

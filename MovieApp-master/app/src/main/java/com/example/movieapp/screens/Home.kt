@@ -19,26 +19,28 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import com.example.movieapp.core.TopBarBackground
 import com.example.movieapp.core.Typography
-import com.example.movieapp.networking.model.genres.GenresList
 import com.example.movieapp.networking.model.movies.Movies
 import com.example.movieapp.networking.viewModel.MoviesViewModel
 import com.example.movieapp.status
-import com.example.movieapp.utils.ErrorScreen
-import com.example.movieapp.utils.MoviesList
+import com.example.movieapp.components.ErrorScreen
+import com.example.movieapp.components.MoviesList
 import com.example.movieapp.utils.network.ConnectivityObserver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.example.movieapp.networking.model.movies.MovieData
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.unit.sp
+import com.example.movieapp.networking.model.genres.Genre
 import com.example.movieapp.utils.size.ScreenSizeUtils
 import org.koin.androidx.compose.koinViewModel
 
 private var moviesViewModel: MoviesViewModel? = null
 private var moviesList: Movies? = null
 private var filteredMovies: List<MovieData> = emptyList()
-private var genresList: GenresList? = null
+private var genresList: ArrayList<Genre>? = ArrayList()
+private var genreType = mutableIntStateOf(0)
 private var isLoading = mutableStateOf(false)
 private var isSuccess = mutableStateOf(false)
 private var isError = mutableStateOf(false)
@@ -54,7 +56,14 @@ fun HomeScreen(backStack: NavBackStack?) {
         topBar = { HomeTopBar() },
         content = {
             if (isLoading.value || isSuccess.value) {
-                MoviesList(it, moviesList, genresList, filteredMovies, moviesViewModel!!)
+                MoviesList(
+                    it,
+                    moviesList,
+                    genresList,
+                    filteredMovies,
+                    genreType.intValue,
+                    moviesViewModel!!
+                )
             } else {
                 ErrorScreen()
             }
@@ -79,7 +88,7 @@ private fun fetchMovies() {
 }
 
 private suspend fun observeMovies() {
-    moviesViewModel?.moviesState?.collect {
+    moviesViewModel?.moviesState?.collect { it ->
         when (it) {
             is MoviesViewModel.MoviesState.Error -> {
                 errorMessage.value = it.message
@@ -94,7 +103,11 @@ private suspend fun observeMovies() {
 
             is MoviesViewModel.MoviesState.Success -> {
                 moviesList = it.movies
-                genresList = it.genres
+                val newGenresList = ArrayList<Genre>()
+                val sourceGenres = it.genres.genres
+                newGenresList.add(Genre(0, "All"))
+                newGenresList.addAll(sourceGenres)
+                genresList = newGenresList.distinctBy { it.name } as ArrayList<Genre>
                 isLoading.value = false
                 isError.value = false
                 isSuccess.value = true
@@ -107,13 +120,15 @@ private suspend fun observeGenres() {
     moviesViewModel?.genreTypeSelected?.collect { it ->
         when (it) {
             is MoviesViewModel.GenresState.NotSelected -> {
+                genreType.intValue = 0
                 filteredMovies = emptyList()
             }
+
             is MoviesViewModel.GenresState.Selected -> {
-                val genreType = it.genresType
+                genreType.intValue = it.genresType
                 if (moviesList != null) {
                     filteredMovies = moviesList?.results?.filter {
-                        it.genre_ids.contains(genreType)
+                        it.genre_ids.contains(genreType.intValue)
                     }!!
                 }
             }

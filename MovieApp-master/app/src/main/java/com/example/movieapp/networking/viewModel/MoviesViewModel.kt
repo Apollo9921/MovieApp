@@ -58,6 +58,10 @@ class MoviesViewModel(private val repository: MoviesRepository) : ViewModel(), G
     }
 
     override fun onGenreTypeSelected(genreId: Int) {
+        if (genreId == 0) {
+            _genreTypeSelected.value = GenresState.NotSelected
+            return
+        }
         _genreTypeSelected.value = GenresState.Selected(genreId)
     }
 }
