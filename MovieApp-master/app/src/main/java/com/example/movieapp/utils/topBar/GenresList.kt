@@ -16,11 +16,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.movieapp.core.Black
 import com.example.movieapp.core.TopBarBackground
 import com.example.movieapp.core.Typography
 import com.example.movieapp.interfaces.GenreTypeSelected
 import com.example.movieapp.networking.model.genres.GenresList
+import com.example.movieapp.utils.size.ScreenSizeUtils
 
 @Composable
 fun GenresListScreen(
@@ -50,8 +52,9 @@ fun GenresListScreen(
                 ),
                 border = BorderStroke(2.dp, Black)
             ) {
+                val label = ScreenSizeUtils.calculateCustomWidth(baseSize = 15).sp
                 Text(
-                    style = Typography.labelMedium,
+                    style = Typography.labelMedium.copy(fontSize = label),
                     text = genresList?.genres?.get(it)?.name ?: "",
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(7.dp)

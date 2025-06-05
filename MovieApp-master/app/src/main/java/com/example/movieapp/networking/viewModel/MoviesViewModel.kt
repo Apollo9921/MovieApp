@@ -36,7 +36,7 @@ class MoviesViewModel(private val repository: MoviesRepository) : ViewModel(), G
         _moviesState.value = MoviesState.Loading
         viewModelScope.launch {
             try {
-                if (status == ConnectivityObserver.Status.Unavailable) {
+                if (status.value == ConnectivityObserver.Status.Unavailable) {
                     _moviesState.value = MoviesState.Error("No Internet Connection")
                     return@launch
                 }

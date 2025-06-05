@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalContext
 import com.example.movieapp.navigation.BasicNavigation
 import com.example.movieapp.core.MovieAppTheme
@@ -14,7 +15,7 @@ import org.koin.androidx.compose.KoinAndroidContext
 import org.koin.core.annotation.KoinExperimentalAPI
 
 private lateinit var connectivityObserver: ConnectivityObserver
-lateinit var status: ConnectivityObserver.Status
+var status = mutableStateOf(ConnectivityObserver.Status.Unavailable)
 
 class MainActivity : ComponentActivity() {
     @OptIn(KoinExperimentalAPI::class)
@@ -25,7 +26,7 @@ class MainActivity : ComponentActivity() {
             KoinAndroidContext {
                 MovieAppTheme {
                     connectivityObserver = NetworkConnectivityObserver(LocalContext.current)
-                    status = connectivityObserver.observe()
+                    status.value = connectivityObserver.observe()
                         .collectAsState(initial = ConnectivityObserver.Status.Unavailable).value
                     BasicNavigation()
                 }

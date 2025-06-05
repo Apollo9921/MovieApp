@@ -31,6 +31,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.example.movieapp.networking.model.movies.MovieData
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.unit.sp
+import com.example.movieapp.utils.size.ScreenSizeUtils
 import org.koin.androidx.compose.koinViewModel
 
 private var moviesViewModel: MoviesViewModel? = null
@@ -55,13 +57,15 @@ fun HomeScreen(backStack: NavBackStack?) {
                 MoviesList(it, moviesList, genresList, filteredMovies, moviesViewModel!!)
             } else {
                 ErrorScreen()
-                if (status == ConnectivityObserver.Status.Available) {
-                    fetchMovies()
-                }
             }
         }
     )
 
+    LaunchedEffect(status.value) {
+        if (status.value == ConnectivityObserver.Status.Available) {
+            fetchMovies()
+        }
+    }
     LaunchedEffect(moviesViewModel?.genreTypeSelected?.collectAsState()?.value) {
         observeGenres()
     }
@@ -128,8 +132,9 @@ private fun HomeTopBar() {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
+        val titleSize = ScreenSizeUtils.calculateCustomWidth(baseSize = 20).sp
         Text(
-            style = Typography.titleLarge,
+            style = Typography.titleLarge.copy(fontSize = titleSize),
             text = "Home"
         )
     }
