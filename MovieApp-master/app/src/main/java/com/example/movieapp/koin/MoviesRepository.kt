@@ -5,6 +5,6 @@ import com.example.movieapp.networking.model.movies.Movies
 import retrofit2.Response
 
 interface MoviesRepository {
-    suspend fun fetchMovies(): Response<Movies>
+    suspend fun fetchMovies(pageNumber: Int): Response<Movies>
     suspend fun fetchGenres(): Response<GenresList>
 }

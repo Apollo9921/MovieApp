@@ -19,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import com.example.movieapp.core.TopBarBackground
 import com.example.movieapp.core.Typography
-import com.example.movieapp.networking.model.movies.Movies
 import com.example.movieapp.networking.viewModel.MoviesViewModel
 import com.example.movieapp.status
 import com.example.movieapp.components.ErrorScreen
@@ -35,9 +34,10 @@ import androidx.compose.ui.unit.sp
 import com.example.movieapp.networking.model.genres.Genre
 import com.example.movieapp.utils.size.ScreenSizeUtils
 import org.koin.androidx.compose.koinViewModel
+import kotlin.collections.distinctBy
 
 private var moviesViewModel: MoviesViewModel? = null
-private var moviesList: Movies? = null
+private var moviesList: ArrayList<MovieData> = ArrayList()
 private var filteredMovies: List<MovieData> = emptyList()
 private var genresList: ArrayList<Genre>? = ArrayList()
 private var genreType = mutableIntStateOf(0)
@@ -45,14 +45,20 @@ private var isLoading = mutableStateOf(false)
 private var isSuccess = mutableStateOf(false)
 private var isError = mutableStateOf(false)
 private var errorMessage = mutableStateOf("")
+private var isConnected = mutableStateOf(false)
 
 @Composable
 fun HomeScreen(backStack: NavBackStack?) {
     moviesViewModel = koinViewModel<MoviesViewModel>()
-    fetchMovies()
+    if (status.value == ConnectivityObserver.Status.Available && !isConnected.value) {
+        isConnected.value = true
+        fetchMovies()
+    }
+    LaunchedEffect(moviesViewModel?.genreTypeSelected?.collectAsState()?.value) {
+        observeGenres()
+    }
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         topBar = { HomeTopBar() },
         content = {
             if (isLoading.value || isSuccess.value) {
@@ -69,15 +75,6 @@ fun HomeScreen(backStack: NavBackStack?) {
             }
         }
     )
-
-    LaunchedEffect(status.value) {
-        if (status.value == ConnectivityObserver.Status.Available) {
-            fetchMovies()
-        }
-    }
-    LaunchedEffect(moviesViewModel?.genreTypeSelected?.collectAsState()?.value) {
-        observeGenres()
-    }
 }
 
 private fun fetchMovies() {
@@ -102,7 +99,11 @@ private suspend fun observeMovies() {
             }
 
             is MoviesViewModel.MoviesState.Success -> {
-                moviesList = it.movies
+                val newMovies = ArrayList<MovieData>()
+                newMovies.addAll(moviesList)
+                newMovies.addAll(it.movies)
+                moviesList = newMovies.distinctBy { it.id } as ArrayList<MovieData>
+
                 val newGenresList = ArrayList<Genre>()
                 val sourceGenres = it.genres.genres
                 newGenresList.add(Genre(0, "All"))
@@ -117,7 +118,7 @@ private suspend fun observeMovies() {
 }
 
 private suspend fun observeGenres() {
-    moviesViewModel?.genreTypeSelected?.collect { it ->
+    moviesViewModel?.genreTypeSelected?.collect {
         when (it) {
             is MoviesViewModel.GenresState.NotSelected -> {
                 genreType.intValue = 0
@@ -126,10 +127,8 @@ private suspend fun observeGenres() {
 
             is MoviesViewModel.GenresState.Selected -> {
                 genreType.intValue = it.genresType
-                if (moviesList != null) {
-                    filteredMovies = moviesList?.results?.filter {
-                        it.genre_ids.contains(genreType.intValue)
-                    }!!
+                filteredMovies = moviesList.filter { movie ->
+                    movie.genre_ids.contains(genreType.intValue)
                 }
             }
         }

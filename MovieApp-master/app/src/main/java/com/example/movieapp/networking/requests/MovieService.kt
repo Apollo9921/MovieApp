@@ -4,11 +4,12 @@ import com.example.movieapp.networking.model.genres.GenresList
 import com.example.movieapp.networking.model.movies.Movies
 import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.Query
 
 interface MovieService {
 
     @GET("discover/movie")
-    suspend fun getMovies(): Response<Movies>
+    suspend fun getMovies(@Query("page") page: Int): Response<Movies>
 
     @GET("genre/movie/list")
     suspend fun getGenres(): Response<GenresList>

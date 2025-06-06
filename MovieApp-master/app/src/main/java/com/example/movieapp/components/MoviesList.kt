@@ -19,29 +19,28 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.example.movieapp.R
 import com.example.movieapp.core.Background
-import com.example.movieapp.core.CircleIndicator
 import com.example.movieapp.networking.model.genres.Genre
 import com.example.movieapp.networking.model.movies.MovieData
-import com.example.movieapp.networking.model.movies.Movies
 import com.example.movieapp.networking.viewModel.MoviesViewModel
+import com.example.movieapp.core.White
 
 @Composable
 fun MoviesList(
     pv: PaddingValues,
-    movies: Movies?,
+    movies: ArrayList<MovieData>,
     genresList: ArrayList<Genre>?,
     filteredMovies: List<MovieData>,
     genreSelected: Int,
     moviesViewModel: MoviesViewModel
 ) {
-    if (movies == null) {
+    if (movies.isEmpty()) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Background),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator(color = CircleIndicator, strokeWidth = 2.dp)
+            CircularProgressIndicator(color = White, strokeWidth = 2.dp)
         }
         return
     }
@@ -55,8 +54,8 @@ fun MoviesList(
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
         ) {
-            items(if (filteredMovies.isNotEmpty()) filteredMovies.size else movies.results.size) { index ->
-                val movie = if (filteredMovies.isNotEmpty()) filteredMovies[index] else movies.results[index]
+            items(if (filteredMovies.isNotEmpty()) filteredMovies.size else movies.size) { index ->
+                val movie = if (filteredMovies.isNotEmpty()) filteredMovies[index] else movies[index]
                 AsyncImage(
                     model = "https://image.tmdb.org/t/p/w500/${movie.poster_path}",
                     placeholder = painterResource(R.drawable.ic_launcher_background),
@@ -68,6 +67,12 @@ fun MoviesList(
                         .fillMaxSize()
                         .padding(10.dp)
                 )
+
+                if (filteredMovies.isEmpty()) {
+                    if (index == movies.size - 1) {
+                        moviesViewModel.fetchMovies()
+                    }
+                }
             }
         }
     }

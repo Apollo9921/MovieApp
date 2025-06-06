@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.movieapp.interfaces.GenreTypeSelected
 import com.example.movieapp.koin.MoviesRepository
 import com.example.movieapp.networking.model.genres.GenresList
-import com.example.movieapp.networking.model.movies.Movies
+import com.example.movieapp.networking.model.movies.MovieData
 import com.example.movieapp.status
 import com.example.movieapp.utils.network.ConnectivityObserver
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,9 +21,11 @@ class MoviesViewModel(private val repository: MoviesRepository) : ViewModel(), G
     private val _genreTypeSelected = MutableStateFlow<GenresState>(GenresState.NotSelected)
     val genreTypeSelected: StateFlow<GenresState> = _genreTypeSelected.asStateFlow()
 
+    private var currentPage = 0
+
     sealed class MoviesState {
         data object Loading : MoviesState()
-        data class Success(val movies: Movies, val genres: GenresList) : MoviesState()
+        data class Success(val movies: List<MovieData>, val genres: GenresList) : MoviesState()
         data class Error(val message: String) : MoviesState()
     }
 
@@ -32,19 +34,25 @@ class MoviesViewModel(private val repository: MoviesRepository) : ViewModel(), G
         data class Selected(val genresType: Int) : GenresState()
     }
 
+    init {
+        fetchMovies()
+    }
+
     fun fetchMovies() {
-        _moviesState.value = MoviesState.Loading
         viewModelScope.launch {
             try {
                 if (status.value == ConnectivityObserver.Status.Unavailable) {
                     _moviesState.value = MoviesState.Error("No Internet Connection")
                     return@launch
                 }
-                val responseMovies = repository.fetchMovies()
+                _moviesState.value = MoviesState.Loading
+                val pageToFetch = ++currentPage
+                val responseMovies = repository.fetchMovies(pageToFetch)
                 if (responseMovies.isSuccessful && responseMovies.body() != null) {
+                    val moviesData = responseMovies.body()!!
                     val responseGenres = repository.fetchGenres()
                     if (responseGenres.isSuccessful && responseGenres.body() != null) {
-                        _moviesState.value = MoviesState.Success(responseMovies.body()!!, responseGenres.body()!!)
+                        _moviesState.value = MoviesState.Success(moviesData.results, responseGenres.body()!!)
                     } else {
                         _moviesState.value = MoviesState.Error("Error: ${responseGenres.code()} ${responseGenres.message()}")
                     }
@@ -60,8 +68,8 @@ class MoviesViewModel(private val repository: MoviesRepository) : ViewModel(), G
     override fun onGenreTypeSelected(genreId: Int) {
         if (genreId == 0) {
             _genreTypeSelected.value = GenresState.NotSelected
-            return
+        } else {
+            _genreTypeSelected.value = GenresState.Selected(genreId)
         }
-        _genreTypeSelected.value = GenresState.Selected(genreId)
     }
 }
