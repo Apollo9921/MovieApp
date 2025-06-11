@@ -1,9 +1,12 @@
 package com.example.movieapp.networking.viewModel
 
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieapp.interfaces.GenreTypeSelected
 import com.example.movieapp.koin.MoviesRepository
+import com.example.movieapp.networking.model.genres.Genre
 import com.example.movieapp.networking.model.genres.GenresList
 import com.example.movieapp.networking.model.movies.MovieData
 import com.example.movieapp.status
@@ -16,10 +19,20 @@ import kotlinx.coroutines.launch
 class MoviesViewModel(private val repository: MoviesRepository) : ViewModel(), GenreTypeSelected {
 
     private val _moviesState = MutableStateFlow<MoviesState>(MoviesState.Loading)
-    val moviesState: StateFlow<MoviesState> = _moviesState.asStateFlow()
+    private val moviesState: StateFlow<MoviesState> = _moviesState.asStateFlow()
 
     private val _genreTypeSelected = MutableStateFlow<GenresState>(GenresState.NotSelected)
-    val genreTypeSelected: StateFlow<GenresState> = _genreTypeSelected.asStateFlow()
+    private val genreTypeSelected: StateFlow<GenresState> = _genreTypeSelected.asStateFlow()
+
+    var moviesList = ArrayList<MovieData>()
+    var genresList = ArrayList<Genre>()
+    var filteredMovies = emptyList<MovieData>()
+    var genreType = mutableIntStateOf(0)
+
+    var isLoading = mutableStateOf(false)
+    var isSuccess = mutableStateOf(false)
+    var isError = mutableStateOf(false)
+    var errorMessage = mutableStateOf("")
 
     private var currentPage = 0
 
@@ -61,6 +74,61 @@ class MoviesViewModel(private val repository: MoviesRepository) : ViewModel(), G
                 }
             } catch (e: Exception) {
                 _moviesState.value = MoviesState.Error("Exception: ${e.message ?: "Unknown error"}")
+            } finally {
+                observeMovies()
+                observeGenres()
+            }
+        }
+    }
+
+    private fun observeMovies() {
+        viewModelScope.launch {
+            moviesState.collect { it ->
+                when (it) {
+                    is MoviesState.Error -> {
+                        errorMessage.value = it.message
+                        isError.value = true
+                        isLoading.value = false
+                    }
+                    MoviesState.Loading -> {
+                        isLoading.value = true
+                        isError.value = false
+                    }
+                    is MoviesState.Success -> {
+                        val newMovies = ArrayList<MovieData>()
+                        newMovies.addAll(moviesList)
+                        newMovies.addAll(it.movies)
+                        moviesList = newMovies.distinctBy { it.id } as ArrayList<MovieData>
+
+                        val newGenresList = ArrayList<Genre>()
+                        val sourceGenres = it.genres.genres
+                        newGenresList.add(Genre(0, "All"))
+                        newGenresList.addAll(sourceGenres)
+                        genresList = newGenresList.distinctBy { it.name } as ArrayList<Genre>
+                        isLoading.value = false
+                        isError.value = false
+                        isSuccess.value = true
+                    }
+                }
+            }
+        }
+    }
+
+    private fun observeGenres() {
+        viewModelScope.launch {
+            genreTypeSelected.collect {
+                when(it) {
+                    GenresState.NotSelected -> {
+                        genreType.intValue = 0
+                        filteredMovies = emptyList()
+                    }
+                    is GenresState.Selected -> {
+                        genreType.intValue = it.genresType
+                        filteredMovies = moviesList.filter { movie ->
+                            movie.genre_ids.contains(genreType.intValue)
+                        }
+                    }
+                }
             }
         }
     }

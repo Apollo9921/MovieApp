@@ -7,15 +7,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.example.movieapp.core.Typography
 import com.example.movieapp.core.Background
 import com.example.movieapp.utils.size.ScreenSizeUtils
 
-@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun ErrorScreen() {
+fun ErrorScreen(errorMessage: String?) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -25,7 +23,7 @@ fun ErrorScreen() {
         val titleSize = ScreenSizeUtils.calculateCustomWidth(baseSize = 20).sp
         Text(
             style = Typography.titleLarge.copy(fontSize = titleSize),
-            text = "No Network Connection"
+            text = "$errorMessage"
         )
     }
 }
