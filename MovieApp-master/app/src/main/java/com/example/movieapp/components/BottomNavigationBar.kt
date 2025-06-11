@@ -1,17 +1,18 @@
 package com.example.movieapp.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -37,56 +38,54 @@ fun BottomNavigationBar(navController: NavController) {
     )
 
     val screenWidthDp = ScreenSizeUtils.getScreenWidthDp() / 2
+    val bottomBarHeight = 60.dp
+    val bottomSize = ScreenSizeUtils.calculateCustomHeight(baseSize = 50).dp
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 30.dp, top = 20.dp)
-            .height(60.dp),
+            .padding(bottom = bottomSize, top = 10.dp)
+            .height(bottomBarHeight),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        NavigationBar(
+        Box(
             modifier = Modifier
                 .width(screenWidthDp)
-                .clip(CircleShape),
-            containerColor = BottomBarBackground
+                .clip(CircleShape)
+                .background(BottomBarBackground),
+            contentAlignment = Alignment.BottomCenter
         ) {
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
-
-            items.forEach { item ->
-                NavigationBarItem(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight()
-                        .padding(top = 20.dp),
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = White,
-                        unselectedIconColor = White,
-                        indicatorColor = Color.Transparent
-                    ),
-                    selected = currentRoute == item.route,
-                    alwaysShowLabel = false,
-                    label = null,
-                    onClick = {
-                       /* navController.navigate(item.route) {
-                            navController.graph.startDestinationRoute?.let { route ->
-                                popUpTo(route) {
-                                    saveState = true
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                items.forEach { item ->
+                    Icon(
+                        imageVector = item.icon,
+                        contentDescription = item.route,
+                        tint = if (currentRoute == item.route) White else Color.Gray,
+                        modifier = Modifier
+                            .size(25.dp)
+                            .clickable {
+                                if (currentRoute != item.route) {
+                                    //TODO navigation to the route when screens created
+                                   /* navController.navigate(item.route) {
+                                        navController.graph.startDestinationRoute?.let { route ->
+                                            popUpTo(route) {
+                                                saveState = true
+                                            }
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }*/
                                 }
                             }
-                            launchSingleTop = true
-                            restoreState = true
-                        }*/
-                    },
-                    icon = {
-                        Icon(
-                            imageVector = item.icon,
-                            contentDescription = item.route
-                        )
-                    }
-                )
+                    )
+                }
             }
         }
     }
