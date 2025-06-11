@@ -1,11 +1,8 @@
 package com.example.movieapp.navigation
 
-import androidx.navigation3.runtime.NavKey
-import kotlinx.serialization.Serializable
-
-sealed class Screen: NavKey {
-    @Serializable
-    data object Home: Screen()
-    @Serializable
-    data class Details(val id: String): Screen()
+sealed class Screen(val route: String) {
+    data object Home: Screen("home")
+    data object Details : Screen("details_screen/{movieId}") {
+        fun createRoute(movieId: String) = "details_screen/$movieId"
+    }
 }

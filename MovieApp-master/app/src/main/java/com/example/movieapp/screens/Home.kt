@@ -14,9 +14,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation3.runtime.NavBackStack
 import com.example.movieapp.core.TopBarBackground
 import com.example.movieapp.core.Typography
 import com.example.movieapp.networking.viewModel.MoviesViewModel
@@ -31,6 +29,8 @@ import com.example.movieapp.networking.model.movies.MovieData
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.movieapp.components.BottomNavigationBar
 import com.example.movieapp.networking.model.genres.Genre
 import com.example.movieapp.utils.size.ScreenSizeUtils
 import org.koin.androidx.compose.koinViewModel
@@ -48,7 +48,7 @@ private var errorMessage = mutableStateOf("")
 private var isConnected = mutableStateOf(false)
 
 @Composable
-fun HomeScreen(backStack: NavBackStack?) {
+fun HomeScreen(navController: NavController) {
     moviesViewModel = koinViewModel<MoviesViewModel>()
     if (status.value == ConnectivityObserver.Status.Available && !isConnected.value) {
         isConnected.value = true
@@ -60,6 +60,7 @@ fun HomeScreen(backStack: NavBackStack?) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = { HomeTopBar() },
+        bottomBar = { BottomNavigationBar(navController = navController) },
         content = {
             if (isLoading.value || isSuccess.value) {
                 MoviesList(
@@ -152,10 +153,4 @@ private fun HomeTopBar() {
             text = "Home"
         )
     }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun HomePreview() {
-    HomeScreen(null)
 }
