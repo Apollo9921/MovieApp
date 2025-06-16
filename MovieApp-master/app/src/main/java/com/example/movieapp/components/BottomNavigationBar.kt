@@ -72,8 +72,7 @@ fun BottomNavigationBar(navController: NavController) {
                             .size(25.dp)
                             .clickable {
                                 if (currentRoute != item.route) {
-                                    //TODO navigation to the route when screens created
-                                   /* navController.navigate(item.route) {
+                                   navController.navigate(item.route) {
                                         navController.graph.startDestinationRoute?.let { route ->
                                             popUpTo(route) {
                                                 saveState = true
@@ -81,7 +80,7 @@ fun BottomNavigationBar(navController: NavController) {
                                         }
                                         launchSingleTop = true
                                         restoreState = true
-                                    }*/
+                                    }
                                 }
                             }
                     )

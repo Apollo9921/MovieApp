@@ -6,6 +6,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.movieapp.screens.HomeScreen
+import com.example.movieapp.screens.MoreScreen
+import com.example.movieapp.screens.SettingsScreen
 
 @Composable
 fun BasicNavigation() {
@@ -18,5 +20,12 @@ fun BasicNavigation() {
         composable(route = Screen.Home.route) {
             HomeScreen(navController = navController)
         }
+        composable(route = BottomNavItem.More.route) {
+            MoreScreen(navController = navController)
+        }
+        composable(route = BottomNavItem.Settings.route) {
+            SettingsScreen(navController = navController)
+        }
+
     }
 }
