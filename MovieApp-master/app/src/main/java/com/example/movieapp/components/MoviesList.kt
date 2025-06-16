@@ -23,6 +23,7 @@ import com.example.movieapp.networking.model.genres.Genre
 import com.example.movieapp.networking.model.movies.MovieData
 import com.example.movieapp.networking.viewModel.MoviesViewModel
 import com.example.movieapp.core.White
+import com.example.movieapp.networking.instance.MovieInstance
 
 @Composable
 fun MoviesList(
@@ -57,7 +58,7 @@ fun MoviesList(
             items(if (filteredMovies.isNotEmpty()) filteredMovies.size else movies.size) { index ->
                 val movie = if (filteredMovies.isNotEmpty()) filteredMovies[index] else movies[index]
                 AsyncImage(
-                    model = "https://image.tmdb.org/t/p/w500/${movie.poster_path}",
+                    model = "${MovieInstance.BASE_URL_IMAGE}${movie.poster_path}",
                     placeholder = painterResource(R.drawable.ic_launcher_background),
                     error = painterResource(R.drawable.ic_launcher_background),
                     contentDescription = null,

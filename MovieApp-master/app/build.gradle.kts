@@ -25,6 +25,13 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "BASE_URL", "\"https://api.themoviedb.org/3/\"")
+            buildConfigField("String", "API_KEY", "\"eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxNzhkNTNkMzU1OWU0NGQzNjczMjA2Yzk5NGFlOTFjNyIsIm5iZiI6MTc0NjQzMzY3My45NjIsInN1YiI6IjY4MTg3Njg5MTVjOTEwMmQyMDA4YTRmOCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.szUFk_jw_YO4X4MdWysqCvIUOC1MEBmirDdsgKqO9ac\"")
+        }
+        debug {
+            buildConfigField("String", "BASE_URL", "\"https://api.themoviedb.org/3/\"")
+            buildConfigField("String", "API_KEY", "\"eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxNzhkNTNkMzU1OWU0NGQzNjczMjA2Yzk5NGFlOTFjNyIsIm5iZiI6MTc0NjQzMzY3My45NjIsInN1YiI6IjY4MTg3Njg5MTVjOTEwMmQyMDA4YTRmOCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.szUFk_jw_YO4X4MdWysqCvIUOC1MEBmirDdsgKqO9ac\"")
+            applicationIdSuffix = ".debug"
         }
     }
     compileOptions {
@@ -36,6 +43,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

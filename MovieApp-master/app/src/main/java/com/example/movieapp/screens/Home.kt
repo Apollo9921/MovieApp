@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.movieapp.core.TopBarBackground
 import com.example.movieapp.core.Typography
@@ -26,6 +27,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.movieapp.R
 import com.example.movieapp.components.BottomNavigationBar
 import com.example.movieapp.utils.size.ScreenSizeUtils
 import org.koin.androidx.compose.koinViewModel
@@ -92,7 +94,7 @@ private fun HomeTopBar() {
         val titleSize = ScreenSizeUtils.calculateCustomWidth(baseSize = 20).sp
         Text(
             style = Typography.titleLarge.copy(fontSize = titleSize),
-            text = "Home"
+            text = stringResource(R.string.home)
         )
     }
 }

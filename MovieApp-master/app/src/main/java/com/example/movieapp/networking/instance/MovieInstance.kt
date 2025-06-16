@@ -6,11 +6,13 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import com.example.movieapp.BuildConfig
 
 object MovieInstance {
 
-    private const val BASE_URL = "https://api.themoviedb.org/3/"
-    private const val API_KEY = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxNzhkNTNkMzU1OWU0NGQzNjczMjA2Yzk5NGFlOTFjNyIsIm5iZiI6MTc0NjQzMzY3My45NjIsInN1YiI6IjY4MTg3Njg5MTVjOTEwMmQyMDA4YTRmOCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.szUFk_jw_YO4X4MdWysqCvIUOC1MEBmirDdsgKqO9ac"
+    private const val BASE_URL = BuildConfig.BASE_URL
+    private const val API_KEY = BuildConfig.API_KEY
+    const val BASE_URL_IMAGE = "https://image.tmdb.org/t/p/w500/"
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
