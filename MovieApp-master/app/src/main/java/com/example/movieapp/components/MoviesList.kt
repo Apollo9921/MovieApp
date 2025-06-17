@@ -1,17 +1,26 @@
 package com.example.movieapp.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -31,6 +40,7 @@ import com.example.movieapp.networking.model.movies.MovieData
 import com.example.movieapp.networking.viewModel.MoviesViewModel
 import com.example.movieapp.core.White
 import com.example.movieapp.networking.instance.MovieInstance
+import com.example.movieapp.utils.size.ScreenSizeUtils
 
 @Composable
 fun MoviesList(
@@ -57,6 +67,19 @@ fun MoviesList(
     var allImagesLoaded by remember { mutableStateOf(false) }
     val currentMovies = if (filteredMovies.isNotEmpty() || genreSelected != 0) filteredMovies else movies
 
+    val lazyGridState = rememberLazyGridState()
+    val moviePosition by remember {
+        derivedStateOf {
+            val layoutInfo = lazyGridState.layoutInfo
+            val visibleItemsInfo = layoutInfo.visibleItemsInfo
+            if (visibleItemsInfo.isEmpty()) {
+                0
+            } else {
+                visibleItemsInfo.last().index + 1
+            }
+        }
+    }
+
     LaunchedEffect(imageLoadingStates.toMap(), currentMovies) {
         allImagesLoaded = if (currentMovies.isNotEmpty()) {
             currentMovies.all { movie ->
@@ -76,7 +99,8 @@ fun MoviesList(
     ) {
         GenresListScreen(genresList, genreSelected, moviesViewModel)
         LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
+            state = lazyGridState,
+            columns = GridCells.Fixed(3)
         ) {
             items(currentMovies.size) { index ->
                 val movie = currentMovies[index]
@@ -107,5 +131,41 @@ fun MoviesList(
                 }
             }
         }
+    }
+    DisplayMoviePosition(currentMovies.size, moviePosition)
+}
+
+@Composable
+private fun DisplayMoviePosition(moviesSize: Int, moviePosition: Int = 0) {
+    val bottomSize = ScreenSizeUtils.calculateCustomHeight(baseSize = 50).dp
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = bottomSize),
+        contentAlignment = Alignment.BottomEnd
+    ) {
+        FloatingActionButton(
+            onClick = { },
+            containerColor = White,
+            contentColor = Background,
+            shape = CircleShape,
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(10.dp),
+            content = {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(text = "$moviePosition")
+                    HorizontalDivider(
+                        thickness = 2.dp,
+                        color = Background,
+                        modifier = Modifier.width(20.dp)
+                    )
+                    Text(text = "$moviesSize")
+                }
+            }
+        )
     }
 }

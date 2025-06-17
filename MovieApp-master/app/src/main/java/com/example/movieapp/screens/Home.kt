@@ -68,6 +68,7 @@ fun HomeScreen(navController: NavController) {
                     moviesViewModel!!
                 )
             } else if (isError == true) {
+                isConnected.value = false
                 ErrorScreen(errorMessage)
             }
         }
