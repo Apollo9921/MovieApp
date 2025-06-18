@@ -31,15 +31,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
 import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
 import com.example.movieapp.R
 import com.example.movieapp.core.Background
 import com.example.movieapp.networking.model.genres.Genre
 import com.example.movieapp.networking.model.movies.MovieData
-import com.example.movieapp.networking.viewModel.MoviesViewModel
 import com.example.movieapp.core.White
 import com.example.movieapp.networking.instance.MovieInstance
+import com.example.movieapp.networking.viewModel.MoviesViewModel
 import com.example.movieapp.utils.size.ScreenSizeUtils
 
 @Composable
@@ -49,8 +50,9 @@ fun MoviesList(
     genresList: ArrayList<Genre>?,
     filteredMovies: List<MovieData>,
     genreSelected: Int,
-    moviesViewModel: MoviesViewModel
+    viewModel: ViewModel
 ) {
+    viewModel as MoviesViewModel
     if (movies.isEmpty()) {
         Box(
             modifier = Modifier
@@ -97,7 +99,7 @@ fun MoviesList(
             .background(Background)
             .padding(pv)
     ) {
-        GenresListScreen(genresList, genreSelected, moviesViewModel)
+        GenresListScreen(genresList, genreSelected, viewModel)
         LazyVerticalGrid(
             state = lazyGridState,
             columns = GridCells.Fixed(3)
@@ -126,7 +128,7 @@ fun MoviesList(
 
                 if (filteredMovies.isEmpty()) {
                     if (index == movies.size - 1 && allImagesLoaded) {
-                        moviesViewModel.fetchMovies()
+                        viewModel.fetchMovies()
                     }
                 }
             }

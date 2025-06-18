@@ -8,6 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.movieapp.screens.HomeScreen
 import com.example.movieapp.screens.MoreScreen
 import com.example.movieapp.screens.SettingsScreen
+import com.example.movieapp.screens.more.SearchScreen
 
 @Composable
 fun BasicNavigation() {
@@ -25,6 +26,12 @@ fun BasicNavigation() {
         }
         composable(route = BottomNavItem.Settings.route) {
             SettingsScreen(navController = navController)
+        }
+        composable(route = Screen.Search.route) {
+            SearchScreen(
+                navController = navController,
+                backStack = navController::popBackStack
+            )
         }
 
     }

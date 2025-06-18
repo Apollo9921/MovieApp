@@ -27,6 +27,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.movieapp.core.BottomBarBackground
 import com.example.movieapp.core.White
 import com.example.movieapp.navigation.BottomNavItem
+import com.example.movieapp.navigation.Screen
 import com.example.movieapp.utils.size.ScreenSizeUtils
 
 @Composable
@@ -35,6 +36,10 @@ fun BottomNavigationBar(navController: NavController) {
         BottomNavItem.Home,
         BottomNavItem.More,
         BottomNavItem.Settings
+    )
+
+    val itemsInCommon = arrayListOf<Pair<String, String>>(
+        Pair(Screen.Search.route, BottomNavItem.More.route)
     )
 
     val screenWidthDp = ScreenSizeUtils.getScreenWidthDp() / 2
@@ -58,6 +63,12 @@ fun BottomNavigationBar(navController: NavController) {
         ) {
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
+
+            var commonRoute: String? = null
+            if (currentRoute in itemsInCommon.map { it.first }) {
+                commonRoute = itemsInCommon.find { it.first == currentRoute }?.second
+            }
+
             Row(
                 modifier = Modifier.fillMaxSize(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
@@ -67,12 +78,12 @@ fun BottomNavigationBar(navController: NavController) {
                     Icon(
                         imageVector = item.icon,
                         contentDescription = item.route,
-                        tint = if (currentRoute == item.route) White else Color.Gray,
+                        tint = if (currentRoute == item.route || commonRoute != null && commonRoute == item.route) White else Color.Gray,
                         modifier = Modifier
                             .size(25.dp)
                             .clickable {
                                 if (currentRoute != item.route) {
-                                   navController.navigate(item.route) {
+                                    navController.navigate(item.route) {
                                         navController.graph.startDestinationRoute?.let { route ->
                                             popUpTo(route) {
                                                 saveState = true

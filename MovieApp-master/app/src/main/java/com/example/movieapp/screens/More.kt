@@ -70,7 +70,7 @@ private fun MoreScreenOptions(pv: PaddingValues, navController: NavController) {
                     .padding(10.dp)
                     .clickable {
                         // TODO Handle option click
-                        //navController.navigate(option[it].second)
+                        navController.navigate(option[0].second)
                     },
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
