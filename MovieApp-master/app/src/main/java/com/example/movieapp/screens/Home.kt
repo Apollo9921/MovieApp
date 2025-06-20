@@ -1,5 +1,6 @@
 package com.example.movieapp.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -10,15 +11,16 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.movieapp.core.TopBarBackground
 import com.example.movieapp.core.Typography
 import com.example.movieapp.networking.viewModel.MoviesViewModel
-import com.example.movieapp.status
 import com.example.movieapp.components.ErrorScreen
 import com.example.movieapp.components.MoviesList
 import com.example.movieapp.utils.network.ConnectivityObserver
@@ -38,7 +40,8 @@ private var isConnected = mutableStateOf(false)
 @Composable
 fun HomeScreen(navController: NavController) {
     moviesViewModel = koinViewModel<MoviesViewModel>()
-    if (status.value == ConnectivityObserver.Status.Available && !isConnected.value) {
+    val networkStatus = moviesViewModel?.networkStatus?.collectAsState()
+    if (networkStatus?.value == ConnectivityObserver.Status.Available && !isConnected.value) {
         isConnected.value = true
         fetchMovies()
     }
@@ -58,18 +61,36 @@ fun HomeScreen(navController: NavController) {
         topBar = { HomeTopBar() },
         bottomBar = { BottomNavigationBar(navController = navController) },
         content = {
-            if (isLoading == true || isSuccess == true) {
-                MoviesList(
-                    it,
-                    moviesList,
-                    genresList,
-                    filteredMovies,
-                    genreType,
-                    moviesViewModel!!
-                )
-            } else if (isError == true) {
-                isConnected.value = false
-                ErrorScreen(errorMessage)
+            when {
+                isLoading == true || isSuccess == true -> {
+                    MoviesList(
+                        it,
+                        moviesList,
+                        genresList,
+                        filteredMovies,
+                        genreType,
+                        moviesViewModel!!
+                    )
+                }
+                isError == true -> {
+                    isConnected.value = false
+                    if (errorMessage == stringResource(R.string.no_internet_connection) && moviesList.isNotEmpty()) {
+                        MoviesList(
+                            it,
+                            moviesList,
+                            genresList,
+                            filteredMovies,
+                            genreType,
+                            moviesViewModel!!
+                        )
+                        Toast.makeText(LocalContext.current, errorMessage, Toast.LENGTH_LONG).show()
+                        return@Scaffold
+                    }
+                    ErrorScreen(errorMessage)
+                }
+                networkStatus?.value == ConnectivityObserver.Status.Unavailable -> {
+                    ErrorScreen(stringResource(R.string.no_internet_connection))
+                }
             }
         }
     )

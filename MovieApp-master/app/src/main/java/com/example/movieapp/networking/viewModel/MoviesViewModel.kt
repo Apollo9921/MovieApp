@@ -9,14 +9,18 @@ import com.example.movieapp.koin.MoviesRepository
 import com.example.movieapp.networking.model.genres.Genre
 import com.example.movieapp.networking.model.genres.GenresList
 import com.example.movieapp.networking.model.movies.MovieData
-import com.example.movieapp.status
 import com.example.movieapp.utils.network.ConnectivityObserver
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class MoviesViewModel(private val repository: MoviesRepository) : ViewModel(), GenreTypeSelected {
+class MoviesViewModel(
+    private val repository: MoviesRepository,
+    connectivityObserver: ConnectivityObserver
+) : ViewModel(), GenreTypeSelected {
 
     private val _moviesState = MutableStateFlow<MoviesState>(MoviesState.Loading)
     private val moviesState: StateFlow<MoviesState> = _moviesState.asStateFlow()
@@ -34,6 +38,14 @@ class MoviesViewModel(private val repository: MoviesRepository) : ViewModel(), G
     var isError = mutableStateOf(false)
     var errorMessage = mutableStateOf("")
 
+    val networkStatus: StateFlow<ConnectivityObserver.Status> =
+        connectivityObserver.observe()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = ConnectivityObserver.Status.Unavailable
+            )
+
     private var currentPage = 0
 
     sealed class MoviesState {
@@ -47,14 +59,10 @@ class MoviesViewModel(private val repository: MoviesRepository) : ViewModel(), G
         data class Selected(val genresType: Int) : GenresState()
     }
 
-    init {
-        fetchMovies()
-    }
-
     fun fetchMovies() {
         viewModelScope.launch {
             try {
-                if (status.value == ConnectivityObserver.Status.Unavailable) {
+                if (networkStatus.value == ConnectivityObserver.Status.Unavailable) {
                     _moviesState.value = MoviesState.Error("No Internet Connection")
                     return@launch
                 }
@@ -89,6 +97,7 @@ class MoviesViewModel(private val repository: MoviesRepository) : ViewModel(), G
                         errorMessage.value = it.message
                         isError.value = true
                         isLoading.value = false
+                        isSuccess.value = false
                     }
                     MoviesState.Loading -> {
                         isLoading.value = true

@@ -16,4 +16,7 @@ class MovieRepositoryImpl(
         return movieService.getGenres()
     }
 
+    override suspend fun searchMovie(query: String): Response<Movies> {
+        return movieService.searchMovie(query)
+    }
 }

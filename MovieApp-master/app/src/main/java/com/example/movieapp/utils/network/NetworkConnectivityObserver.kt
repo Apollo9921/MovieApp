@@ -28,6 +28,11 @@ class NetworkConnectivityObserver(
                     super.onUnavailable()
                     launch { send(ConnectivityObserver.Status.Unavailable) }
                 }
+
+                override fun onLost(network: Network) {
+                    super.onLost(network)
+                    launch { send(ConnectivityObserver.Status.Unavailable) }
+                }
             }
 
             connectivityManager.registerDefaultNetworkCallback(callback)

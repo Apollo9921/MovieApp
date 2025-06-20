@@ -41,6 +41,7 @@ import com.example.movieapp.networking.model.movies.MovieData
 import com.example.movieapp.core.White
 import com.example.movieapp.networking.instance.MovieInstance
 import com.example.movieapp.networking.viewModel.MoviesViewModel
+import com.example.movieapp.networking.viewModel.SearchMoviesViewModel
 import com.example.movieapp.utils.size.ScreenSizeUtils
 
 @Composable
@@ -52,7 +53,13 @@ fun MoviesList(
     genreSelected: Int,
     viewModel: ViewModel
 ) {
-    viewModel as MoviesViewModel
+    when (viewModel) {
+        is MoviesViewModel -> {
+            viewModel
+        }
+
+        else -> viewModel as? SearchMoviesViewModel
+    }
     if (movies.isEmpty()) {
         Box(
             modifier = Modifier
@@ -99,7 +106,9 @@ fun MoviesList(
             .background(Background)
             .padding(pv)
     ) {
-        GenresListScreen(genresList, genreSelected, viewModel)
+        if (genresList?.isNotEmpty() == true) {
+            GenresListScreen(genresList, genreSelected, viewModel as MoviesViewModel)
+        }
         LazyVerticalGrid(
             state = lazyGridState,
             columns = GridCells.Fixed(3)
@@ -126,8 +135,9 @@ fun MoviesList(
                         .padding(10.dp)
                 )
 
-                if (filteredMovies.isEmpty()) {
+                if (filteredMovies.isEmpty() && genresList?.isNotEmpty() == true) {
                     if (index == movies.size - 1 && allImagesLoaded) {
+                        viewModel as MoviesViewModel
                         viewModel.fetchMovies()
                     }
                 }

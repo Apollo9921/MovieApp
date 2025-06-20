@@ -7,4 +7,5 @@ import retrofit2.Response
 interface MoviesRepository {
     suspend fun fetchMovies(pageNumber: Int): Response<Movies>
     suspend fun fetchGenres(): Response<GenresList>
+    suspend fun searchMovie(query: String): Response<Movies>
 }

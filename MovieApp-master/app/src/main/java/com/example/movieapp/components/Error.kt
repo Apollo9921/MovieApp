@@ -7,6 +7,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import com.example.movieapp.core.Typography
 import com.example.movieapp.core.Background
@@ -23,7 +24,8 @@ fun ErrorScreen(errorMessage: String?) {
         val titleSize = ScreenSizeUtils.calculateCustomWidth(baseSize = 20).sp
         Text(
             style = Typography.titleLarge.copy(fontSize = titleSize),
-            text = "$errorMessage"
+            text = "$errorMessage",
+            textAlign = TextAlign.Center
         )
     }
 }

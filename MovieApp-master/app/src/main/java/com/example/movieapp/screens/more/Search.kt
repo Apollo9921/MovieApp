@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,8 +19,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -32,16 +35,39 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.movieapp.R
 import com.example.movieapp.components.BottomNavigationBar
+import com.example.movieapp.components.ErrorScreen
+import com.example.movieapp.components.MoviesList
 import com.example.movieapp.core.Background
 import com.example.movieapp.core.TopBarBackground
 import com.example.movieapp.core.Typography
 import com.example.movieapp.core.White
+import com.example.movieapp.networking.viewModel.SearchMoviesViewModel
 import com.example.movieapp.utils.size.ScreenSizeUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
+
+private var viewModel: SearchMoviesViewModel? = null
 
 @Composable
 fun SearchScreen(navController: NavController, backStack: () -> Boolean) {
+    viewModel = koinViewModel<SearchMoviesViewModel>()
+    val isLoading = viewModel?.isLoading?.value
+    val isSuccess = viewModel?.isSuccess?.value
+    val isError = viewModel?.isError?.value
+
+    val errorMessage = viewModel?.errorMessage?.value
+    val searchMovies = viewModel?.moviesList ?: ArrayList()
+
+
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .safeDrawingPadding(),
         topBar = { SearchTopBar(backStack) },
         bottomBar = { BottomNavigationBar(navController = navController) },
         content = {
@@ -52,23 +78,45 @@ fun SearchScreen(navController: NavController, backStack: () -> Boolean) {
                     .padding(it)
             ) {
                 SearchBar()
-                //TODO Add search results
-                /*MoviesList(
-                    it,
-                    arrayListOf(),
-                    arrayListOf(),
-                    emptyList(),
-                    0,
-
-                )*/
+                when {
+                    isLoading == true || isSuccess == true -> {
+                        MoviesList(
+                            PaddingValues(0.dp),
+                            searchMovies,
+                            arrayListOf(),
+                            emptyList(),
+                            0,
+                            viewModel!!
+                        )
+                    }
+                    isError == true -> {
+                        ErrorScreen(errorMessage)
+                    }
+                }
             }
         }
     )
 }
 
+@OptIn(FlowPreview::class)
 @Composable
 private fun SearchBar() {
     val searchValue = remember { mutableStateOf("") }
+    LaunchedEffect(searchValue.value) {
+        snapshotFlow { searchValue.value }
+            .debounce(500L)
+            .collectLatest { query ->
+                if (query.isNotEmpty()) {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        if (viewModel?.moviesList?.isNotEmpty() == true) {
+                            viewModel?.moviesList?.clear()
+                        }
+                        viewModel?.searchMovies(query)
+                    }
+                }
+            }
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -82,6 +130,7 @@ private fun SearchBar() {
             label = { Text(text = stringResource(R.string.search_hint)) },
             shape = RoundedCornerShape(20.dp),
             maxLines = 1,
+            singleLine = true,
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = White,
                 unfocusedContainerColor = White,
@@ -100,8 +149,7 @@ private fun SearchTopBar(backStack: () -> Boolean) {
         modifier = Modifier
             .fillMaxWidth()
             .background(TopBarBackground)
-            .padding(horizontal = 10.dp, vertical = 10.dp)
-            .safeDrawingPadding(),
+            .padding(horizontal = 10.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {

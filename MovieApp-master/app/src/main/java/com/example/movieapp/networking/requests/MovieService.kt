@@ -14,4 +14,7 @@ interface MovieService {
     @GET("genre/movie/list")
     suspend fun getGenres(): Response<GenresList>
 
+    @GET("search/movie")
+    suspend fun searchMovie(@Query("query") query: String): Response<Movies>
+
 }
