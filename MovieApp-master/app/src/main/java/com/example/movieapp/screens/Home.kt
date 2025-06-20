@@ -3,6 +3,7 @@ package com.example.movieapp.screens
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.movieapp.R
 import com.example.movieapp.components.BottomNavigationBar
+import com.example.movieapp.core.Background
 import com.example.movieapp.utils.size.ScreenSizeUtils
 import org.koin.androidx.compose.koinViewModel
 
@@ -61,20 +63,13 @@ fun HomeScreen(navController: NavController) {
         topBar = { HomeTopBar() },
         bottomBar = { BottomNavigationBar(navController = navController) },
         content = {
-            when {
-                isLoading == true || isSuccess == true -> {
-                    MoviesList(
-                        it,
-                        moviesList,
-                        genresList,
-                        filteredMovies,
-                        genreType,
-                        moviesViewModel!!
-                    )
-                }
-                isError == true -> {
-                    isConnected.value = false
-                    if (errorMessage == stringResource(R.string.no_internet_connection) && moviesList.isNotEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Background)
+            ) {
+                when {
+                    isLoading == true || isSuccess == true -> {
                         MoviesList(
                             it,
                             moviesList,
@@ -83,13 +78,21 @@ fun HomeScreen(navController: NavController) {
                             genreType,
                             moviesViewModel!!
                         )
-                        Toast.makeText(LocalContext.current, errorMessage, Toast.LENGTH_LONG).show()
-                        return@Scaffold
+                        if (errorMessage == stringResource(R.string.no_internet_connection) && moviesList.isNotEmpty()) {
+                            Toast.makeText(LocalContext.current, errorMessage, Toast.LENGTH_LONG)
+                                .show()
+                            moviesViewModel?.errorMessage?.value = ""
+                        }
                     }
-                    ErrorScreen(errorMessage)
-                }
-                networkStatus?.value == ConnectivityObserver.Status.Unavailable -> {
-                    ErrorScreen(stringResource(R.string.no_internet_connection))
+
+                    isError == true -> {
+                        isConnected.value = false
+                        ErrorScreen(errorMessage)
+                    }
+
+                    networkStatus?.value == ConnectivityObserver.Status.Unavailable -> {
+                        ErrorScreen(stringResource(R.string.no_internet_connection))
+                    }
                 }
             }
         }

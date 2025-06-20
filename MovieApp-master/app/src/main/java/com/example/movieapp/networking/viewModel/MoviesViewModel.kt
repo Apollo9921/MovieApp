@@ -22,7 +22,7 @@ class MoviesViewModel(
     connectivityObserver: ConnectivityObserver
 ) : ViewModel(), GenreTypeSelected {
 
-    private val _moviesState = MutableStateFlow<MoviesState>(MoviesState.Loading)
+    private val _moviesState = MutableStateFlow<MoviesState>(MoviesState.Error("Unknown Error"))
     private val moviesState: StateFlow<MoviesState> = _moviesState.asStateFlow()
 
     private val _genreTypeSelected = MutableStateFlow<GenresState>(GenresState.NotSelected)
@@ -49,7 +49,6 @@ class MoviesViewModel(
     private var currentPage = 0
 
     sealed class MoviesState {
-        data object Loading : MoviesState()
         data class Success(val movies: List<MovieData>, val genres: GenresList) : MoviesState()
         data class Error(val message: String) : MoviesState()
     }
@@ -62,11 +61,12 @@ class MoviesViewModel(
     fun fetchMovies() {
         viewModelScope.launch {
             try {
+                isLoading.value = true
                 if (networkStatus.value == ConnectivityObserver.Status.Unavailable) {
                     _moviesState.value = MoviesState.Error("No Internet Connection")
+                    isLoading.value = false
                     return@launch
                 }
-                _moviesState.value = MoviesState.Loading
                 val pageToFetch = ++currentPage
                 val responseMovies = repository.fetchMovies(pageToFetch)
                 if (responseMovies.isSuccessful && responseMovies.body() != null) {
@@ -97,11 +97,6 @@ class MoviesViewModel(
                         errorMessage.value = it.message
                         isError.value = true
                         isLoading.value = false
-                        isSuccess.value = false
-                    }
-                    MoviesState.Loading -> {
-                        isLoading.value = true
-                        isError.value = false
                     }
                     is MoviesState.Success -> {
                         val newMovies = ArrayList<MovieData>()
