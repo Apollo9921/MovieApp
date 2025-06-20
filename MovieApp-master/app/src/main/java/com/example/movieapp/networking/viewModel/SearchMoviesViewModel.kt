@@ -18,7 +18,7 @@ class SearchMoviesViewModel(
     connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
-    private val _moviesState = MutableStateFlow<SearchedMoviesState>(SearchedMoviesState.Loading)
+    private val _moviesState = MutableStateFlow<SearchedMoviesState>(SearchedMoviesState.Error("Unknown Error"))
     private var moviesState: StateFlow<SearchedMoviesState> = _moviesState.asStateFlow()
 
     var moviesList = ArrayList<MovieData>()
@@ -37,7 +37,6 @@ class SearchMoviesViewModel(
             )
 
     sealed class SearchedMoviesState {
-        data object Loading : SearchedMoviesState()
         data class Success(val movies: List<MovieData>) : SearchedMoviesState()
         data class Error(val message: String) : SearchedMoviesState()
     }
@@ -45,11 +44,12 @@ class SearchMoviesViewModel(
     fun searchMovies(query: String) {
         viewModelScope.launch {
             try {
+                isLoading.value = true
                 if (networkStatus.value == ConnectivityObserver.Status.Unavailable) {
                     _moviesState.value = SearchedMoviesState.Error("No Internet Connection")
+                    isLoading.value = false
                     return@launch
                 }
-                _moviesState.value = SearchedMoviesState.Loading
                 val responseMovies = repository.searchMovie(query)
                 if (responseMovies.isSuccessful && responseMovies.body() != null) {
                     val moviesData = responseMovies.body()!!
@@ -74,11 +74,6 @@ class SearchMoviesViewModel(
                         isError.value = true
                         isLoading.value = false
                         isSuccess.value = false
-                    }
-
-                    is SearchedMoviesState.Loading -> {
-                        isLoading.value = true
-                        isError.value = false
                     }
 
                     is SearchedMoviesState.Success -> {

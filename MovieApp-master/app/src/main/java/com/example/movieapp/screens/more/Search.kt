@@ -80,6 +80,10 @@ fun SearchScreen(navController: NavController, backStack: () -> Boolean) {
                 SearchBar()
                 when {
                     isLoading == true || isSuccess == true -> {
+                        if (isSuccess == true && searchMovies.isEmpty()) {
+                            ErrorScreen(stringResource(R.string.no_movies_found))
+                            return@Column
+                        }
                         MoviesList(
                             PaddingValues(0.dp),
                             searchMovies,
@@ -108,9 +112,6 @@ private fun SearchBar() {
             .collectLatest { query ->
                 if (query.isNotEmpty()) {
                     CoroutineScope(Dispatchers.IO).launch {
-                        if (viewModel?.moviesList?.isNotEmpty() == true) {
-                            viewModel?.moviesList?.clear()
-                        }
                         viewModel?.searchMovies(query)
                     }
                 }
