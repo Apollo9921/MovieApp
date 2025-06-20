@@ -40,7 +40,9 @@ import com.example.movieapp.utils.size.ScreenSizeUtils
 @Composable
 fun MoreScreen(navController: NavController) {
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .safeDrawingPadding(),
         topBar = { MoreTopBar() },
         bottomBar = { BottomNavigationBar(navController = navController) },
         content = {
@@ -99,8 +101,7 @@ private fun MoreTopBar() {
         modifier = Modifier
             .fillMaxWidth()
             .background(TopBarBackground)
-            .padding(horizontal = 10.dp, vertical = 10.dp)
-            .safeDrawingPadding(),
+            .padding(horizontal = 10.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {

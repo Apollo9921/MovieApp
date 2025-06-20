@@ -59,7 +59,9 @@ fun HomeScreen(navController: NavController) {
     val genreType = moviesViewModel?.genreType?.intValue ?: 0
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .safeDrawingPadding(),
         topBar = { HomeTopBar() },
         bottomBar = { BottomNavigationBar(navController = navController) },
         content = {
@@ -111,8 +113,7 @@ private fun HomeTopBar() {
         modifier = Modifier
             .fillMaxWidth()
             .background(TopBarBackground)
-            .padding(horizontal = 10.dp, vertical = 10.dp)
-            .safeDrawingPadding(),
+            .padding(horizontal = 10.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {

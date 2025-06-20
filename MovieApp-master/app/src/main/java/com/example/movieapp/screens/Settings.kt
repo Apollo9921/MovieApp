@@ -32,7 +32,9 @@ import com.example.movieapp.utils.size.ScreenSizeUtils
 @Composable
 fun SettingsScreen(navController: NavController) {
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .safeDrawingPadding(),
         topBar = { SettingsTopBar() },
         bottomBar = { BottomNavigationBar(navController = navController) },
         content = {
@@ -60,8 +62,7 @@ private fun SettingsTopBar() {
         modifier = Modifier
             .fillMaxWidth()
             .background(TopBarBackground)
-            .padding(horizontal = 10.dp, vertical = 10.dp)
-            .safeDrawingPadding(),
+            .padding(horizontal = 10.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
