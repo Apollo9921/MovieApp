@@ -90,7 +90,8 @@ fun SearchScreen(navController: NavController, backStack: () -> Boolean) {
                             arrayListOf(),
                             emptyList(),
                             0,
-                            viewModel!!
+                            viewModel!!,
+                            navController
                         )
                     }
                     isError == true -> {

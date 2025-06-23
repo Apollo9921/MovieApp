@@ -78,7 +78,8 @@ fun HomeScreen(navController: NavController) {
                             genresList,
                             filteredMovies,
                             genreType,
-                            moviesViewModel!!
+                            moviesViewModel!!,
+                            navController
                         )
                         if (errorMessage == stringResource(R.string.no_internet_connection) && moviesList.isNotEmpty()) {
                             Toast.makeText(LocalContext.current, errorMessage, Toast.LENGTH_LONG)

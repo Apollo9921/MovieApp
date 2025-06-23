@@ -1,6 +1,7 @@
 package com.example.movieapp.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +33,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
 import com.example.movieapp.R
@@ -51,7 +53,8 @@ fun MoviesList(
     genresList: ArrayList<Genre>?,
     filteredMovies: List<MovieData>,
     genreSelected: Int,
-    viewModel: ViewModel
+    viewModel: ViewModel,
+    navController: NavController
 ) {
     when (viewModel) {
         is MoviesViewModel -> {
@@ -133,6 +136,9 @@ fun MoviesList(
                         .aspectRatio(2f / 3f)
                         .fillMaxSize()
                         .padding(10.dp)
+                        .clickable {
+                            navController.navigate("details_screen/${movie.id}")
+                        }
                 )
 
                 if (filteredMovies.isEmpty() && genresList?.isNotEmpty() == true) {
