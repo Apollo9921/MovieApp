@@ -1,6 +1,7 @@
 package com.example.movieapp.koin
 
 import com.example.movieapp.networking.instance.MovieInstance
+import com.example.movieapp.networking.viewModel.MovieDetailsViewModel
 import com.example.movieapp.networking.viewModel.MoviesViewModel
 import com.example.movieapp.networking.viewModel.SearchMoviesViewModel
 import com.example.movieapp.utils.network.ConnectivityObserver
@@ -28,6 +29,10 @@ val appModule = module {
 
     viewModel {
         SearchMoviesViewModel(get(), get())
+    }
+
+    viewModel {
+        MovieDetailsViewModel(get(), get())
     }
 
 }

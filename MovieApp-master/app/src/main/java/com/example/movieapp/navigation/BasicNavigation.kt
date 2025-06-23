@@ -35,7 +35,9 @@ fun BasicNavigation() {
             )
         }
         composable(route = Screen.Details.route) {
+            val movieId = navController.currentBackStackEntry?.arguments?.getString("movieId")
             DetailsScreen(
+                movieId = movieId,
                 navController = navController,
                 backStack = navController::popBackStack
             )

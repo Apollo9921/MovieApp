@@ -1,9 +1,11 @@
 package com.example.movieapp.networking.requests
 
+import com.example.movieapp.networking.model.details.MovieDetails
 import com.example.movieapp.networking.model.genres.GenresList
 import com.example.movieapp.networking.model.movies.Movies
 import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface MovieService {
@@ -16,5 +18,8 @@ interface MovieService {
 
     @GET("search/movie")
     suspend fun searchMovie(@Query("query") query: String): Response<Movies>
+
+    @GET("movie/{movie_id}")
+    suspend fun getMovieDetails(@Path("movie_id") movieId: Int): Response<MovieDetails>
 
 }

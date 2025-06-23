@@ -1,5 +1,6 @@
 package com.example.movieapp.koin
 
+import com.example.movieapp.networking.model.details.MovieDetails
 import com.example.movieapp.networking.model.genres.GenresList
 import com.example.movieapp.networking.model.movies.Movies
 import com.example.movieapp.networking.requests.MovieService
@@ -18,5 +19,9 @@ class MovieRepositoryImpl(
 
     override suspend fun searchMovie(query: String): Response<Movies> {
         return movieService.searchMovie(query)
+    }
+
+    override suspend fun getMovieDetails(movieId: Int): Response<MovieDetails> {
+        return movieService.getMovieDetails(movieId)
     }
 }
