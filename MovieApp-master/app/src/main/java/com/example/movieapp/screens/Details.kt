@@ -1,6 +1,8 @@
 package com.example.movieapp.screens
 
+import android.content.res.Configuration
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.wrapContentSize
@@ -27,16 +30,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,6 +58,7 @@ import com.example.movieapp.core.White
 import com.example.movieapp.networking.instance.MovieInstance
 import com.example.movieapp.networking.model.details.MovieDetails
 import com.example.movieapp.networking.viewModel.MovieDetailsViewModel
+import com.example.movieapp.utils.formatVoteCount
 import com.example.movieapp.utils.network.ConnectivityObserver
 import com.example.movieapp.utils.size.ScreenSizeUtils
 import org.koin.androidx.compose.koinViewModel
@@ -71,9 +77,7 @@ fun DetailsScreen(navController: NavHostController, backStack: () -> Boolean, mo
     val networkStatus = viewModel?.networkStatus?.collectAsState()
 
     val movieDetails = viewModel?.movieDetails
-    var isConnected = remember { mutableStateOf(false) }
-    if (networkStatus?.value == ConnectivityObserver.Status.Available && !isConnected.value) {
-        isConnected.value = true
+    if (networkStatus?.value == ConnectivityObserver.Status.Available && !isLoading!! && !isSuccess!!) {
         viewModel?.fetchMovieDetails(movieId!!.toInt())
     }
 
@@ -133,46 +137,93 @@ private fun DetailsContent(pv: PaddingValues, movieDetails: MovieDetails) {
     val runtime = "${hours}h ${minutes}m"
     val languages = movieDetails.spoken_languages.map { it.name }
     val companies = movieDetails.production_companies.map { it.name }
+    val scrollState = rememberScrollState()
+    val imageMaxHeight = 300.dp
+    val imageMaxHeightPx = with(LocalDensity.current) { imageMaxHeight.toPx() }
 
-    Column(
+    Box(
         modifier = Modifier
-            .verticalScroll(rememberScrollState())
             .fillMaxSize()
             .background(Background)
-            .padding(pv),
+            .padding(top = pv.calculateTopPadding()),
     ) {
-        SectionImage(imageUrl)
-        Spacer(modifier = Modifier.padding(10.dp))
-        SectionDetails(movieDetails, titleSize, ratingTextSize, formattedVoteAverage)
-        Spacer(modifier = Modifier.padding(3.dp))
-        SectionReleaseDate(releaseDate, genres, runtime, label)
-        Spacer(modifier = Modifier.padding(10.dp))
-        SectionTitle("Available Languages", titleSize)
-        Spacer(modifier = Modifier.padding(3.dp))
-        SectionList(languages, label)
-        Spacer(modifier = Modifier.padding(10.dp))
-        SectionTitle("Overview", titleSize)
-        Spacer(modifier = Modifier.padding(3.dp))
-        SectionOverview(movieDetails, label)
-        Spacer(modifier = Modifier.padding(10.dp))
-        SectionTitle("Production Companies", titleSize)
-        Spacer(modifier = Modifier.padding(3.dp))
-        SectionList(companies, label)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(bottom = pv.calculateBottomPadding())
+        ) {
+            SectionImage(imageUrl, scrollState, imageMaxHeightPx)
+            Spacer(modifier = Modifier.padding(10.dp))
+            SectionDetails(movieDetails, titleSize, ratingTextSize, formattedVoteAverage)
+            Spacer(modifier = Modifier.padding(3.dp))
+            SectionReleaseDate(releaseDate, genres, runtime, label)
+            Spacer(modifier = Modifier.padding(10.dp))
+            SectionTitle("Overview", titleSize)
+            Spacer(modifier = Modifier.padding(3.dp))
+            SectionOverview(movieDetails, label)
+            Spacer(modifier = Modifier.padding(10.dp))
+            SectionTitle("Available Languages", titleSize)
+            Spacer(modifier = Modifier.padding(3.dp))
+            SectionList(languages, label)
+            Spacer(modifier = Modifier.padding(10.dp))
+            SectionTitle("Production Companies", titleSize)
+            Spacer(modifier = Modifier.padding(3.dp))
+            SectionList(companies, label)
+        }
     }
 }
 
 @Composable
-private fun SectionImage(imageUrl: String) {
-    AsyncImage(
-        model = imageUrl,
-        placeholder = painterResource(R.drawable.ic_launcher_background),
-        error = painterResource(R.drawable.ic_launcher_background),
-        contentDescription = null,
-        contentScale = ContentScale.FillWidth,
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(2f / 3f)
-    )
+private fun SectionImage(imageUrl: String, scrollState: ScrollState, imageMaxHeightPx: Float) {
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    val landscapeMaxHeight = ScreenSizeUtils.calculateCustomWidth(300).dp
+    val landscapeMaxHeightPx = with(LocalDensity.current) { landscapeMaxHeight.toPx() }
+
+    val currentImageMaxHeightPx = if (isLandscape) {
+        landscapeMaxHeightPx
+    } else {
+        imageMaxHeightPx
+    }
+
+    if (isLandscape) {
+        AsyncImage(
+            model = imageUrl,
+            placeholder = painterResource(R.drawable.ic_launcher_background),
+            error = painterResource(R.drawable.ic_launcher_background),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(with(LocalDensity.current) { currentImageMaxHeightPx.toDp() })
+                .graphicsLayer {
+                    val parallaxFactor = 0.5f
+                    translationY = -scrollState.value * parallaxFactor
+                    val scrollProgress = (scrollState.value / imageMaxHeightPx).coerceIn(0f, 1f)
+                    alpha = (1f - (scrollProgress * (1f - 0.0f))).coerceIn(0.0f, 1f)
+                }
+        )
+    } else {
+        AsyncImage(
+            model = imageUrl,
+            placeholder = painterResource(R.drawable.ic_launcher_background),
+            error = painterResource(R.drawable.ic_launcher_background),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(2f / 3f)
+                .graphicsLayer {
+                    val parallaxFactor = 0.5f
+                    translationY = -scrollState.value * parallaxFactor
+                    val scrollProgress = (scrollState.value / imageMaxHeightPx).coerceIn(0f, 1f)
+                    alpha = (1f - (scrollProgress * (1f - 0.0f))).coerceIn(0.0f, 1f)
+                }
+        )
+    }
+
 }
 
 @Composable
@@ -181,16 +232,21 @@ private fun SectionDetails(
     titleSize: TextUnit,
     ratingTextSize: TextUnit,
     formattedVoteAverage: String
-) {
+)
+{
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Start,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = movieDetails.title,
             style = Typography.titleLarge.copy(fontSize = titleSize),
-            modifier = Modifier.padding(horizontal = 10.dp)
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1,
+            modifier = Modifier.weight(1f)
         )
         Spacer(modifier = Modifier.padding(5.dp))
         SectionRating(formattedVoteAverage, ratingTextSize, movieDetails)
@@ -218,7 +274,7 @@ private fun SectionRating(
             )
         )
         Text(
-            text = "(${movieDetails.vote_count})",
+            text = "(${formatVoteCount(movieDetails.vote_count)})",
             style = Typography.labelMedium.copy(
                 fontSize = ratingTextSize,
                 color = Color.Gray
@@ -234,37 +290,41 @@ private fun SectionReleaseDate(
     runtime: String,
     label: TextUnit
 ) {
-    Row(
+    FlowRow(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 10.dp),
-        horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.CenterVertically
+            .padding(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
+        verticalArrangement = Arrangement.spacedBy(3.dp),
+        maxLines = 1
     ) {
-        Text(
-            text = releaseDate,
-            style = Typography.labelMedium.copy(fontSize = label)
-        )
-        Spacer(modifier = Modifier.padding(3.dp))
-        Text(
-            text = "•",
-            style = Typography.labelMedium.copy(fontSize = label)
-        )
-        Spacer(modifier = Modifier.padding(3.dp))
-        Text(
-            text = genres,
-            style = Typography.labelMedium.copy(fontSize = label)
-        )
-        Spacer(modifier = Modifier.padding(3.dp))
-        Text(
-            text = "•",
-            style = Typography.labelMedium.copy(fontSize = label)
-        )
-        Spacer(modifier = Modifier.padding(3.dp))
-        Text(
-            text = runtime,
-            style = Typography.labelMedium.copy(fontSize = label)
-        )
+        if (releaseDate.isNotEmpty()) {
+            Text(
+                text = releaseDate,
+                style = Typography.labelMedium.copy(fontSize = label),
+            )
+            Text(
+                text = "•",
+                style = Typography.labelMedium.copy(fontSize = label)
+            )
+        }
+        if (genres.isNotEmpty()) {
+            Text(
+                text = genres,
+                style = Typography.labelMedium.copy(fontSize = label),
+                maxLines = 3
+            )
+            Text(
+                text = "•",
+                style = Typography.labelMedium.copy(fontSize = label)
+            )
+        }
+        if (runtime.isNotEmpty()) {
+            Text(
+                text = runtime,
+                style = Typography.labelMedium.copy(fontSize = label),
+            )
+        }
     }
 }
 
