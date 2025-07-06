@@ -31,7 +31,7 @@ fun BasicNavigation() {
         composable(route = Screen.Search.route) {
             SearchScreen(
                 navController = navController,
-                backStack = navController::popBackStack
+                backStack = navController::navigateUp
             )
         }
         composable(route = Screen.Details.route) {
@@ -39,7 +39,7 @@ fun BasicNavigation() {
             DetailsScreen(
                 movieId = movieId,
                 navController = navController,
-                backStack = navController::popBackStack
+                backStack = navController::navigateUp
             )
         }
     }
