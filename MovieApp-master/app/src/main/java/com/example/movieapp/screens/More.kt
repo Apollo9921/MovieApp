@@ -77,7 +77,7 @@ private fun MoreScreenOptions(pv: PaddingValues, navController: NavController) {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                val iconSize = ScreenSizeUtils.calculateCustomWidth(baseSize = 100).dp
+                val iconSize = ScreenSizeUtils.calculateCustomWidth(baseSize = 75).dp
                 Image(
                     painter = painterResource(id = option[it].first),
                     contentDescription = null,
