@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.movieapp.R
-import com.example.movieapp.components.BottomNavigationBar
 import com.example.movieapp.components.ErrorScreen
 import com.example.movieapp.components.MoviesList
 import com.example.movieapp.core.Background
@@ -69,7 +68,6 @@ fun SearchScreen(navController: NavController, backStack: () -> Boolean) {
             .fillMaxSize()
             .safeDrawingPadding(),
         topBar = { SearchTopBar(backStack) },
-        bottomBar = { BottomNavigationBar(navController = navController) },
         content = {
             Column(
                 modifier = Modifier

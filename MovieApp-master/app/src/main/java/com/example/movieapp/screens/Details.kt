@@ -48,7 +48,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.example.movieapp.R
-import com.example.movieapp.components.BottomNavigationBar
 import com.example.movieapp.components.ErrorScreen
 import com.example.movieapp.core.Background
 import com.example.movieapp.core.Black
@@ -86,7 +85,6 @@ fun DetailsScreen(navController: NavHostController, backStack: () -> Boolean, mo
             .fillMaxSize()
             .safeDrawingPadding(),
         topBar = { DetailsTopBar(backStack) },
-        bottomBar = { BottomNavigationBar(navController = navController) },
         content = {
             Box(
                 modifier = Modifier
