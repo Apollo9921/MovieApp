@@ -77,7 +77,7 @@ fun DetailsScreen(navController: NavHostController, backStack: () -> Boolean, mo
     val networkStatus = viewModel?.networkStatus?.collectAsState()
 
     val movieDetails = viewModel?.movieDetails
-    if (networkStatus?.value == ConnectivityObserver.Status.Available && !isLoading!! && !isSuccess!!) {
+    if (networkStatus?.value == ConnectivityObserver.Status.Available && !isLoading!! && !isSuccess!! && !isError!!) {
         viewModel?.fetchMovieDetails(movieId!!.toInt())
     }
 
@@ -347,20 +347,22 @@ private fun SectionList(list: List<String>, label: TextUnit) {
         verticalArrangement = Arrangement.spacedBy(3.dp)
     ) {
         list.forEach { language ->
-            Box(
-                modifier = Modifier
-                    .wrapContentSize()
-                    .clip(RoundedCornerShape(5.dp))
-                    .background(Black)
-            ) {
-                Text(
-                    text = language,
-                    style = Typography.labelMedium.copy(fontSize = label),
-                    modifier = Modifier.padding(
-                        horizontal = 10.dp,
-                        vertical = 5.dp
+            if (language.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .clip(RoundedCornerShape(5.dp))
+                        .background(Black)
+                ) {
+                    Text(
+                        text = language,
+                        style = Typography.labelMedium.copy(fontSize = label),
+                        modifier = Modifier.padding(
+                            horizontal = 10.dp,
+                            vertical = 5.dp
+                        )
                     )
-                )
+                }
             }
         }
     }
