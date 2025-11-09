@@ -15,9 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -26,17 +24,25 @@ import com.example.movieapp.components.BottomNavigationBar
 import com.example.movieapp.core.Background
 import com.example.movieapp.core.TopBarBackground
 import com.example.movieapp.core.Typography
-import com.example.movieapp.utils.size.ScreenSizeUtils
+import com.example.movieapp.viewModel.ScreenSizingViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun SettingsScreen(navController: NavController) {
+fun SettingsScreen(
+    navController: NavController,
+    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
+    screenViewModel: ScreenSizingViewModel
+) {
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .safeDrawingPadding(),
-        topBar = { SettingsTopBar() },
-        bottomBar = { BottomNavigationBar(navController = navController) },
+        topBar = { SettingsTopBar(screenMetrics, screenViewModel) },
+        bottomBar = { BottomNavigationBar(
+            navController = navController,
+            screenMetrics = screenMetrics,
+            screenViewModel = screenViewModel
+        ) },
         content = {
             SettingsOptions(it, navController)
         }
@@ -57,7 +63,10 @@ private fun SettingsOptions(pv: PaddingValues, navController: NavController) {
 }
 
 @Composable
-private fun SettingsTopBar() {
+private fun SettingsTopBar(
+    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
+    screenViewModel: ScreenSizingViewModel
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -66,17 +75,10 @@ private fun SettingsTopBar() {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        val titleSize = ScreenSizeUtils.calculateCustomWidth(baseSize = 20).sp
+        val titleSize = screenViewModel.calculateCustomWidth(baseSize = 20, screenMetrics).sp
         Text(
             style = Typography.titleLarge.copy(fontSize = titleSize),
             text = stringResource(R.string.settings)
         )
     }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun SettingsScreenPreview() {
-    val navController = NavController(LocalContext.current)
-    SettingsScreen(navController)
 }

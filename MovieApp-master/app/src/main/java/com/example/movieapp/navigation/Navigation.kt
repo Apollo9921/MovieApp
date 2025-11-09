@@ -10,28 +10,47 @@ import com.example.movieapp.screens.HomeScreen
 import com.example.movieapp.screens.MoreScreen
 import com.example.movieapp.screens.SettingsScreen
 import com.example.movieapp.screens.more.SearchScreen
+import com.example.movieapp.utils.size.getScreenMetrics
+import com.example.movieapp.viewModel.ScreenSizingViewModel
+
+private var screenViewModel: ScreenSizingViewModel = ScreenSizingViewModel()
 
 @Composable
-fun BasicNavigation() {
+fun Navigation() {
     val navController: NavHostController = rememberNavController()
+    val screenMetrics = getScreenMetrics()
 
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route
     ) {
         composable(route = Screen.Home.route) {
-            HomeScreen(navController = navController)
+            HomeScreen(
+                navController = navController,
+                screenMetrics = screenMetrics,
+                screenViewModel = screenViewModel
+            )
         }
         composable(route = BottomNavItem.More.route) {
-            MoreScreen(navController = navController)
+            MoreScreen(
+                navController = navController,
+                screenMetrics = screenMetrics,
+                screenViewModel = screenViewModel
+            )
         }
         composable(route = BottomNavItem.Settings.route) {
-            SettingsScreen(navController = navController)
+            SettingsScreen(
+                navController = navController,
+                screenMetrics = screenMetrics,
+                screenViewModel = screenViewModel
+            )
         }
         composable(route = Screen.Search.route) {
             SearchScreen(
                 navController = navController,
-                backStack = navController::navigateUp
+                backStack = navController::navigateUp,
+                screenMetrics = screenMetrics,
+                screenViewModel = screenViewModel
             )
         }
         composable(route = Screen.Details.route) {
@@ -39,7 +58,9 @@ fun BasicNavigation() {
             DetailsScreen(
                 movieId = movieId,
                 navController = navController,
-                backStack = navController::navigateUp
+                backStack = navController::navigateUp,
+                screenMetrics = screenMetrics,
+                screenViewModel = screenViewModel
             )
         }
     }

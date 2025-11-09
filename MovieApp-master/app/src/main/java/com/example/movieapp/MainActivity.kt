@@ -10,7 +10,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
-import com.example.movieapp.navigation.BasicNavigation
+import com.example.movieapp.navigation.Navigation
 import com.example.movieapp.core.MovieAppTheme
 import com.example.movieapp.utils.network.ConnectivityObserver
 import com.example.movieapp.utils.network.NetworkConnectivityObserver
@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
                         .collectAsState(initial = ConnectivityObserver.Status.Unavailable)
 
                     CompositionLocalProvider(LocalConnectivityStatus provides currentStatus.value) {
-                        BasicNavigation()
+                        Navigation()
                     }
                 }
             }

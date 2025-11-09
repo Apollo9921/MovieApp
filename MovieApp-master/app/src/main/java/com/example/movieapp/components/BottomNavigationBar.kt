@@ -19,27 +19,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.movieapp.core.BottomBarBackground
 import com.example.movieapp.core.White
 import com.example.movieapp.navigation.BottomNavItem
-import com.example.movieapp.utils.size.ScreenSizeUtils
+import com.example.movieapp.viewModel.ScreenSizingViewModel
 
 @Composable
-fun BottomNavigationBar(navController: NavController) {
+fun BottomNavigationBar(
+    navController: NavController,
+    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
+    screenViewModel: ScreenSizingViewModel
+) {
     val items = listOf(
         BottomNavItem.Home,
         BottomNavItem.More,
         BottomNavItem.Settings
     )
 
-    val screenWidthDp = ScreenSizeUtils.getScreenWidthDp() / 2
+    val screenWidthDp = screenMetrics.screenWidth / 2
     val bottomBarHeight = 60.dp
-    val bottomSize = ScreenSizeUtils.calculateCustomHeight(baseSize = 50).dp
+    val bottomSize = screenViewModel.calculateCustomHeight(baseSize = 50, screenMetrics).dp
 
     Row(
         modifier = Modifier
@@ -89,10 +91,4 @@ fun BottomNavigationBar(navController: NavController) {
             }
         }
     }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun BottomNavigationBarPreview() {
-    BottomNavigationBar(navController = NavController(LocalContext.current))
 }

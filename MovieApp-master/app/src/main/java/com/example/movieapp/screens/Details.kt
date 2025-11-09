@@ -56,17 +56,23 @@ import com.example.movieapp.core.Typography
 import com.example.movieapp.core.White
 import com.example.movieapp.networking.instance.MovieInstance
 import com.example.movieapp.networking.model.details.MovieDetails
-import com.example.movieapp.networking.viewModel.MovieDetailsViewModel
+import com.example.movieapp.viewModel.MovieDetailsViewModel
 import com.example.movieapp.utils.formatVoteCount
 import com.example.movieapp.utils.network.ConnectivityObserver
-import com.example.movieapp.utils.size.ScreenSizeUtils
+import com.example.movieapp.viewModel.ScreenSizingViewModel
 import org.koin.androidx.compose.koinViewModel
 import java.text.DecimalFormat
 
 private var viewModel: MovieDetailsViewModel? = null
 
 @Composable
-fun DetailsScreen(navController: NavHostController, backStack: () -> Boolean, movieId: String?) {
+fun DetailsScreen(
+    navController: NavHostController,
+    backStack: () -> Boolean,
+    movieId: String?,
+    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
+    screenViewModel: ScreenSizingViewModel
+) {
     viewModel = koinViewModel<MovieDetailsViewModel>()
 
     val isLoading = viewModel?.isLoading?.value
@@ -84,7 +90,7 @@ fun DetailsScreen(navController: NavHostController, backStack: () -> Boolean, mo
         modifier = Modifier
             .fillMaxSize()
             .safeDrawingPadding(),
-        topBar = { DetailsTopBar(backStack) },
+        topBar = { DetailsTopBar(backStack, screenMetrics, screenViewModel) },
         content = {
             Box(
                 modifier = Modifier
@@ -105,15 +111,19 @@ fun DetailsScreen(navController: NavHostController, backStack: () -> Boolean, mo
 
                     isSuccess == true -> {
                         if (movieDetails == null) return@Box
-                        DetailsContent(it, movieDetails)
+                        DetailsContent(it, movieDetails, screenMetrics, screenViewModel)
                     }
 
                     isError == true -> {
-                        ErrorScreen(errorMessage)
+                        ErrorScreen(errorMessage, screenMetrics, screenViewModel)
                     }
 
                     networkStatus?.value == ConnectivityObserver.Status.Unavailable -> {
-                        ErrorScreen(stringResource(R.string.no_internet_connection))
+                        ErrorScreen(
+                            stringResource(R.string.no_internet_connection),
+                            screenMetrics,
+                            screenViewModel
+                        )
                     }
                 }
             }
@@ -122,10 +132,15 @@ fun DetailsScreen(navController: NavHostController, backStack: () -> Boolean, mo
 }
 
 @Composable
-private fun DetailsContent(pv: PaddingValues, movieDetails: MovieDetails) {
-    val titleSize = ScreenSizeUtils.calculateCustomWidth(baseSize = 20).sp
-    val label = ScreenSizeUtils.calculateCustomWidth(baseSize = 15).sp
-    val ratingTextSize = ScreenSizeUtils.calculateCustomWidth(baseSize = 14).sp
+private fun DetailsContent(
+    pv: PaddingValues,
+    movieDetails: MovieDetails,
+    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
+    screenViewModel: ScreenSizingViewModel
+) {
+    val titleSize = screenViewModel.calculateCustomWidth(baseSize = 20, screenMetrics).sp
+    val label = screenViewModel.calculateCustomWidth(baseSize = 15, screenMetrics).sp
+    val ratingTextSize = screenViewModel.calculateCustomWidth(baseSize = 14, screenMetrics).sp
     val imageUrl = "${MovieInstance.BASE_URL_IMAGE}${movieDetails.poster_path}"
     val formattedVoteAverage = DecimalFormat("#.#").format(movieDetails.vote_average)
     val releaseDate = movieDetails.release_date.split("-").first()
@@ -151,7 +166,7 @@ private fun DetailsContent(pv: PaddingValues, movieDetails: MovieDetails) {
                 .verticalScroll(scrollState)
                 .padding(bottom = pv.calculateBottomPadding())
         ) {
-            SectionImage(imageUrl, scrollState, imageMaxHeightPx)
+            SectionImage(imageUrl, scrollState, imageMaxHeightPx, screenMetrics, screenViewModel)
             Spacer(modifier = Modifier.padding(10.dp))
             SectionDetails(movieDetails, titleSize, ratingTextSize, formattedVoteAverage)
             Spacer(modifier = Modifier.padding(3.dp))
@@ -173,11 +188,17 @@ private fun DetailsContent(pv: PaddingValues, movieDetails: MovieDetails) {
 }
 
 @Composable
-private fun SectionImage(imageUrl: String, scrollState: ScrollState, imageMaxHeightPx: Float) {
+private fun SectionImage(
+    imageUrl: String,
+    scrollState: ScrollState,
+    imageMaxHeightPx: Float,
+    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
+    screenViewModel: ScreenSizingViewModel
+) {
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    val landscapeMaxHeight = ScreenSizeUtils.calculateCustomWidth(300).dp
+    val landscapeMaxHeight = screenViewModel.calculateCustomWidth(300, screenMetrics).dp
     val landscapeMaxHeightPx = with(LocalDensity.current) { landscapeMaxHeight.toPx() }
 
     val currentImageMaxHeightPx = if (isLandscape) {
@@ -376,7 +397,11 @@ private fun SectionOverview(movieDetails: MovieDetails, label: TextUnit) {
 }
 
 @Composable
-private fun DetailsTopBar(backStack: () -> Boolean) {
+private fun DetailsTopBar(
+    backStack: () -> Boolean,
+    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
+    screenViewModel: ScreenSizingViewModel
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -392,7 +417,7 @@ private fun DetailsTopBar(backStack: () -> Boolean) {
             modifier = Modifier.clickable { backStack() }
         )
         Spacer(modifier = Modifier.padding(10.dp))
-        val titleSize = ScreenSizeUtils.calculateCustomWidth(baseSize = 20).sp
+        val titleSize = screenViewModel.calculateCustomWidth(baseSize = 20, screenMetrics).sp
         Text(
             style = Typography.titleLarge.copy(fontSize = titleSize),
             text = stringResource(R.string.details)

@@ -11,17 +11,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import com.example.movieapp.core.Typography
 import com.example.movieapp.core.Background
-import com.example.movieapp.utils.size.ScreenSizeUtils
+import com.example.movieapp.viewModel.ScreenSizingViewModel
 
 @Composable
-fun ErrorScreen(errorMessage: String?) {
+fun ErrorScreen(
+    errorMessage: String?,
+    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
+    screenViewModel: ScreenSizingViewModel
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Background),
         contentAlignment = Alignment.Center
     ) {
-        val titleSize = ScreenSizeUtils.calculateCustomWidth(baseSize = 20).sp
+        val titleSize = screenViewModel.calculateCustomWidth(baseSize = 20,  screenMetrics).sp
         Text(
             style = Typography.titleLarge.copy(fontSize = titleSize),
             text = "$errorMessage",

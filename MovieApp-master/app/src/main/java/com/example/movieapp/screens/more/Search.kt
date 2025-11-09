@@ -26,10 +26,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -40,8 +38,8 @@ import com.example.movieapp.core.Background
 import com.example.movieapp.core.TopBarBackground
 import com.example.movieapp.core.Typography
 import com.example.movieapp.core.White
-import com.example.movieapp.networking.viewModel.SearchMoviesViewModel
-import com.example.movieapp.utils.size.ScreenSizeUtils
+import com.example.movieapp.viewModel.ScreenSizingViewModel
+import com.example.movieapp.viewModel.SearchMoviesViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -53,7 +51,12 @@ import org.koin.androidx.compose.koinViewModel
 private var viewModel: SearchMoviesViewModel? = null
 
 @Composable
-fun SearchScreen(navController: NavController, backStack: () -> Boolean) {
+fun SearchScreen(
+    navController: NavController,
+    backStack: () -> Boolean,
+    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
+    screenViewModel: ScreenSizingViewModel
+) {
     viewModel = koinViewModel<SearchMoviesViewModel>()
     val isLoading = viewModel?.isLoading?.value
     val isSuccess = viewModel?.isSuccess?.value
@@ -67,7 +70,7 @@ fun SearchScreen(navController: NavController, backStack: () -> Boolean) {
         modifier = Modifier
             .fillMaxSize()
             .safeDrawingPadding(),
-        topBar = { SearchTopBar(backStack) },
+        topBar = { SearchTopBar(backStack, screenMetrics, screenViewModel) },
         content = {
             Column(
                 modifier = Modifier
@@ -75,11 +78,15 @@ fun SearchScreen(navController: NavController, backStack: () -> Boolean) {
                     .background(Background)
                     .padding(it)
             ) {
-                SearchBar()
+                SearchBar(screenMetrics, screenViewModel)
                 when {
                     isLoading == true || isSuccess == true -> {
                         if (isSuccess == true && searchMovies.isEmpty()) {
-                            ErrorScreen(stringResource(R.string.no_movies_found))
+                            ErrorScreen(
+                                stringResource(R.string.no_movies_found),
+                                screenMetrics,
+                                screenViewModel
+                            )
                             return@Column
                         }
                         MoviesList(
@@ -89,11 +96,13 @@ fun SearchScreen(navController: NavController, backStack: () -> Boolean) {
                             emptyList(),
                             0,
                             viewModel!!,
-                            navController
+                            navController,
+                            screenMetrics,
+                            screenViewModel
                         )
                     }
                     isError == true -> {
-                        ErrorScreen(errorMessage)
+                        ErrorScreen(errorMessage, screenMetrics, screenViewModel)
                     }
                 }
             }
@@ -103,7 +112,10 @@ fun SearchScreen(navController: NavController, backStack: () -> Boolean) {
 
 @OptIn(FlowPreview::class)
 @Composable
-private fun SearchBar() {
+private fun SearchBar(
+    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
+    screenViewModel: ScreenSizingViewModel
+) {
     val searchValue = remember { mutableStateOf("") }
     LaunchedEffect(searchValue.value) {
         snapshotFlow { searchValue.value }
@@ -138,13 +150,17 @@ private fun SearchBar() {
                 focusedIndicatorColor = Background,
                 unfocusedIndicatorColor = Background,
             ),
-            modifier = Modifier.width(ScreenSizeUtils.calculateCustomWidth(baseSize = 250).dp)
+            modifier = Modifier.width(screenViewModel.calculateCustomWidth(baseSize = 250, screenMetrics).dp)
         )
     }
 }
 
 @Composable
-private fun SearchTopBar(backStack: () -> Boolean) {
+private fun SearchTopBar(
+    backStack: () -> Boolean,
+    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
+    screenViewModel: ScreenSizingViewModel
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -160,17 +176,10 @@ private fun SearchTopBar(backStack: () -> Boolean) {
             modifier = Modifier.clickable { backStack() }
         )
         Spacer(modifier = Modifier.padding(10.dp))
-        val titleSize = ScreenSizeUtils.calculateCustomWidth(baseSize = 20).sp
+        val titleSize = screenViewModel.calculateCustomWidth(baseSize = 20, screenMetrics).sp
         Text(
             style = Typography.titleLarge.copy(fontSize = titleSize),
             text = stringResource(R.string.search)
         )
     }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun SearchScreenPreview() {
-    val navController = NavController(LocalContext.current)
-    SearchScreen(navController, navController::popBackStack)
 }

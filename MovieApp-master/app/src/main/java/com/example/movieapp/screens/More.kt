@@ -22,10 +22,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -35,24 +33,37 @@ import com.example.movieapp.core.Background
 import com.example.movieapp.core.TopBarBackground
 import com.example.movieapp.core.Typography
 import com.example.movieapp.core.White
-import com.example.movieapp.utils.size.ScreenSizeUtils
+import com.example.movieapp.viewModel.ScreenSizingViewModel
 
 @Composable
-fun MoreScreen(navController: NavController) {
+fun MoreScreen(
+    navController: NavController,
+    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
+    screenViewModel: ScreenSizingViewModel
+) {
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .safeDrawingPadding(),
-        topBar = { MoreTopBar() },
-        bottomBar = { BottomNavigationBar(navController = navController) },
+        topBar = { MoreTopBar(screenMetrics, screenViewModel) },
+        bottomBar = { BottomNavigationBar(
+            navController = navController,
+            screenMetrics = screenMetrics,
+            screenViewModel = screenViewModel
+        ) },
         content = {
-            MoreScreenOptions(it, navController)
+            MoreScreenOptions(it, navController, screenMetrics, screenViewModel)
         }
     )
 }
 
 @Composable
-private fun MoreScreenOptions(pv: PaddingValues, navController: NavController) {
+private fun MoreScreenOptions(
+    pv: PaddingValues,
+    navController: NavController,
+    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
+    screenViewModel: ScreenSizingViewModel
+) {
     val option: ArrayList<Pair<Int, String>> = arrayListOf()
     option.add(Pair(R.drawable.search, stringResource(R.string.search)))
     option.add(Pair(R.drawable.favourite, stringResource(R.string.favourites)))
@@ -77,7 +88,7 @@ private fun MoreScreenOptions(pv: PaddingValues, navController: NavController) {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                val iconSize = ScreenSizeUtils.calculateCustomWidth(baseSize = 75).dp
+                val iconSize = screenViewModel.calculateCustomWidth(baseSize = 75, screenMetrics).dp
                 Image(
                     painter = painterResource(id = option[it].first),
                     contentDescription = null,
@@ -85,7 +96,7 @@ private fun MoreScreenOptions(pv: PaddingValues, navController: NavController) {
                     modifier = Modifier.size(iconSize)
                 )
                 Spacer(modifier = Modifier.padding(10.dp))
-                val titleSize = ScreenSizeUtils.calculateCustomWidth(baseSize = 20).sp
+                val titleSize = screenViewModel.calculateCustomWidth(baseSize = 20, screenMetrics).sp
                 Text(
                     style = Typography.displayMedium.copy(fontSize = titleSize),
                     text = option[it].second
@@ -96,7 +107,10 @@ private fun MoreScreenOptions(pv: PaddingValues, navController: NavController) {
 }
 
 @Composable
-private fun MoreTopBar() {
+private fun MoreTopBar(
+    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
+    screenViewModel: ScreenSizingViewModel
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -105,17 +119,10 @@ private fun MoreTopBar() {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        val titleSize = ScreenSizeUtils.calculateCustomWidth(baseSize = 20).sp
+        val titleSize = screenViewModel.calculateCustomWidth(baseSize = 20, screenMetrics).sp
         Text(
             style = Typography.titleLarge.copy(fontSize = titleSize),
             text = stringResource(R.string.more)
         )
     }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun MoreScreenPreview() {
-    val navController = NavController(LocalContext.current)
-    MoreScreen(navController)
 }

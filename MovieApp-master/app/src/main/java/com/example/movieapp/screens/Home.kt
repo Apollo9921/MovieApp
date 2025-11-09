@@ -21,7 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.movieapp.core.TopBarBackground
 import com.example.movieapp.core.Typography
-import com.example.movieapp.networking.viewModel.MoviesViewModel
+import com.example.movieapp.viewModel.MoviesViewModel
 import com.example.movieapp.components.ErrorScreen
 import com.example.movieapp.components.MoviesList
 import com.example.movieapp.utils.network.ConnectivityObserver
@@ -33,14 +33,18 @@ import androidx.navigation.NavController
 import com.example.movieapp.R
 import com.example.movieapp.components.BottomNavigationBar
 import com.example.movieapp.core.Background
-import com.example.movieapp.utils.size.ScreenSizeUtils
+import com.example.movieapp.viewModel.ScreenSizingViewModel
 import org.koin.androidx.compose.koinViewModel
 
 private var moviesViewModel: MoviesViewModel? = null
 private var isConnected = mutableStateOf(false)
 
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(
+    navController: NavController,
+    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
+    screenViewModel: ScreenSizingViewModel
+) {
     moviesViewModel = koinViewModel<MoviesViewModel>()
     val networkStatus = moviesViewModel?.networkStatus?.collectAsState()
     if (networkStatus?.value == ConnectivityObserver.Status.Available && !isConnected.value) {
@@ -62,8 +66,14 @@ fun HomeScreen(navController: NavController) {
         modifier = Modifier
             .fillMaxSize()
             .safeDrawingPadding(),
-        topBar = { HomeTopBar() },
-        bottomBar = { BottomNavigationBar(navController = navController) },
+        topBar = { HomeTopBar(screenMetrics, screenViewModel) },
+        bottomBar = {
+            BottomNavigationBar(
+                navController = navController,
+                screenMetrics,
+                screenViewModel
+            )
+        },
         content = {
             Box(
                 modifier = Modifier
@@ -79,7 +89,9 @@ fun HomeScreen(navController: NavController) {
                             filteredMovies,
                             genreType,
                             moviesViewModel!!,
-                            navController
+                            navController,
+                            screenMetrics,
+                            screenViewModel
                         )
                         if (errorMessage == stringResource(R.string.no_internet_connection) && moviesList.isNotEmpty()) {
                             Toast.makeText(LocalContext.current, errorMessage, Toast.LENGTH_LONG)
@@ -90,11 +102,15 @@ fun HomeScreen(navController: NavController) {
 
                     isError == true -> {
                         isConnected.value = false
-                        ErrorScreen(errorMessage)
+                        ErrorScreen(errorMessage, screenMetrics, screenViewModel)
                     }
 
                     networkStatus?.value == ConnectivityObserver.Status.Unavailable -> {
-                        ErrorScreen(stringResource(R.string.no_internet_connection))
+                        ErrorScreen(
+                            stringResource(R.string.no_internet_connection),
+                            screenMetrics,
+                            screenViewModel
+                        )
                     }
                 }
             }
@@ -109,7 +125,10 @@ private fun fetchMovies() {
 }
 
 @Composable
-private fun HomeTopBar() {
+private fun HomeTopBar(
+    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
+    screenViewModel: ScreenSizingViewModel
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -118,7 +137,7 @@ private fun HomeTopBar() {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        val titleSize = ScreenSizeUtils.calculateCustomWidth(baseSize = 20).sp
+        val titleSize = screenViewModel.calculateCustomWidth(baseSize = 20, screenMetrics).sp
         Text(
             style = Typography.titleLarge.copy(fontSize = titleSize),
             text = stringResource(R.string.home)

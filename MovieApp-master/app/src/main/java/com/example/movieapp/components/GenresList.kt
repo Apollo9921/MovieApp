@@ -22,13 +22,15 @@ import com.example.movieapp.core.TopBarBackground
 import com.example.movieapp.core.Typography
 import com.example.movieapp.interfaces.GenreTypeSelected
 import com.example.movieapp.networking.model.genres.Genre
-import com.example.movieapp.utils.size.ScreenSizeUtils
+import com.example.movieapp.viewModel.ScreenSizingViewModel
 
 @Composable
 fun GenresListScreen(
     genresList: ArrayList<Genre>?,
     genreSelected: Int,
-    genreTypeSelectedListener: GenreTypeSelected
+    genreTypeSelectedListener: GenreTypeSelected,
+    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
+    screenViewModel: ScreenSizingViewModel
 ) {
     LazyRow(
         modifier = Modifier
@@ -53,7 +55,7 @@ fun GenresListScreen(
                 ),
                 border = BorderStroke(2.dp, Black)
             ) {
-                val label = ScreenSizeUtils.calculateCustomWidth(baseSize = 15).sp
+                val label = screenViewModel.calculateCustomWidth(baseSize = 15, screenMetrics).sp
                 Text(
                     style = Typography.labelMedium.copy(fontSize = label),
                     text = genresList?.get(it)?.name ?: "",

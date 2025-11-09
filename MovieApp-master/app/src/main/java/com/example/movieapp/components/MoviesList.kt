@@ -42,9 +42,9 @@ import com.example.movieapp.networking.model.genres.Genre
 import com.example.movieapp.networking.model.movies.MovieData
 import com.example.movieapp.core.White
 import com.example.movieapp.networking.instance.MovieInstance
-import com.example.movieapp.networking.viewModel.MoviesViewModel
-import com.example.movieapp.networking.viewModel.SearchMoviesViewModel
-import com.example.movieapp.utils.size.ScreenSizeUtils
+import com.example.movieapp.viewModel.MoviesViewModel
+import com.example.movieapp.viewModel.ScreenSizingViewModel
+import com.example.movieapp.viewModel.SearchMoviesViewModel
 
 @Composable
 fun MoviesList(
@@ -54,7 +54,9 @@ fun MoviesList(
     filteredMovies: List<MovieData>,
     genreSelected: Int,
     viewModel: ViewModel,
-    navController: NavController
+    navController: NavController,
+    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
+    screenViewModel: ScreenSizingViewModel
 ) {
     when (viewModel) {
         is MoviesViewModel -> {
@@ -110,7 +112,7 @@ fun MoviesList(
             .padding(pv)
     ) {
         if (genresList?.isNotEmpty() == true) {
-            GenresListScreen(genresList, genreSelected, viewModel as MoviesViewModel)
+            GenresListScreen(genresList, genreSelected, viewModel as MoviesViewModel, screenMetrics, screenViewModel)
         }
         LazyVerticalGrid(
             state = lazyGridState,
@@ -150,12 +152,17 @@ fun MoviesList(
             }
         }
     }
-    DisplayMoviePosition(currentMovies.size, moviePosition)
+    DisplayMoviePosition(currentMovies.size, moviePosition, screenMetrics, screenViewModel)
 }
 
 @Composable
-private fun DisplayMoviePosition(moviesSize: Int, moviePosition: Int = 0) {
-    val bottomSize = ScreenSizeUtils.calculateCustomHeight(baseSize = 50).dp
+private fun DisplayMoviePosition(
+    moviesSize: Int,
+    moviePosition: Int = 0,
+    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
+    screenViewModel: ScreenSizingViewModel
+) {
+    val bottomSize = screenViewModel.calculateCustomHeight(baseSize = 50, screenMetrics).dp
     Box(
         modifier = Modifier
             .fillMaxSize()

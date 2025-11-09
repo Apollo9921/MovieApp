@@ -1,4 +1,4 @@
-package com.example.movieapp.networking.viewModel
+package com.example.movieapp.viewModel
 
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
