@@ -6,10 +6,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
@@ -29,8 +27,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.movieapp.R
 import com.example.movieapp.components.BottomNavigationBar
+import com.example.movieapp.components.TopBar
 import com.example.movieapp.core.Background
-import com.example.movieapp.core.TopBarBackground
 import com.example.movieapp.core.Typography
 import com.example.movieapp.core.White
 import com.example.movieapp.viewModel.ScreenSizingViewModel
@@ -45,7 +43,15 @@ fun MoreScreen(
         modifier = Modifier
             .fillMaxSize()
             .safeDrawingPadding(),
-        topBar = { MoreTopBar(screenMetrics, screenViewModel) },
+        topBar = {
+            TopBar(
+                stringResource(R.string.more),
+                isBack = false,
+                backStack = { false },
+                screenMetrics = screenMetrics,
+                screenViewModel = screenViewModel
+            )
+        },
         bottomBar = { BottomNavigationBar(
             navController = navController,
             screenMetrics = screenMetrics,
@@ -103,26 +109,5 @@ private fun MoreScreenOptions(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun MoreTopBar(
-    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
-    screenViewModel: ScreenSizingViewModel
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(TopBarBackground)
-            .padding(horizontal = 10.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        val titleSize = screenViewModel.calculateCustomWidth(baseSize = 20, screenMetrics).sp
-        Text(
-            style = Typography.titleLarge.copy(fontSize = titleSize),
-            text = stringResource(R.string.more)
-        )
     }
 }

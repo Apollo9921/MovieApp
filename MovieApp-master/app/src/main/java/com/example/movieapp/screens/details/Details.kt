@@ -1,10 +1,8 @@
 package com.example.movieapp.screens.details
 
 import android.content.res.Configuration
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,7 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -49,9 +46,9 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.example.movieapp.R
 import com.example.movieapp.components.ErrorScreen
+import com.example.movieapp.components.TopBar
 import com.example.movieapp.core.Background
 import com.example.movieapp.core.Black
-import com.example.movieapp.core.TopBarBackground
 import com.example.movieapp.core.Typography
 import com.example.movieapp.core.White
 import com.example.movieapp.networking.instance.MovieInstance
@@ -90,7 +87,15 @@ fun DetailsScreen(
         modifier = Modifier
             .fillMaxSize()
             .safeDrawingPadding(),
-        topBar = { DetailsTopBar(backStack, screenMetrics, screenViewModel) },
+        topBar = {
+            TopBar(
+                stringResource(R.string.details),
+                isBack = true,
+                backStack = { backStack() },
+                screenMetrics = screenMetrics,
+                screenViewModel = screenViewModel
+            )
+        },
         content = {
             Box(
                 modifier = Modifier
@@ -394,33 +399,4 @@ private fun SectionOverview(movieDetails: MovieDetails, label: TextUnit) {
         style = Typography.labelMedium.copy(fontSize = label),
         modifier = Modifier.padding(horizontal = 10.dp)
     )
-}
-
-@Composable
-private fun DetailsTopBar(
-    backStack: () -> Boolean,
-    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
-    screenViewModel: ScreenSizingViewModel
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(TopBarBackground)
-            .padding(horizontal = 10.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.back),
-            contentDescription = null,
-            colorFilter = ColorFilter.tint(White),
-            modifier = Modifier.clickable { backStack() }
-        )
-        Spacer(modifier = Modifier.padding(10.dp))
-        val titleSize = screenViewModel.calculateCustomWidth(baseSize = 20, screenMetrics).sp
-        Text(
-            style = Typography.titleLarge.copy(fontSize = titleSize),
-            text = stringResource(R.string.details)
-        )
-    }
 }
