@@ -22,6 +22,7 @@ import kotlinx.coroutines.launch
 import androidx.navigation.NavController
 import com.example.movieapp.R
 import com.example.movieapp.components.BottomNavigationBar
+import com.example.movieapp.components.LoadingScreen
 import com.example.movieapp.components.TopBar
 import com.example.movieapp.core.Background
 import com.example.movieapp.viewModel.ScreenSizingViewModel
@@ -43,15 +44,7 @@ fun HomeScreen(
         fetchMovies()
     }
 
-    val isLoading = moviesViewModel?.isLoading?.value
-    val isSuccess = moviesViewModel?.isSuccess?.value
-    val isError = moviesViewModel?.isError?.value
-    val errorMessage = moviesViewModel?.errorMessage?.value
-
-    val moviesList = moviesViewModel?.moviesList ?: ArrayList()
-    val genresList = moviesViewModel?.genresList
-    val filteredMovies = moviesViewModel?.filteredMovies ?: emptyList()
-    val genreType = moviesViewModel?.genreType?.intValue ?: 0
+    val uiState = moviesViewModel?.uiState?.collectAsState()
 
     Scaffold(
         modifier = Modifier
@@ -80,7 +73,15 @@ fun HomeScreen(
                     .background(Background)
             ) {
                 when {
-                    isLoading == true || isSuccess == true -> {
+                    uiState?.value?.isLoading == true && uiState.value.movies.isEmpty() -> {
+                        LoadingScreen()
+                    }
+
+                    uiState?.value?.isSuccess == true -> {
+                        val moviesList = moviesViewModel?.moviesList ?: ArrayList()
+                        val genresList = moviesViewModel?.genresList
+                        val filteredMovies = moviesViewModel?.filteredMovies ?: emptyList()
+                        val genreType = moviesViewModel?.genreType?.intValue ?: 0
                         MoviesList(
                             it,
                             moviesList,
@@ -92,16 +93,19 @@ fun HomeScreen(
                             screenMetrics,
                             screenViewModel
                         )
-                        if (errorMessage == stringResource(R.string.no_internet_connection) && moviesList.isNotEmpty()) {
-                            Toast.makeText(LocalContext.current, errorMessage, Toast.LENGTH_LONG)
-                                .show()
-                            moviesViewModel?.errorMessage?.value = ""
+                        if (uiState.value.errorMessage == stringResource(R.string.no_internet_connection)) {
+                            Toast.makeText(
+                                LocalContext.current,
+                                uiState.value.errorMessage,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            uiState.value.errorMessage = null
                         }
                     }
 
-                    isError == true -> {
+                    uiState?.value?.error == true -> {
                         isConnected.value = false
-                        ErrorScreen(errorMessage, screenMetrics, screenViewModel)
+                        ErrorScreen(uiState.value.errorMessage, screenMetrics, screenViewModel)
                     }
 
                     networkStatus?.value == ConnectivityObserver.Status.Unavailable -> {

@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
@@ -64,17 +63,6 @@ fun MoviesList(
         }
 
         else -> viewModel as? SearchMoviesViewModel
-    }
-    if (movies.isEmpty()) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Background),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(color = White, strokeWidth = 2.dp)
-        }
-        return
     }
 
     val imageLoadingStates = remember { mutableStateMapOf<String, AsyncImagePainter.State>() }

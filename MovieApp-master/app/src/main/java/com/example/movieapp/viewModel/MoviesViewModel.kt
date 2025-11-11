@@ -1,7 +1,6 @@
 package com.example.movieapp.viewModel
 
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieapp.interfaces.GenreTypeSelected
@@ -22,21 +21,11 @@ class MoviesViewModel(
     connectivityObserver: ConnectivityObserver
 ) : ViewModel(), GenreTypeSelected {
 
-    private val _moviesState = MutableStateFlow<MoviesState>(MoviesState.Error("Unknown Error"))
-    private val moviesState: StateFlow<MoviesState> = _moviesState.asStateFlow()
-
     private val _genreTypeSelected = MutableStateFlow<GenresState>(GenresState.NotSelected)
     private val genreTypeSelected: StateFlow<GenresState> = _genreTypeSelected.asStateFlow()
 
-    var moviesList = ArrayList<MovieData>()
-    var genresList = ArrayList<Genre>()
-    var filteredMovies = emptyList<MovieData>()
-    var genreType = mutableIntStateOf(0)
-
-    var isLoading = mutableStateOf(false)
-    var isSuccess = mutableStateOf(false)
-    var isError = mutableStateOf(false)
-    var errorMessage = mutableStateOf("")
+    private val _uiState = MutableStateFlow(MoviesUiState(isLoading = false))
+    val uiState: StateFlow<MoviesUiState> = _uiState.asStateFlow()
 
     val networkStatus: StateFlow<ConnectivityObserver.Status> =
         connectivityObserver.observe()
@@ -48,10 +37,19 @@ class MoviesViewModel(
 
     private var currentPage = 0
 
-    sealed class MoviesState {
-        data class Success(val movies: List<MovieData>, val genres: GenresList) : MoviesState()
-        data class Error(val message: String) : MoviesState()
-    }
+    var moviesList = ArrayList<MovieData>()
+    var genresList = ArrayList<Genre>()
+    var filteredMovies = emptyList<MovieData>()
+    var genreType = mutableIntStateOf(0)
+
+    data class MoviesUiState(
+        val isLoading: Boolean = false,
+        val isSuccess: Boolean = false,
+        val error: Boolean = false,
+        var errorMessage: String? = null,
+        var movies: ArrayList<MovieData> = ArrayList(),
+        val genres: GenresList = GenresList(emptyList()),
+    )
 
     sealed class GenresState {
         data object NotSelected : GenresState()
@@ -59,12 +57,17 @@ class MoviesViewModel(
     }
 
     fun fetchMovies() {
+        if (_uiState.value.isLoading) return
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, error = false)
             try {
-                isLoading.value = true
                 if (networkStatus.value == ConnectivityObserver.Status.Unavailable) {
-                    _moviesState.value = MoviesState.Error("No Internet Connection")
-                    isLoading.value = false
+                    _uiState.value =
+                        _uiState.value.copy(
+                            isLoading = false,
+                            error = true,
+                            errorMessage = "No Internet Connection"
+                        )
                     return@launch
                 }
                 val pageToFetch = ++currentPage
@@ -73,15 +76,33 @@ class MoviesViewModel(
                     val moviesData = responseMovies.body()!!
                     val responseGenres = repository.fetchGenres()
                     if (responseGenres.isSuccessful && responseGenres.body() != null) {
-                        _moviesState.value = MoviesState.Success(moviesData.results, responseGenres.body()!!)
+                        _uiState.value =
+                            MoviesUiState(
+                                isLoading = false,
+                                isSuccess = true,
+                                movies = moviesData.results as ArrayList<MovieData>,
+                                genres = responseGenres.body()!!
+                            )
                     } else {
-                        _moviesState.value = MoviesState.Error("Error: ${responseGenres.code()} ${responseGenres.message()}")
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            error = true,
+                            errorMessage = "Error: ${responseGenres.code()} ${responseGenres.message()}"
+                        )
                     }
                 } else {
-                    _moviesState.value = MoviesState.Error("Error: ${responseMovies.code()} ${responseMovies.message()}")
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        error = true,
+                        errorMessage = "Error: ${responseMovies.code()} ${responseMovies.message()}"
+                    )
                 }
             } catch (e: Exception) {
-                _moviesState.value = MoviesState.Error("Exception: ${e.message ?: "Unknown error"}")
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = true,
+                    errorMessage = "Exception: ${e.message ?: "Unknown error"}"
+                )
             } finally {
                 observeMovies()
                 observeGenres()
@@ -90,42 +111,27 @@ class MoviesViewModel(
     }
 
     private fun observeMovies() {
-        viewModelScope.launch {
-            moviesState.collect { it ->
-                when (it) {
-                    is MoviesState.Error -> {
-                        errorMessage.value = it.message
-                        isError.value = true
-                        isLoading.value = false
-                    }
-                    is MoviesState.Success -> {
-                        val newMovies = ArrayList<MovieData>()
-                        newMovies.addAll(moviesList)
-                        newMovies.addAll(it.movies)
-                        moviesList = newMovies.distinctBy { it.id } as ArrayList<MovieData>
+        val newMovies = ArrayList<MovieData>()
+        newMovies.addAll(moviesList)
+        newMovies.addAll(uiState.value.movies)
+        moviesList = newMovies.distinctBy { it.id } as ArrayList<MovieData>
 
-                        val newGenresList = ArrayList<Genre>()
-                        val sourceGenres = it.genres.genres
-                        newGenresList.add(Genre(0, "All"))
-                        newGenresList.addAll(sourceGenres)
-                        genresList = newGenresList.distinctBy { it.name } as ArrayList<Genre>
-                        isLoading.value = false
-                        isError.value = false
-                        isSuccess.value = true
-                    }
-                }
-            }
-        }
+        val newGenresList = ArrayList<Genre>()
+        val sourceGenres = uiState.value.genres.genres
+        newGenresList.add(Genre(0, "All"))
+        newGenresList.addAll(sourceGenres)
+        genresList = newGenresList.distinctBy { it.name } as ArrayList<Genre>
     }
 
     private fun observeGenres() {
         viewModelScope.launch {
             genreTypeSelected.collect {
-                when(it) {
+                when (it) {
                     GenresState.NotSelected -> {
                         genreType.intValue = 0
                         filteredMovies = emptyList()
                     }
+
                     is GenresState.Selected -> {
                         genreType.intValue = it.genresType
                         filteredMovies = moviesList.filter { movie ->
