@@ -1,5 +1,6 @@
 package com.example.movieapp.viewModel
 
+import android.util.Log
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,6 +9,7 @@ import com.example.movieapp.koin.MoviesRepository
 import com.example.movieapp.networking.model.genres.Genre
 import com.example.movieapp.networking.model.genres.GenresList
 import com.example.movieapp.networking.model.movies.MovieData
+import com.example.movieapp.utils.Constants
 import com.example.movieapp.utils.network.ConnectivityObserver
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -65,7 +67,7 @@ class MoviesViewModel(
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         error = true,
-                        errorMessage = "No Internet Connection"
+                        errorMessage = Constants.NO_INTERNET_CONNECTION
                     )
                 }
             }
@@ -82,7 +84,7 @@ class MoviesViewModel(
                         _uiState.value.copy(
                             isLoading = false,
                             error = true,
-                            errorMessage = "No Internet Connection"
+                            errorMessage = Constants.NO_INTERNET_CONNECTION
                         )
                     return@launch
                 }
@@ -100,24 +102,27 @@ class MoviesViewModel(
                                 genres = responseGenres.body()!!
                             )
                     } else {
+                        Log.e("Error", "${responseMovies.code()} ${responseMovies.message()}")
                         _uiState.value = _uiState.value.copy(
                             isLoading = false,
                             error = true,
-                            errorMessage = "Error: ${responseGenres.code()} ${responseGenres.message()}"
+                            errorMessage = Constants.ERROR_FETCHING_GENRES
                         )
                     }
                 } else {
+                    Log.e("Error", "${responseMovies.code()} ${responseMovies.message()}")
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         error = true,
-                        errorMessage = "Error: ${responseMovies.code()} ${responseMovies.message()}"
+                        errorMessage = Constants.ERROR_FETCHING_MOVIES
                     )
                 }
             } catch (e: Exception) {
+                Log.e("Exception:", e.message ?: Constants.UNKNOWN_ERROR)
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     error = true,
-                    errorMessage = "Exception: ${e.message ?: "Unknown error"}"
+                    errorMessage = Constants.ERROR_FETCHING_MOVIES
                 )
             } finally {
                 observeMovies()
