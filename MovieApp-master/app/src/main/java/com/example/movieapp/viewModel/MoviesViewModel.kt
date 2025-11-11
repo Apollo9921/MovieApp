@@ -56,6 +56,22 @@ class MoviesViewModel(
         data class Selected(val genresType: Int) : GenresState()
     }
 
+    init {
+        viewModelScope.launch {
+            networkStatus.collect { status ->
+                if (status == ConnectivityObserver.Status.Available && moviesList.isEmpty()) {
+                    fetchMovies()
+                } else if (status == ConnectivityObserver.Status.Unavailable) {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        error = true,
+                        errorMessage = "No Internet Connection"
+                    )
+                }
+            }
+        }
+    }
+
     fun fetchMovies() {
         if (_uiState.value.isLoading) return
         viewModelScope.launch {

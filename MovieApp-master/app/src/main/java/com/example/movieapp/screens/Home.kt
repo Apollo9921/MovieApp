@@ -15,10 +15,6 @@ import androidx.compose.ui.res.stringResource
 import com.example.movieapp.viewModel.MoviesViewModel
 import com.example.movieapp.components.ErrorScreen
 import com.example.movieapp.components.MoviesList
-import com.example.movieapp.utils.network.ConnectivityObserver
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import androidx.navigation.NavController
 import com.example.movieapp.R
 import com.example.movieapp.components.BottomNavigationBar
@@ -38,12 +34,6 @@ fun HomeScreen(
     screenViewModel: ScreenSizingViewModel
 ) {
     moviesViewModel = koinViewModel<MoviesViewModel>()
-    val networkStatus = moviesViewModel?.networkStatus?.collectAsState()
-    if (networkStatus?.value == ConnectivityObserver.Status.Available && !isConnected.value) {
-        isConnected.value = true
-        fetchMovies()
-    }
-
     val uiState = moviesViewModel?.uiState?.collectAsState()
 
     Scaffold(
@@ -107,22 +97,8 @@ fun HomeScreen(
                         isConnected.value = false
                         ErrorScreen(uiState.value.errorMessage, screenMetrics, screenViewModel)
                     }
-
-                    networkStatus?.value == ConnectivityObserver.Status.Unavailable -> {
-                        ErrorScreen(
-                            stringResource(R.string.no_internet_connection),
-                            screenMetrics,
-                            screenViewModel
-                        )
-                    }
                 }
             }
         }
     )
-}
-
-private fun fetchMovies() {
-    CoroutineScope(Dispatchers.IO).launch {
-        moviesViewModel?.fetchMovies()
-    }
 }
