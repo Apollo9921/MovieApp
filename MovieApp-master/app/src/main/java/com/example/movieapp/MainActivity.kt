@@ -10,10 +10,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
-import com.example.movieapp.navigation.Navigation
+import com.example.movieapp.presentation.navigation.Navigation
 import com.example.movieapp.core.MovieAppTheme
-import com.example.movieapp.utils.network.ConnectivityObserver
-import com.example.movieapp.utils.network.NetworkConnectivityObserver
+import com.example.movieapp.core.utils.network.ConnectivityObserver
+import com.example.movieapp.core.utils.network.NetworkConnectivityObserver
 import org.koin.androidx.compose.KoinAndroidContext
 import org.koin.core.annotation.KoinExperimentalAPI
 

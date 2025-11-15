@@ -1,5 +1,6 @@
 package com.example.movieapp.utils
 
+import com.example.movieapp.core.utils.formatVoteCount
 import org.junit.Test
 import kotlin.test.assertEquals
 

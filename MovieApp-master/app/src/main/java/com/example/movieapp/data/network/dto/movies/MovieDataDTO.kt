@@ -1,0 +1,54 @@
+package com.example.movieapp.data.network.dto.movies
+
+import com.example.movieapp.domain.model.movies.MovieData
+import com.squareup.moshi.Json
+
+data class MovieDataDTO(
+    @field:Json(name = "adult")
+    val adult: Boolean?,
+    @field:Json(name = "backdrop_path")
+    val backdropPath: String?,
+    @field:Json(name = "genre_ids")
+    val genreIds: List<Int>?,
+    @field:Json(name = "id")
+    val id: Int?,
+    @field:Json(name = "original_language")
+    val originalLanguage: String?,
+    @field:Json(name = "original_title")
+    val originalTitle: String?,
+    @field:Json(name = "overview")
+    val overview: String?,
+    @field:Json(name = "popularity")
+    val popularity: Double?,
+    @field:Json(name = "poster_path")
+    val posterPath: String?,
+    @field:Json(name = "release_date")
+    val releaseDate: String?,
+    @field:Json(name = "title")
+    val title: String?,
+    @field:Json(name = "video")
+    val video: Boolean?,
+    @field:Json(name = "vote_average")
+    val voteAverage: Double?,
+    @field:Json(name = "vote_count")
+    val voteCount: Int?
+)
+
+fun MovieDataDTO.toMovieData(): MovieData {
+    return MovieData(
+        adult = adult == true,
+        backdropPath = backdropPath ?: "",
+        genreIds = genreIds ?: emptyList(),
+        id = id ?: 0,
+        originalLanguage = originalLanguage ?: "",
+        originalTitle = originalTitle ?: "",
+        overview = overview ?: "",
+        popularity = popularity ?: 0.0,
+        posterPath = posterPath ?: "",
+        releaseDate = releaseDate ?: "",
+        title = title ?: "",
+        video = video == true,
+        voteAverage = voteAverage ?: 0.0,
+        voteCount = voteCount ?: 0
+    )
+}
