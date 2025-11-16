@@ -101,19 +101,21 @@ class MoviesViewModel(
                         ?: genresResult.exceptionOrNull()?.message
                         ?: Constants.UNKNOWN_ERROR
 
+                    Log.e("MoviesViewModel", errorMsg)
+
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         error = true,
-                        errorMessage = errorMsg
+                        errorMessage = Constants.UNKNOWN_ERROR
                     )
                 }
             } catch (e: Exception) {
-                Log.e("MoviesViewModel", e.message.toString())
                 val errorMsg = e.message ?: Constants.UNKNOWN_ERROR
+                Log.e("MoviesViewModel", errorMsg)
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     error = true,
-                    errorMessage = errorMsg
+                    errorMessage = Constants.UNKNOWN_ERROR
                 )
             } finally {
                 observeMovies()
