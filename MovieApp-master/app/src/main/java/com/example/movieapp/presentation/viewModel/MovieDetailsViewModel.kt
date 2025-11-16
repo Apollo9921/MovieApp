@@ -4,7 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieapp.domain.model.details.MovieDetails
-import com.example.movieapp.core.utils.network.ConnectivityObserver
+import com.example.movieapp.domain.repository.ConnectivityObserver
 import com.example.movieapp.domain.usecase.GetMovieDetailsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

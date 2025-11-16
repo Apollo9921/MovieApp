@@ -1,4 +1,4 @@
-package com.example.movieapp.core.utils
+package com.example.movieapp.presentation.utils
 
 import java.text.DecimalFormat
 

@@ -8,8 +8,8 @@ import com.example.movieapp.presentation.interaction.GenreTypeSelected
 import com.example.movieapp.domain.model.genres.Genre
 import com.example.movieapp.domain.model.genres.GenresList
 import com.example.movieapp.domain.model.movies.MovieData
-import com.example.movieapp.core.utils.Constants
-import com.example.movieapp.core.utils.network.ConnectivityObserver
+import com.example.movieapp.core.Constants
+import com.example.movieapp.domain.repository.ConnectivityObserver
 import com.example.movieapp.domain.usecase.GetGenresUseCase
 import com.example.movieapp.domain.usecase.GetMoviesUseCase
 import kotlinx.coroutines.flow.MutableStateFlow

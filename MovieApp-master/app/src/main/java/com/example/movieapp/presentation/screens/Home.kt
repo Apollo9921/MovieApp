@@ -20,7 +20,7 @@ import com.example.movieapp.R
 import com.example.movieapp.presentation.components.BottomNavigationBar
 import com.example.movieapp.presentation.components.LoadingScreen
 import com.example.movieapp.presentation.components.TopBar
-import com.example.movieapp.core.Background
+import com.example.movieapp.presentation.theme.Background
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 import org.koin.androidx.compose.koinViewModel
 

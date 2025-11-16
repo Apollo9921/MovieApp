@@ -11,9 +11,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 import com.example.movieapp.presentation.navigation.Navigation
-import com.example.movieapp.core.MovieAppTheme
-import com.example.movieapp.core.utils.network.ConnectivityObserver
-import com.example.movieapp.core.utils.network.NetworkConnectivityObserver
+import com.example.movieapp.presentation.theme.MovieAppTheme
+import com.example.movieapp.domain.repository.ConnectivityObserver
+import com.example.movieapp.data.repository.NetworkConnectivityObserver
 import org.koin.androidx.compose.KoinAndroidContext
 import org.koin.core.annotation.KoinExperimentalAPI
 

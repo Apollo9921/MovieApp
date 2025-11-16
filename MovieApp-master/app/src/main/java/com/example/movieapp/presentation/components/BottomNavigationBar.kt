@@ -22,8 +22,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.movieapp.core.BottomBarBackground
-import com.example.movieapp.core.White
+import com.example.movieapp.presentation.theme.BottomBarBackground
+import com.example.movieapp.presentation.theme.White
 import com.example.movieapp.presentation.navigation.BottomNavItem
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 

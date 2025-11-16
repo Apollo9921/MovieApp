@@ -16,10 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.movieapp.core.Black
-import com.example.movieapp.core.Selected
-import com.example.movieapp.core.TopBarBackground
-import com.example.movieapp.core.Typography
+import com.example.movieapp.presentation.theme.Black
+import com.example.movieapp.presentation.theme.Selected
+import com.example.movieapp.presentation.theme.TopBarBackground
+import com.example.movieapp.presentation.theme.Typography
 import com.example.movieapp.presentation.interaction.GenreTypeSelected
 import com.example.movieapp.domain.model.genres.Genre
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel

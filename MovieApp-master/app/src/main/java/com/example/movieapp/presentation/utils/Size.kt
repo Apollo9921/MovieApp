@@ -1,4 +1,4 @@
-package com.example.movieapp.core.utils.size
+package com.example.movieapp.presentation.utils
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable

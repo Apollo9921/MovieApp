@@ -1,4 +1,4 @@
-package com.example.movieapp.core.utils.network
+package com.example.movieapp.domain.repository
 
 import kotlinx.coroutines.flow.Flow
 

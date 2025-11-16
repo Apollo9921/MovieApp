@@ -6,8 +6,8 @@ import com.example.movieapp.domain.repository.MoviesRepository
 import com.example.movieapp.presentation.viewModel.MovieDetailsViewModel
 import com.example.movieapp.presentation.viewModel.MoviesViewModel
 import com.example.movieapp.presentation.viewModel.SearchMoviesViewModel
-import com.example.movieapp.core.utils.network.ConnectivityObserver
-import com.example.movieapp.core.utils.network.NetworkConnectivityObserver
+import com.example.movieapp.domain.repository.ConnectivityObserver
+import com.example.movieapp.data.repository.NetworkConnectivityObserver
 import com.example.movieapp.domain.usecase.GetGenresUseCase
 import com.example.movieapp.domain.usecase.GetMovieDetailsUseCase
 import com.example.movieapp.domain.usecase.GetMoviesUseCase

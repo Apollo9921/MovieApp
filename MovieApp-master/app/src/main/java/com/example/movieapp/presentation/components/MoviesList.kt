@@ -36,10 +36,10 @@ import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
 import com.example.movieapp.R
-import com.example.movieapp.core.Background
+import com.example.movieapp.presentation.theme.Background
 import com.example.movieapp.domain.model.genres.Genre
 import com.example.movieapp.domain.model.movies.MovieData
-import com.example.movieapp.core.White
+import com.example.movieapp.presentation.theme.White
 import com.example.movieapp.data.network.instance.MovieInstance
 import com.example.movieapp.presentation.viewModel.MoviesViewModel
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel

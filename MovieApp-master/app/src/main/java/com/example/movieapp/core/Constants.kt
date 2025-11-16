@@ -1,4 +1,4 @@
-package com.example.movieapp.core.utils
+package com.example.movieapp.core
 
 object Constants {
     const val NO_INTERNET_CONNECTION = "No Internet Connection"

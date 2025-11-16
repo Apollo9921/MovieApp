@@ -10,7 +10,7 @@ import com.example.movieapp.presentation.screens.HomeScreen
 import com.example.movieapp.presentation.screens.MoreScreen
 import com.example.movieapp.presentation.screens.SettingsScreen
 import com.example.movieapp.presentation.screens.more.SearchScreen
-import com.example.movieapp.core.utils.size.getScreenMetrics
+import com.example.movieapp.presentation.utils.getScreenMetrics
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 
 private var screenViewModel: ScreenSizingViewModel = ScreenSizingViewModel()

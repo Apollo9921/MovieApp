@@ -17,9 +17,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.movieapp.R
-import com.example.movieapp.core.TopBarBackground
-import com.example.movieapp.core.Typography
-import com.example.movieapp.core.White
+import com.example.movieapp.presentation.theme.TopBarBackground
+import com.example.movieapp.presentation.theme.Typography
+import com.example.movieapp.presentation.theme.White
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 
 @Composable

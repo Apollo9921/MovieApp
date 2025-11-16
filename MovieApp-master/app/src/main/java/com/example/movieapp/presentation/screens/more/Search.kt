@@ -29,8 +29,8 @@ import com.example.movieapp.R
 import com.example.movieapp.presentation.components.ErrorScreen
 import com.example.movieapp.presentation.components.MoviesList
 import com.example.movieapp.presentation.components.TopBar
-import com.example.movieapp.core.Background
-import com.example.movieapp.core.White
+import com.example.movieapp.presentation.theme.Background
+import com.example.movieapp.presentation.theme.White
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 import com.example.movieapp.presentation.viewModel.SearchMoviesViewModel
 import kotlinx.coroutines.CoroutineScope

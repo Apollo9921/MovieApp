@@ -8,8 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.movieapp.core.Background
-import com.example.movieapp.core.White
+import com.example.movieapp.presentation.theme.Background
+import com.example.movieapp.presentation.theme.White
 
 @Composable
 fun LoadingScreen() {
