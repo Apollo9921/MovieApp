@@ -1,5 +1,6 @@
 package com.example.movieapp.data.repository
 
+import com.example.movieapp.data.network.dto.details.toMovieDetails
 import com.example.movieapp.data.network.dto.genres.toGenresList
 import com.example.movieapp.data.network.dto.movies.toMovies
 import com.example.movieapp.domain.model.details.MovieDetails
@@ -9,7 +10,6 @@ import com.example.movieapp.data.network.service.MovieService
 import com.example.movieapp.domain.repository.MoviesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import retrofit2.Response
 
 class MovieRepositoryImpl(
     private val movieService: MovieService
@@ -26,16 +26,15 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun searchMovie(query: String): Response<Movies> {
+    override suspend fun searchMovie(query: String): Movies {
         return withContext(Dispatchers.IO) {
-            //TODO create UseCase and DTO
-            Response.success(movieService.searchMovie(query).toMovies())
+            movieService.searchMovie(query).toMovies()
         }
     }
 
-    override suspend fun getMovieDetails(movieId: Int): Response<MovieDetails> {
+    override suspend fun getMovieDetails(movieId: Int): MovieDetails {
         return withContext(Dispatchers.IO) {
-            movieService.getMovieDetails(movieId)
+            movieService.getMovieDetails(movieId).toMovieDetails()
         }
     }
 }

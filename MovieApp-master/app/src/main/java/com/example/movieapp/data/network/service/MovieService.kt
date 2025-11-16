@@ -1,10 +1,8 @@
 package com.example.movieapp.data.network.service
 
+import com.example.movieapp.data.network.dto.details.DetailsDTO
 import com.example.movieapp.data.network.dto.genres.GenresListDTO
 import com.example.movieapp.data.network.dto.movies.MoviesDTO
-import com.example.movieapp.domain.model.details.MovieDetails
-import com.example.movieapp.domain.model.movies.Movies
-import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -21,6 +19,6 @@ interface MovieService {
     suspend fun searchMovie(@Query("query") query: String): MoviesDTO
 
     @GET("movie/{movie_id}")
-    suspend fun getMovieDetails(@Path("movie_id") movieId: Int): Response<MovieDetails>
+    suspend fun getMovieDetails(@Path("movie_id") movieId: Int): DetailsDTO
 
 }

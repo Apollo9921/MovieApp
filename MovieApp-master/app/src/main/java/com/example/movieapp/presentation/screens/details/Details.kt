@@ -146,15 +146,15 @@ private fun DetailsContent(
     val titleSize = screenViewModel.calculateCustomWidth(baseSize = 20, screenMetrics).sp
     val label = screenViewModel.calculateCustomWidth(baseSize = 15, screenMetrics).sp
     val ratingTextSize = screenViewModel.calculateCustomWidth(baseSize = 14, screenMetrics).sp
-    val imageUrl = "${MovieInstance.BASE_URL_IMAGE}${movieDetails.poster_path}"
-    val formattedVoteAverage = DecimalFormat("#.#").format(movieDetails.vote_average)
-    val releaseDate = movieDetails.release_date.split("-").first()
+    val imageUrl = "${MovieInstance.BASE_URL_IMAGE}${movieDetails.posterPath}"
+    val formattedVoteAverage = DecimalFormat("#.#").format(movieDetails.voteAverage)
+    val releaseDate = movieDetails.releaseDate.split("-").first()
     val genres = movieDetails.genres.joinToString(", ") { it.name }
     val hours = movieDetails.runtime / 60
     val minutes = movieDetails.runtime % 60
     val runtime = "${hours}h ${minutes}m"
-    val languages = movieDetails.spoken_languages.map { it.name }
-    val companies = movieDetails.production_companies.map { it.name }
+    val languages = movieDetails.spokenLanguages.map { it.name }
+    val companies = movieDetails.productionCompanies.map { it.name }
     val scrollState = rememberScrollState()
     val imageMaxHeight = 300.dp
     val imageMaxHeightPx = with(LocalDensity.current) { imageMaxHeight.toPx() }
@@ -298,7 +298,7 @@ private fun SectionRating(
             )
         )
         Text(
-            text = "(${formatVoteCount(movieDetails.vote_count)})",
+            text = "(${formatVoteCount(movieDetails.voteCount)})",
             style = Typography.labelMedium.copy(
                 fontSize = ratingTextSize,
                 color = Color.Gray

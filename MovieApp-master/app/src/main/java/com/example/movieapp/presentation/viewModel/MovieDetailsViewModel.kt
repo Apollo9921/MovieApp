@@ -3,18 +3,19 @@ package com.example.movieapp.presentation.viewModel
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.movieapp.domain.repository.MoviesRepository
 import com.example.movieapp.domain.model.details.MovieDetails
 import com.example.movieapp.core.utils.network.ConnectivityObserver
+import com.example.movieapp.domain.usecase.GetMovieDetailsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class MovieDetailsViewModel(
-    private val movieRepository: MoviesRepository,
+    private val getMovieDetailsUseCase: GetMovieDetailsUseCase,
     connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
@@ -52,13 +53,8 @@ class MovieDetailsViewModel(
                     isLoading.value = false
                     return@launch
                 }
-                val response = movieRepository.getMovieDetails(movieId)
-                if (response.isSuccessful && response.body() != null) {
-                    _movieDetailState.value = MovieDetailState.Success(response.body()!!)
-                } else {
-                    _movieDetailState.value =
-                        MovieDetailState.Error("Error: ${response.code()} ${response.message()}")
-                }
+                val response = getMovieDetailsUseCase(movieId).first()
+                _movieDetailState.value = MovieDetailState.Success(response.getOrThrow())
             } catch (e: Exception) {
                 _movieDetailState.value =
                     MovieDetailState.Error("Exception: ${e.message ?: "Unknown error"}")
@@ -77,6 +73,7 @@ class MovieDetailsViewModel(
                         isError.value = true
                         isLoading.value = false
                     }
+
                     is MovieDetailState.Success -> {
                         movieDetails = it.movieDetails
                         isLoading.value = false

@@ -18,7 +18,8 @@ class SearchMoviesViewModel(
     connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
-    private val _moviesState = MutableStateFlow<SearchedMoviesState>(SearchedMoviesState.Error("Unknown Error"))
+    private val _moviesState =
+        MutableStateFlow<SearchedMoviesState>(SearchedMoviesState.Error("Unknown Error"))
     private var moviesState: StateFlow<SearchedMoviesState> = _moviesState.asStateFlow()
 
     var moviesList = ArrayList<MovieData>()
@@ -51,14 +52,11 @@ class SearchMoviesViewModel(
                     return@launch
                 }
                 val responseMovies = repository.searchMovie(query)
-                if (responseMovies.isSuccessful && responseMovies.body() != null) {
-                    val moviesData = responseMovies.body()!!
-                    _moviesState.value = SearchedMoviesState.Success(moviesData.results)
-                } else {
-                    _moviesState.value = SearchedMoviesState.Error("Error: ${responseMovies.code()} ${responseMovies.message()}")
-                }
+                val moviesData = responseMovies.results
+                _moviesState.value = SearchedMoviesState.Success(moviesData)
             } catch (e: Exception) {
-                _moviesState.value = SearchedMoviesState.Error("Exception: ${e.message ?: "Unknown error"}")
+                _moviesState.value =
+                    SearchedMoviesState.Error("Exception: ${e.message ?: "Unknown error"}")
             } finally {
                 observeMoviesSearched()
             }

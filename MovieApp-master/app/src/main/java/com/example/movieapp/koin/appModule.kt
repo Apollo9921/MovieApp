@@ -9,6 +9,7 @@ import com.example.movieapp.presentation.viewModel.SearchMoviesViewModel
 import com.example.movieapp.core.utils.network.ConnectivityObserver
 import com.example.movieapp.core.utils.network.NetworkConnectivityObserver
 import com.example.movieapp.domain.usecase.GetGenresUseCase
+import com.example.movieapp.domain.usecase.GetMovieDetailsUseCase
 import com.example.movieapp.domain.usecase.GetMoviesUseCase
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -29,6 +30,10 @@ val appModule = module {
 
     single {
         GetGenresUseCase(get())
+    }
+
+    single {
+        GetMovieDetailsUseCase(get())
     }
 
     single<ConnectivityObserver> {
