@@ -29,7 +29,7 @@ class MoviesViewModel(
     private val _genreTypeSelected = MutableStateFlow<GenresState>(GenresState.NotSelected)
     private val genreTypeSelected: StateFlow<GenresState> = _genreTypeSelected.asStateFlow()
 
-    private val _uiState = MutableStateFlow(MoviesUiState(isLoading = false))
+    private val _uiState = MutableStateFlow(MoviesUiState())
     val uiState: StateFlow<MoviesUiState> = _uiState.asStateFlow()
 
     val networkStatus: StateFlow<ConnectivityObserver.Status> =
@@ -68,7 +68,6 @@ class MoviesViewModel(
                     fetchMovies()
                 } else if (status == ConnectivityObserver.Status.Unavailable) {
                     _uiState.value = _uiState.value.copy(
-                        isLoading = false,
                         error = true,
                         errorMessage = Constants.NO_INTERNET_CONNECTION
                     )

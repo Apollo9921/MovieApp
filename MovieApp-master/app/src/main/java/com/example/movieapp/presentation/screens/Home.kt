@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -24,17 +23,14 @@ import com.example.movieapp.presentation.theme.Background
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 import org.koin.androidx.compose.koinViewModel
 
-private var moviesViewModel: MoviesViewModel? = null
-private var isConnected = mutableStateOf(false)
-
 @Composable
 fun HomeScreen(
     navController: NavController,
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel
 ) {
-    moviesViewModel = koinViewModel<MoviesViewModel>()
-    val uiState = moviesViewModel?.uiState?.collectAsState()
+    val moviesViewModel = koinViewModel<MoviesViewModel>()
+    val uiState = moviesViewModel.uiState.collectAsState()
 
     Scaffold(
         modifier = Modifier
@@ -63,22 +59,22 @@ fun HomeScreen(
                     .background(Background)
             ) {
                 when {
-                    uiState?.value?.isLoading == true && uiState.value.movies.isEmpty() -> {
+                    uiState.value.isLoading == true && uiState.value.movies.isEmpty() -> {
                         LoadingScreen()
                     }
 
-                    uiState?.value?.isSuccess == true -> {
-                        val moviesList = moviesViewModel?.moviesList ?: ArrayList()
-                        val genresList = moviesViewModel?.genresList
-                        val filteredMovies = moviesViewModel?.filteredMovies ?: emptyList()
-                        val genreType = moviesViewModel?.genreType?.intValue ?: 0
+                    uiState.value.isSuccess == true -> {
+                        val moviesList = moviesViewModel.moviesList
+                        val genresList = moviesViewModel.genresList
+                        val filteredMovies = moviesViewModel.filteredMovies
+                        val genreType = moviesViewModel.genreType.intValue
                         MoviesList(
                             it,
                             moviesList,
                             genresList,
                             filteredMovies,
                             genreType,
-                            moviesViewModel!!,
+                            moviesViewModel,
                             navController,
                             screenMetrics,
                             screenViewModel
@@ -93,8 +89,7 @@ fun HomeScreen(
                         }
                     }
 
-                    uiState?.value?.error == true -> {
-                        isConnected.value = false
+                    uiState.value.error == true && uiState.value.errorMessage != null -> {
                         ErrorScreen(uiState.value.errorMessage, screenMetrics, screenViewModel)
                     }
                 }
