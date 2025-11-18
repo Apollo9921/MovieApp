@@ -1,8 +1,9 @@
 package com.example.movieapp.presentation.viewModel
 
-import androidx.compose.runtime.mutableStateOf
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.movieapp.core.Constants
 import com.example.movieapp.domain.model.details.MovieDetails
 import com.example.movieapp.domain.repository.ConnectivityObserver
 import com.example.movieapp.domain.usecase.GetMovieDetailsUseCase
@@ -19,16 +20,17 @@ class MovieDetailsViewModel(
     connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
-    private val _movieDetailState =
-        MutableStateFlow<MovieDetailState>(MovieDetailState.Error("Unknown Error"))
-    private val movieDetailState: StateFlow<MovieDetailState> = _movieDetailState.asStateFlow()
+    private val _uiState = MutableStateFlow(MovieDetailsUiState())
+    val uiState: StateFlow<MovieDetailsUiState> = _uiState.asStateFlow()
 
-    var isLoading = mutableStateOf(false)
-    var isSuccess = mutableStateOf(false)
-    var isError = mutableStateOf(false)
-    var errorMessage = mutableStateOf("")
-
-    var movieDetails: MovieDetails? = null
+    data class MovieDetailsUiState(
+        val isLoading: Boolean = false,
+        val isSuccess: Boolean = false,
+        val error: Boolean = false,
+        var errorMessage: String? = null,
+        var movieDetails: MovieDetails? = null,
+        var movieId: Int = 0
+    )
 
     val networkStatus: StateFlow<ConnectivityObserver.Status> =
         connectivityObserver.observe()
@@ -38,49 +40,48 @@ class MovieDetailsViewModel(
                 initialValue = ConnectivityObserver.Status.Unavailable
             )
 
-
-    sealed class MovieDetailState {
-        data class Success(val movieDetails: MovieDetails) : MovieDetailState()
-        data class Error(val message: String) : MovieDetailState()
-    }
-
-    fun fetchMovieDetails(movieId: Int) {
+    init {
         viewModelScope.launch {
-            try {
-                isLoading.value = true
-                if (networkStatus.value == ConnectivityObserver.Status.Unavailable) {
-                    _movieDetailState.value = MovieDetailState.Error("No Internet Connection")
-                    isLoading.value = false
-                    return@launch
+            networkStatus.collect { status ->
+                if (status == ConnectivityObserver.Status.Available && uiState.value.movieDetails == null) {
+                    fetchMovieDetails(uiState.value.movieId)
+                } else if (status == ConnectivityObserver.Status.Unavailable) {
+                    _uiState.value = _uiState.value.copy(
+                        error = true,
+                        errorMessage = Constants.NO_INTERNET_CONNECTION
+                    )
                 }
-                val response = getMovieDetailsUseCase(movieId).first()
-                _movieDetailState.value = MovieDetailState.Success(response.getOrThrow())
-            } catch (e: Exception) {
-                _movieDetailState.value =
-                    MovieDetailState.Error("Exception: ${e.message ?: "Unknown error"}")
-            } finally {
-                observeMovieDetails()
             }
         }
     }
 
-    private fun observeMovieDetails() {
+    private fun fetchMovieDetails(movieId: Int) {
         viewModelScope.launch {
-            movieDetailState.collect {
-                when (it) {
-                    is MovieDetailState.Error -> {
-                        errorMessage.value = it.message
-                        isError.value = true
-                        isLoading.value = false
-                    }
-
-                    is MovieDetailState.Success -> {
-                        movieDetails = it.movieDetails
-                        isLoading.value = false
-                        isError.value = false
-                        isSuccess.value = true
-                    }
+            try {
+                _uiState.value = _uiState.value.copy(isLoading = true, error = false)
+                if (networkStatus.value == ConnectivityObserver.Status.Unavailable) {
+                    _uiState.value = _uiState.value.copy(
+                        error = true,
+                        errorMessage = Constants.NO_INTERNET_CONNECTION
+                    )
+                    return@launch
                 }
+                val response = getMovieDetailsUseCase(movieId).first()
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    isSuccess = true,
+                    errorMessage = null,
+                    error = false,
+                    movieDetails = response.getOrNull()
+                )
+            } catch (e: Exception) {
+                val errorMsg = e.message ?: Constants.UNKNOWN_ERROR
+                Log.e("MovieDetailsViewModel", errorMsg)
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = true,
+                    errorMessage = Constants.UNKNOWN_ERROR
+                )
             }
         }
     }

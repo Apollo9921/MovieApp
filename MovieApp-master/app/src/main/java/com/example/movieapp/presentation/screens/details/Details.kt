@@ -55,12 +55,9 @@ import com.example.movieapp.data.network.instance.MovieInstance
 import com.example.movieapp.domain.model.details.MovieDetails
 import com.example.movieapp.presentation.viewModel.MovieDetailsViewModel
 import com.example.movieapp.presentation.utils.formatVoteCount
-import com.example.movieapp.domain.repository.ConnectivityObserver
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 import org.koin.androidx.compose.koinViewModel
 import java.text.DecimalFormat
-
-private var viewModel: MovieDetailsViewModel? = null
 
 @Composable
 fun DetailsScreen(
@@ -70,18 +67,9 @@ fun DetailsScreen(
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel
 ) {
-    viewModel = koinViewModel<MovieDetailsViewModel>()
-
-    val isLoading = viewModel?.isLoading?.value
-    val isSuccess = viewModel?.isSuccess?.value
-    val isError = viewModel?.isError?.value
-    val errorMessage = viewModel?.errorMessage?.value
-    val networkStatus = viewModel?.networkStatus?.collectAsState()
-
-    val movieDetails = viewModel?.movieDetails
-    if (networkStatus?.value == ConnectivityObserver.Status.Available && !isLoading!! && !isSuccess!! && !isError!!) {
-        viewModel?.fetchMovieDetails(movieId!!.toInt())
-    }
+    val viewModel = koinViewModel<MovieDetailsViewModel>()
+    val uiState = viewModel.uiState.collectAsState()
+    uiState.value.movieId = Integer.parseInt(movieId ?: "0")
 
     Scaffold(
         modifier = Modifier
@@ -103,7 +91,7 @@ fun DetailsScreen(
                     .background(Background)
             ) {
                 when {
-                    isLoading == true -> {
+                    uiState.value.isLoading == true -> {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -114,21 +102,18 @@ fun DetailsScreen(
                         }
                     }
 
-                    isSuccess == true -> {
-                        if (movieDetails == null) return@Box
-                        DetailsContent(it, movieDetails, screenMetrics, screenViewModel)
-                    }
-
-                    isError == true -> {
-                        ErrorScreen(errorMessage, screenMetrics, screenViewModel)
-                    }
-
-                    networkStatus?.value == ConnectivityObserver.Status.Unavailable -> {
-                        ErrorScreen(
-                            stringResource(R.string.no_internet_connection),
+                    uiState.value.isSuccess == true -> {
+                        if (uiState.value.movieDetails == null) return@Box
+                        DetailsContent(
+                            it,
+                            uiState.value.movieDetails!!,
                             screenMetrics,
                             screenViewModel
                         )
+                    }
+
+                    uiState.value.error == true -> {
+                        ErrorScreen(uiState.value.errorMessage, screenMetrics, screenViewModel)
                     }
                 }
             }
@@ -256,8 +241,7 @@ private fun SectionDetails(
     titleSize: TextUnit,
     ratingTextSize: TextUnit,
     formattedVoteAverage: String
-)
-{
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
