@@ -11,6 +11,7 @@ import com.example.movieapp.data.repository.NetworkConnectivityObserver
 import com.example.movieapp.domain.usecase.GetGenresUseCase
 import com.example.movieapp.domain.usecase.GetMovieDetailsUseCase
 import com.example.movieapp.domain.usecase.GetMoviesUseCase
+import com.example.movieapp.domain.usecase.GetSearchUseCase
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -34,6 +35,10 @@ val appModule = module {
 
     single {
         GetMovieDetailsUseCase(get())
+    }
+
+    single {
+        GetSearchUseCase(get())
     }
 
     single<ConnectivityObserver> {

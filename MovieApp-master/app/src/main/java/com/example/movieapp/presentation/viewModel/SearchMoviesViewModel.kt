@@ -1,33 +1,40 @@
 package com.example.movieapp.presentation.viewModel
 
-import androidx.compose.runtime.mutableStateOf
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.movieapp.domain.repository.MoviesRepository
+import com.example.movieapp.core.Constants
 import com.example.movieapp.domain.model.movies.MovieData
 import com.example.movieapp.domain.repository.ConnectivityObserver
+import com.example.movieapp.domain.usecase.GetSearchUseCase
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class SearchMoviesViewModel(
-    private val repository: MoviesRepository,
+    private val getSearchUseCase: GetSearchUseCase,
     connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
-    private val _moviesState =
-        MutableStateFlow<SearchedMoviesState>(SearchedMoviesState.Error("Unknown Error"))
-    private var moviesState: StateFlow<SearchedMoviesState> = _moviesState.asStateFlow()
+    private val _uiState = MutableStateFlow(SearchMovieUiState())
+    val uiState: StateFlow<SearchMovieUiState> = _uiState.asStateFlow()
 
-    var moviesList = ArrayList<MovieData>()
-
-    var isLoading = mutableStateOf(false)
-    var isSuccess = mutableStateOf(false)
-    var isError = mutableStateOf(false)
-    var errorMessage = mutableStateOf("")
+    data class SearchMovieUiState(
+        val isLoading: Boolean = false,
+        val isSuccess: Boolean = false,
+        val isError: Boolean = false,
+        var errorMessage: String? = null,
+        var moviesList: ArrayList<MovieData> = ArrayList(),
+        var query: String = ""
+    )
 
     val networkStatus: StateFlow<ConnectivityObserver.Status> =
         connectivityObserver.observe()
@@ -37,50 +44,75 @@ class SearchMoviesViewModel(
                 initialValue = ConnectivityObserver.Status.Unavailable
             )
 
-    sealed class SearchedMoviesState {
-        data class Success(val movies: List<MovieData>) : SearchedMoviesState()
-        data class Error(val message: String) : SearchedMoviesState()
+    init {
+        observeQueryChanges()
     }
 
-    fun searchMovies(query: String) {
+    fun onQueryChanged(newQuery: String) {
+        _uiState.value = _uiState.value.copy(query = newQuery)
+    }
+
+    @OptIn(FlowPreview::class)
+    private fun observeQueryChanges() {
         viewModelScope.launch {
-            try {
-                isLoading.value = true
-                if (networkStatus.value == ConnectivityObserver.Status.Unavailable) {
-                    _moviesState.value = SearchedMoviesState.Error("No Internet Connection")
-                    isLoading.value = false
-                    return@launch
+            _uiState
+                .debounce(500L)
+                .distinctUntilChanged { old, new ->
+                    old.query == new.query
                 }
-                val responseMovies = repository.searchMovie(query)
-                val moviesData = responseMovies.results
-                _moviesState.value = SearchedMoviesState.Success(moviesData)
-            } catch (e: Exception) {
-                _moviesState.value =
-                    SearchedMoviesState.Error("Exception: ${e.message ?: "Unknown error"}")
-            } finally {
-                observeMoviesSearched()
-            }
+                .collectLatest { state ->
+                    if (state.query.isEmpty()) {
+                        _uiState.value = _uiState.value.copy(
+                            moviesList = ArrayList(),
+                            isLoading = false,
+                            isSuccess = false,
+                            isError = true,
+                            errorMessage = Constants.NO_MOVIES_FOUND
+                        )
+                    } else {
+                        searchMovies(state.query)
+                    }
+                }
         }
     }
 
-    private fun observeMoviesSearched() {
+    private fun searchMovies(query: String) {
         viewModelScope.launch {
-            moviesState.collect { it ->
-                when (it) {
-                    is SearchedMoviesState.Error -> {
-                        errorMessage.value = it.message
-                        isError.value = true
-                        isLoading.value = false
-                        isSuccess.value = false
-                    }
-
-                    is SearchedMoviesState.Success -> {
-                        moviesList = it.movies as ArrayList<MovieData>
-                        isLoading.value = false
-                        isError.value = false
-                        isSuccess.value = true
-                    }
+            try {
+                _uiState.value = _uiState.value.copy(isLoading = true, isError = false)
+                if (networkStatus.value == ConnectivityObserver.Status.Unavailable) {
+                    _uiState.value = _uiState.value.copy(
+                        isError = true,
+                        errorMessage = Constants.NO_INTERNET_CONNECTION
+                    )
+                    return@launch
                 }
+                val responseMovies = getSearchUseCase(query).first()
+                val moviesData = responseMovies.getOrNull()?.results ?: emptyList()
+                if (moviesData.isEmpty()) {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        isSuccess = false,
+                        isError = true,
+                        errorMessage = Constants.NO_MOVIES_FOUND
+                    )
+                    return@launch
+                }
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    isSuccess = true,
+                    errorMessage = null,
+                    isError = false,
+                    moviesList = moviesData as ArrayList<MovieData>
+                )
+            } catch (e: Exception) {
+                val errorMsg = e.message ?: Constants.UNKNOWN_ERROR
+                Log.e("SearchMoviesViewModel", errorMsg)
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    isError = true,
+                    errorMessage = Constants.UNKNOWN_ERROR
+                )
             }
         }
     }

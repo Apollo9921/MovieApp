@@ -17,6 +17,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
@@ -27,21 +28,18 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.movieapp.R
 import com.example.movieapp.presentation.components.ErrorScreen
+import com.example.movieapp.presentation.components.LoadingScreen
 import com.example.movieapp.presentation.components.MoviesList
 import com.example.movieapp.presentation.components.TopBar
 import com.example.movieapp.presentation.theme.Background
 import com.example.movieapp.presentation.theme.White
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 import com.example.movieapp.presentation.viewModel.SearchMoviesViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.androidx.compose.koinViewModel
-
-private var viewModel: SearchMoviesViewModel? = null
 
 @Composable
 fun SearchScreen(
@@ -50,14 +48,8 @@ fun SearchScreen(
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel
 ) {
-    viewModel = koinViewModel<SearchMoviesViewModel>()
-    val isLoading = viewModel?.isLoading?.value
-    val isSuccess = viewModel?.isSuccess?.value
-    val isError = viewModel?.isError?.value
-
-    val errorMessage = viewModel?.errorMessage?.value
-    val searchMovies = viewModel?.moviesList ?: ArrayList()
-
+    val viewModel = koinViewModel<SearchMoviesViewModel>()
+    val uiState = viewModel.uiState.collectAsState()
 
     Scaffold(
         modifier = Modifier
@@ -79,31 +71,28 @@ fun SearchScreen(
                     .background(Background)
                     .padding(it)
             ) {
-                SearchBar(screenMetrics, screenViewModel)
+                SearchBar(screenMetrics, screenViewModel, viewModel)
                 when {
-                    isLoading == true || isSuccess == true -> {
-                        if (isSuccess == true && searchMovies.isEmpty()) {
-                            ErrorScreen(
-                                stringResource(R.string.no_movies_found),
-                                screenMetrics,
-                                screenViewModel
-                            )
-                            return@Column
-                        }
+                    uiState.value.isLoading == true -> {
+                        LoadingScreen()
+                    }
+
+                    uiState.value.isSuccess == true -> {
                         MoviesList(
                             PaddingValues(0.dp),
-                            searchMovies,
+                            uiState.value.moviesList,
                             arrayListOf(),
                             emptyList(),
                             0,
-                            viewModel!!,
+                            viewModel,
                             navController,
                             screenMetrics,
                             screenViewModel
                         )
                     }
-                    isError == true -> {
-                        ErrorScreen(errorMessage, screenMetrics, screenViewModel)
+
+                    uiState.value.isError == true -> {
+                        ErrorScreen(uiState.value.errorMessage, screenMetrics, screenViewModel)
                     }
                 }
             }
@@ -115,18 +104,18 @@ fun SearchScreen(
 @Composable
 private fun SearchBar(
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
-    screenViewModel: ScreenSizingViewModel
+    screenViewModel: ScreenSizingViewModel,
+    viewModel: SearchMoviesViewModel
 ) {
     val searchValue = remember { mutableStateOf("") }
     LaunchedEffect(searchValue.value) {
         snapshotFlow { searchValue.value }
             .debounce(500L)
+            .distinctUntilChanged { old, new ->
+                old == new
+            }
             .collectLatest { query ->
-                if (query.isNotEmpty()) {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        viewModel?.searchMovies(query)
-                    }
-                }
+                viewModel.onQueryChanged(query)
             }
     }
 
@@ -151,7 +140,12 @@ private fun SearchBar(
                 focusedIndicatorColor = Background,
                 unfocusedIndicatorColor = Background,
             ),
-            modifier = Modifier.width(screenViewModel.calculateCustomWidth(baseSize = 250, screenMetrics).dp)
+            modifier = Modifier.width(
+                screenViewModel.calculateCustomWidth(
+                    baseSize = 250,
+                    screenMetrics
+                ).dp
+            )
         )
     }
 }

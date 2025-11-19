@@ -5,4 +5,5 @@ object Constants {
     const val UNKNOWN_ERROR = "Unknown Error"
     const val ERROR_FETCHING_MOVIES = "Error Fetching Movies"
     const val ERROR_FETCHING_GENRES = "Error Fetching Genres"
+    const val NO_MOVIES_FOUND = "No Movies Found"
 }
