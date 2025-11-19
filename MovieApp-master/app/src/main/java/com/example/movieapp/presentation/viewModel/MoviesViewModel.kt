@@ -52,7 +52,7 @@ class MoviesViewModel(
         val isSuccess: Boolean = false,
         val error: Boolean = false,
         var errorMessage: String? = null,
-        var movies: ArrayList<MovieData> = ArrayList(),
+        var movies: List<MovieData> = emptyList(),
         val genres: GenresList = GenresList(emptyList()),
     )
 
@@ -78,7 +78,7 @@ class MoviesViewModel(
 
     fun fetchMovies() {
         if (_uiState.value.isLoading) return
-        _uiState.value = _uiState.value.copy(isLoading = true, error = false)
+        _uiState.value = _uiState.value.copy(isLoading = true, error = false, errorMessage = null)
         viewModelScope.launch {
             try {
                 val pageToFetch = currentPage + 1
@@ -92,7 +92,7 @@ class MoviesViewModel(
                         errorMessage = null,
                         error = false,
                         genres = genresResult.getOrThrow(),
-                        movies = moviesResult.getOrThrow().results as ArrayList<MovieData>,
+                        movies = moviesResult.getOrThrow().results,
                     )
                     currentPage = pageToFetch
                 } else {
