@@ -41,6 +41,7 @@ import com.example.movieapp.domain.model.genres.Genre
 import com.example.movieapp.domain.model.movies.MovieData
 import com.example.movieapp.presentation.theme.White
 import com.example.movieapp.data.network.instance.MovieInstance
+import com.example.movieapp.presentation.navigation.Details
 import com.example.movieapp.presentation.viewModel.MoviesViewModel
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 import com.example.movieapp.presentation.viewModel.SearchMoviesViewModel
@@ -127,7 +128,7 @@ fun MoviesList(
                         .fillMaxSize()
                         .padding(10.dp)
                         .clickable {
-                            navController.navigate("details_screen/${movie.id}")
+                            navController.navigate(Details(movieId = movie.id.toString()))
                         }
                 )
 

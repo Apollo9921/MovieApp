@@ -28,6 +28,7 @@ import androidx.navigation.NavController
 import com.example.movieapp.R
 import com.example.movieapp.presentation.components.BottomNavigationBar
 import com.example.movieapp.presentation.components.TopBar
+import com.example.movieapp.presentation.navigation.Search
 import com.example.movieapp.presentation.theme.Background
 import com.example.movieapp.presentation.theme.Typography
 import com.example.movieapp.presentation.theme.White
@@ -89,7 +90,7 @@ private fun MoreScreenOptions(
                     .padding(10.dp)
                     .clickable {
                         // TODO Handle option click
-                        navController.navigate(option[0].second)
+                        navController.navigate(Search)
                     },
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally

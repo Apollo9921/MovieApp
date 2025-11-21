@@ -22,9 +22,9 @@ fun Navigation() {
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route
+        startDestination = BottomNavItem.Home.route
     ) {
-        composable(route = Screen.Home.route) {
+        composable(route = BottomNavItem.Home.route) {
             HomeScreen(
                 navController = navController,
                 screenMetrics = screenMetrics,
@@ -45,7 +45,7 @@ fun Navigation() {
                 screenViewModel = screenViewModel
             )
         }
-        composable(route = Screen.Search.route) {
+        composable<Search> {
             SearchScreen(
                 navController = navController,
                 backStack = navController::navigateUp,
@@ -53,7 +53,7 @@ fun Navigation() {
                 screenViewModel = screenViewModel
             )
         }
-        composable(route = Screen.Details.route) {
+        composable<Details> {
             val movieId = navController.currentBackStackEntry?.arguments?.getString("movieId")
             DetailsScreen(
                 movieId = movieId,
