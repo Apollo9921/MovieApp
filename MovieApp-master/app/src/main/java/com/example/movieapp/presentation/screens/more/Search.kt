@@ -31,6 +31,7 @@ import com.example.movieapp.presentation.components.ErrorScreen
 import com.example.movieapp.presentation.components.LoadingScreen
 import com.example.movieapp.presentation.components.MoviesList
 import com.example.movieapp.presentation.components.TopBar
+import com.example.movieapp.presentation.navigation.Details
 import com.example.movieapp.presentation.theme.Background
 import com.example.movieapp.presentation.theme.White
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
@@ -79,15 +80,17 @@ fun SearchScreen(
 
                     uiState.value.isSuccess == true -> {
                         MoviesList(
-                            PaddingValues(0.dp),
-                            uiState.value.moviesList,
-                            arrayListOf(),
-                            emptyList(),
-                            0,
-                            viewModel,
-                            navController,
-                            screenMetrics,
-                            screenViewModel
+                            pv = PaddingValues(0.dp),
+                            movies = uiState.value.moviesList,
+                            genresList = arrayListOf(),
+                            selectedGenreId = 0,
+                            onMovieClick = { movieId ->
+                                navController.navigate(Details(movieId = movieId))
+                            },
+                            onLoadMore = {},
+                            onGenreClick = {},
+                            screenMetrics = screenMetrics,
+                            screenViewModel = screenViewModel
                         )
                     }
 

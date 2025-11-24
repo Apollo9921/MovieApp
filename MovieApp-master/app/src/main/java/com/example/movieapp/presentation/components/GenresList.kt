@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
@@ -16,19 +17,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.movieapp.domain.model.genres.Genre
 import com.example.movieapp.presentation.theme.Black
 import com.example.movieapp.presentation.theme.Selected
 import com.example.movieapp.presentation.theme.TopBarBackground
 import com.example.movieapp.presentation.theme.Typography
-import com.example.movieapp.presentation.interaction.GenreTypeSelected
-import com.example.movieapp.domain.model.genres.Genre
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 
 @Composable
 fun GenresListScreen(
-    genresList: ArrayList<Genre>?,
+    genresList: List<Genre> = emptyList(),
     genreSelected: Int,
-    genreTypeSelectedListener: GenreTypeSelected,
+    onGenreClick: (Int) -> Unit,
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel
 ) {
@@ -39,16 +39,16 @@ fun GenresListScreen(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
-        items(genresList?.size ?: 0) {
+        items(items = genresList, key = { it.id }) { genre ->
             Card(
                 modifier = Modifier
                     .wrapContentSize()
                     .padding(horizontal = 10.dp)
                     .clickable {
-                        genreTypeSelectedListener.onGenreTypeSelected(genresList?.get(it)?.id ?: 0)
+                        onGenreClick(genre.id)
                     },
                 colors = CardDefaults.cardColors(
-                    containerColor = if (genreSelected == genresList?.get(it)?.id) Selected else TopBarBackground,
+                    containerColor = if (genreSelected == genre.id) Selected else TopBarBackground,
                 ),
                 elevation = CardDefaults.cardElevation(
                     defaultElevation = 6.dp
@@ -58,7 +58,7 @@ fun GenresListScreen(
                 val label = screenViewModel.calculateCustomWidth(baseSize = 15, screenMetrics).sp
                 Text(
                     style = Typography.labelMedium.copy(fontSize = label),
-                    text = genresList?.get(it)?.name ?: "",
+                    text = genre.name,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(7.dp)
                 )

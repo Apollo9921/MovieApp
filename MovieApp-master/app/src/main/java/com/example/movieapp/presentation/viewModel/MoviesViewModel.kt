@@ -66,6 +66,7 @@ class MoviesViewModel(
         viewModelScope.launch {
             networkStatus.collect { status ->
                 if (status == ConnectivityObserver.Status.Available && moviesList.isEmpty()) {
+                    _uiState.value = _uiState.value.copy(isLoading = true, error = false, errorMessage = null)
                     fetchMovies()
                 } else if (status == ConnectivityObserver.Status.Unavailable) {
                     _uiState.value = _uiState.value.copy(
@@ -78,8 +79,6 @@ class MoviesViewModel(
     }
 
     fun fetchMovies() {
-        if (_uiState.value.isLoading) return
-        _uiState.value = _uiState.value.copy(isLoading = true, error = false, errorMessage = null)
         viewModelScope.launch {
             try {
                 val pageToFetch = currentPage + 1

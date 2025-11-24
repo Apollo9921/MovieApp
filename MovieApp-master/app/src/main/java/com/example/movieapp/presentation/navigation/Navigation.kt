@@ -5,8 +5,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.movieapp.presentation.screens.HomeRoute
 import com.example.movieapp.presentation.screens.details.DetailsScreen
-import com.example.movieapp.presentation.screens.HomeScreen
 import com.example.movieapp.presentation.screens.MoreScreen
 import com.example.movieapp.presentation.screens.SettingsScreen
 import com.example.movieapp.presentation.screens.more.SearchScreen
@@ -25,7 +25,7 @@ fun Navigation() {
         startDestination = BottomNavItem.Home.route
     ) {
         composable(route = BottomNavItem.Home.route) {
-            HomeScreen(
+            HomeRoute(
                 navController = navController,
                 screenMetrics = screenMetrics,
                 screenViewModel = screenViewModel

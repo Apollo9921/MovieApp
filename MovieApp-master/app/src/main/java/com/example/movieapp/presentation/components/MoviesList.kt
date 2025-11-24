@@ -31,44 +31,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
 import com.example.movieapp.R
-import com.example.movieapp.presentation.theme.Background
+import com.example.movieapp.data.network.instance.MovieInstance
 import com.example.movieapp.domain.model.genres.Genre
 import com.example.movieapp.domain.model.movies.MovieData
+import com.example.movieapp.presentation.theme.Background
 import com.example.movieapp.presentation.theme.White
-import com.example.movieapp.data.network.instance.MovieInstance
-import com.example.movieapp.presentation.navigation.Details
-import com.example.movieapp.presentation.viewModel.MoviesViewModel
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
-import com.example.movieapp.presentation.viewModel.SearchMoviesViewModel
 
 @Composable
 fun MoviesList(
-    pv: PaddingValues,
-    movies: ArrayList<MovieData>,
-    genresList: ArrayList<Genre>?,
-    filteredMovies: List<MovieData>,
-    genreSelected: Int,
-    viewModel: ViewModel,
-    navController: NavController,
+    pv: PaddingValues = PaddingValues(0.dp),
+    movies: List<MovieData>,
+    genresList: List<Genre> = emptyList(),
+    selectedGenreId: Int = 0,
+    onMovieClick: (String) -> Unit,
+    onGenreClick: (Int) -> Unit = {},
+    onLoadMore: () -> Unit,
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel
 ) {
-    when (viewModel) {
-        is MoviesViewModel -> {
-            viewModel
-        }
-
-        else -> viewModel as? SearchMoviesViewModel
-    }
-
     val imageLoadingStates = remember { mutableStateMapOf<String, AsyncImagePainter.State>() }
     var allImagesLoaded by remember { mutableStateOf(false) }
-    val currentMovies = if (filteredMovies.isNotEmpty() || genreSelected != 0) filteredMovies else movies
 
     val lazyGridState = rememberLazyGridState()
     val moviePosition by remember {
@@ -83,9 +69,9 @@ fun MoviesList(
         }
     }
 
-    LaunchedEffect(imageLoadingStates.toMap(), currentMovies) {
-        allImagesLoaded = if (currentMovies.isNotEmpty()) {
-            currentMovies.all { movie ->
+    LaunchedEffect(imageLoadingStates.toMap(), movies) {
+        allImagesLoaded = if (movies.isNotEmpty()) {
+            movies.all { movie ->
                 val imageUrl = "${MovieInstance.BASE_URL_IMAGE}${movie.posterPath}"
                 imageLoadingStates[imageUrl] is AsyncImagePainter.State.Success || imageLoadingStates[imageUrl] is AsyncImagePainter.State.Error
             }
@@ -100,15 +86,24 @@ fun MoviesList(
             .background(Background)
             .padding(pv)
     ) {
-        if (genresList?.isNotEmpty() == true) {
-            GenresListScreen(genresList, genreSelected, viewModel as MoviesViewModel, screenMetrics, screenViewModel)
+        if (genresList.isNotEmpty()) {
+            GenresListScreen(
+                genresList = genresList,
+                genreSelected = selectedGenreId,
+                onGenreClick = { id ->
+                    onGenreClick(id)
+                },
+                screenMetrics = screenMetrics,
+                screenViewModel = screenViewModel
+            )
         }
+
         LazyVerticalGrid(
             state = lazyGridState,
             columns = GridCells.Fixed(3)
         ) {
-            items(currentMovies.size) { index ->
-                val movie = currentMovies[index]
+            items(movies.size) { index ->
+                val movie = movies[index]
                 val imageUrl = "${MovieInstance.BASE_URL_IMAGE}${movie.posterPath}"
 
                 AsyncImage(
@@ -121,27 +116,27 @@ fun MoviesList(
                     onSuccess = { state ->
                         imageLoadingStates[imageUrl] = state
                     },
-                    contentDescription = null,
+                    contentDescription = movie.title,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .aspectRatio(2f / 3f)
                         .fillMaxSize()
                         .padding(10.dp)
-                        .clickable {
-                            navController.navigate(Details(movieId = movie.id.toString()))
-                        }
+                        .clickable { onMovieClick(movie.id.toString()) }
                 )
 
-                if (filteredMovies.isEmpty() && genresList?.isNotEmpty() == true) {
-                    if (index == movies.size - 1 && allImagesLoaded) {
-                        viewModel as MoviesViewModel
-                        viewModel.fetchMovies()
-                    }
+                if (index == movies.size - 1 && allImagesLoaded) {
+                    onLoadMore()
                 }
             }
         }
     }
-    DisplayMoviePosition(currentMovies.size, moviePosition, screenMetrics, screenViewModel)
+    DisplayMoviePosition(
+        moviesSize = movies.size,
+        moviePosition = moviePosition,
+        screenMetrics = screenMetrics,
+        screenViewModel = screenViewModel
+    )
 }
 
 @Composable
