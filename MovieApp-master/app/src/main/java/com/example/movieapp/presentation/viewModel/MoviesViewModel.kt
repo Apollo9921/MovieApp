@@ -1,5 +1,6 @@
 package com.example.movieapp.presentation.viewModel
 
+import android.accounts.NetworkErrorException
 import android.util.Log
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.lifecycle.ViewModel
@@ -96,25 +97,29 @@ class MoviesViewModel(
                     )
                     currentPage = pageToFetch
                 } else {
-                    val errorMsg = moviesResult.exceptionOrNull()?.message
-                        ?: genresResult.exceptionOrNull()?.message
-                        ?: Constants.UNKNOWN_ERROR
-
+                    val errorMsg =
+                        if (moviesResult.exceptionOrNull() is NetworkErrorException || genresResult.exceptionOrNull() is NetworkErrorException) {
+                            Constants.NO_INTERNET_CONNECTION
+                        } else {
+                            moviesResult.exceptionOrNull()?.message
+                                ?: genresResult.exceptionOrNull()?.message
+                        } ?: Constants.UNKNOWN_ERROR
                     Log.e("MoviesViewModel", errorMsg)
 
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         error = true,
-                        errorMessage = Constants.UNKNOWN_ERROR
+                        errorMessage = errorMsg
                     )
                 }
             } catch (e: Exception) {
-                val errorMsg = e.message ?: Constants.UNKNOWN_ERROR
+                val errorMsg =
+                    if (e is NetworkErrorException) Constants.NO_INTERNET_CONNECTION else Constants.UNKNOWN_ERROR
                 Log.e("MoviesViewModel", errorMsg)
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     error = true,
-                    errorMessage = Constants.UNKNOWN_ERROR
+                    errorMessage = errorMsg
                 )
             } finally {
                 observeMovies()
