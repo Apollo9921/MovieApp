@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.net.ConnectException
 
 class MoviesViewModel(
     private val getMoviesUseCase: GetMoviesUseCase,
@@ -98,7 +99,7 @@ class MoviesViewModel(
                     currentPage = pageToFetch
                 } else {
                     val errorMsg =
-                        if (moviesResult.exceptionOrNull() is NetworkErrorException || genresResult.exceptionOrNull() is NetworkErrorException) {
+                        if (moviesResult.exceptionOrNull() is ConnectException || genresResult.exceptionOrNull() is ConnectException) {
                             Constants.NO_INTERNET_CONNECTION
                         } else {
                             moviesResult.exceptionOrNull()?.message
@@ -114,7 +115,7 @@ class MoviesViewModel(
                 }
             } catch (e: Exception) {
                 val errorMsg =
-                    if (e is NetworkErrorException) Constants.NO_INTERNET_CONNECTION else Constants.UNKNOWN_ERROR
+                    if (e is ConnectException) Constants.NO_INTERNET_CONNECTION else Constants.UNKNOWN_ERROR
                 Log.e("MoviesViewModel", errorMsg)
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
