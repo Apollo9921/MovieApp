@@ -1,6 +1,5 @@
 package com.example.movieapp.presentation.viewModel
 
-import android.accounts.NetworkErrorException
 import android.util.Log
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.lifecycle.ViewModel
