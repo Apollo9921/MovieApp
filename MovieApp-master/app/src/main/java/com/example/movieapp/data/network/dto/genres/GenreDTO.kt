@@ -9,10 +9,3 @@ data class GenreDTO(
     @Json(name = "name")
     val name: String
 )
-
-fun GenreDTO.toGenre(): Genre {
-    return Genre(
-        id = id,
-        name = name
-    )
-}

@@ -1,6 +1,5 @@
 package com.example.movieapp.data.network.dto.movies
 
-import com.example.movieapp.domain.model.movies.MovieData
 import com.squareup.moshi.Json
 
 data class MovieDataDTO(
@@ -33,22 +32,3 @@ data class MovieDataDTO(
     @field:Json(name = "vote_count")
     val voteCount: Int?
 )
-
-fun MovieDataDTO.toMovieData(): MovieData {
-    return MovieData(
-        adult = adult == true,
-        backdropPath = backdropPath ?: "",
-        genreIds = genreIds ?: emptyList(),
-        id = id ?: 0,
-        originalLanguage = originalLanguage ?: "",
-        originalTitle = originalTitle ?: "",
-        overview = overview ?: "",
-        popularity = popularity ?: 0.0,
-        posterPath = posterPath ?: "",
-        releaseDate = releaseDate ?: "",
-        title = title ?: "",
-        video = video == true,
-        voteAverage = voteAverage ?: 0.0,
-        voteCount = voteCount ?: 0
-    )
-}

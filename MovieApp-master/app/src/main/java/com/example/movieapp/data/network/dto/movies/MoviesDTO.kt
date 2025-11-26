@@ -1,6 +1,5 @@
 package com.example.movieapp.data.network.dto.movies
 
-import com.example.movieapp.domain.model.movies.Movies
 import com.squareup.moshi.Json
 
 data class MoviesDTO(
@@ -13,12 +12,3 @@ data class MoviesDTO(
     @field:Json(name = "total_results")
     val totalResults: Int
 )
-
-fun MoviesDTO.toMovies(): Movies {
-    return Movies(
-        page = page,
-        results = results.map { it.toMovieData() },
-        totalPages = totalPages,
-        totalResults = totalResults
-    )
-}

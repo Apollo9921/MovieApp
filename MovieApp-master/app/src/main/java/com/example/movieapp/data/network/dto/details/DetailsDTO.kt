@@ -1,6 +1,5 @@
 package com.example.movieapp.data.network.dto.details
 
-import com.example.movieapp.domain.model.details.MovieDetails
 import com.squareup.moshi.Json
 
 data class DetailsDTO (
@@ -57,34 +56,3 @@ data class DetailsDTO (
     @field:Json(name = "vote_count")
     val voteCount: Int?
 )
-
-fun DetailsDTO.toMovieDetails() : MovieDetails {
-    return MovieDetails(
-        adult = adult == true,
-        backdropPath = this@toMovieDetails.backdropPath ?: "",
-        belongsToCollection = this@toMovieDetails.belongsToCollection ?: "",
-        budget = budget ?: 0,
-        genres = genres?.map { it.toGenre() } ?: emptyList(),
-        homepage = homepage ?: "",
-        id = id ?: 0,
-        imdbId = this@toMovieDetails.imdbId ?: "",
-        originCountry = this@toMovieDetails.originCountry ?: emptyList(),
-        originalLanguage = this@toMovieDetails.originalLanguage ?: "",
-        originalTitle = this@toMovieDetails.originalTitle ?: "",
-        overview = overview ?: "",
-        popularity = popularity ?: 0.0,
-        posterPath = this@toMovieDetails.posterPath ?: "",
-        productionCompanies = this@toMovieDetails.productionCompanies?.map { it.toProductionCompany() } ?: emptyList(),
-        productionCountries = this@toMovieDetails.productionCountries?.map { it.toProductionCountry() } ?: emptyList(),
-        releaseDate = this@toMovieDetails.releaseDate ?: "",
-        revenue = revenue ?: 0L,
-        runtime = runtime ?: 0,
-        spokenLanguages = this@toMovieDetails.spokenLanguages?.map { it.toSpokenLanguage() } ?: emptyList(),
-        status = status ?: "",
-        tagline = tagline ?: "",
-        title = title ?: "",
-        video = video == true,
-        voteAverage = this@toMovieDetails.voteAverage ?: 0.0,
-        voteCount = this@toMovieDetails.voteCount ?: 0
-    )
-}

@@ -1,8 +1,8 @@
 package com.example.movieapp.data.repository
 
-import com.example.movieapp.data.network.dto.details.toMovieDetails
-import com.example.movieapp.data.network.dto.genres.toGenresList
-import com.example.movieapp.data.network.dto.movies.toMovies
+import com.example.movieapp.data.network.mapper.toGenresList
+import com.example.movieapp.data.network.mapper.toMovieDetails
+import com.example.movieapp.data.network.mapper.toMovies
 import com.example.movieapp.domain.model.details.MovieDetails
 import com.example.movieapp.domain.model.genres.GenresList
 import com.example.movieapp.domain.model.movies.Movies
