@@ -9,6 +9,7 @@ import com.example.movieapp.domain.model.genres.Genre
 import com.example.movieapp.domain.model.genres.GenresList
 import com.example.movieapp.domain.model.movies.MovieData
 import com.example.movieapp.core.Constants
+import com.example.movieapp.domain.model.movies.Movies
 import com.example.movieapp.domain.repository.ConnectivityObserver
 import com.example.movieapp.domain.usecase.GetGenresUseCase
 import com.example.movieapp.domain.usecase.GetMoviesUseCase
@@ -63,13 +64,24 @@ class MoviesViewModel(
     }
 
     init {
+        fetchMoviesFistTime()
+    }
+
+    private fun fetchMoviesFistTime() {
         viewModelScope.launch {
             networkStatus.collect { status ->
                 if (status == ConnectivityObserver.Status.Available && moviesList.isEmpty()) {
-                    _uiState.value = _uiState.value.copy(isLoading = true, error = false, errorMessage = null)
+                    definingUiState(
+                        isLoading = true,
+                        isSuccess = null,
+                        error = false,
+                        errorMessage = null
+                    )
                     fetchMovies()
                 } else if (status == ConnectivityObserver.Status.Unavailable) {
-                    _uiState.value = _uiState.value.copy(
+                    definingUiState(
+                        isLoading = false,
+                        isSuccess = false,
                         error = true,
                         errorMessage = Constants.NO_INTERNET_CONNECTION
                     )
@@ -84,47 +96,105 @@ class MoviesViewModel(
                 val pageToFetch = currentPage + 1
                 val moviesResult = getMoviesUseCase(pageToFetch).first()
                 val genresResult = getGenresUseCase().first()
-
                 if (moviesResult.isSuccess && genresResult.isSuccess) {
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        isSuccess = true,
-                        errorMessage = null,
-                        error = false,
-                        genres = genresResult.getOrThrow(),
-                        movies = moviesResult.getOrThrow().results,
-                    )
-                    currentPage = pageToFetch
+                   fetchMoviesSuccess(moviesResult, genresResult, pageToFetch)
                 } else {
-                    val errorMsg =
-                        if (moviesResult.exceptionOrNull() is ConnectException || genresResult.exceptionOrNull() is ConnectException) {
-                            Constants.NO_INTERNET_CONNECTION
-                        } else {
-                            moviesResult.exceptionOrNull()?.message
-                                ?: genresResult.exceptionOrNull()?.message
-                        } ?: Constants.UNKNOWN_ERROR
-                    Log.e("MoviesViewModel", errorMsg)
-
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        error = true,
-                        errorMessage = errorMsg
-                    )
+                    fetchMoviesFailure(moviesResult, genresResult)
                 }
             } catch (e: Exception) {
-                val errorMsg =
-                    if (e is ConnectException) Constants.NO_INTERNET_CONNECTION else Constants.UNKNOWN_ERROR
-                Log.e("MoviesViewModel", errorMsg)
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = true,
-                    errorMessage = errorMsg
-                )
+                fetchMoviesException(e)
             } finally {
                 observeMovies()
                 observeGenres()
             }
         }
+    }
+
+    private fun fetchMoviesSuccess(
+        moviesResult: Result<Movies>,
+        genresResult: Result<GenresList>,
+        pageToFetch: Int
+    ) {
+        Log.e("MoviesViewModel", "Movies fetched successfully")
+        if (moviesResult.getOrThrow().results.isEmpty()) {
+            definingUiState(
+                isLoading = false,
+                isSuccess = null,
+                error = true,
+                errorMessage = Constants.NO_MOVIES_FOUND
+            )
+        } else {
+            _uiState.value = _uiState.value.copy(
+                isLoading = false,
+                isSuccess = true,
+                errorMessage = null,
+                error = false,
+                genres = genresResult.getOrThrow(),
+                movies = moviesResult.getOrThrow().results,
+            )
+        }
+        currentPage = pageToFetch
+    }
+
+    private fun fetchMoviesFailure(moviesResult: Result<Movies>, genresResult: Result<GenresList>) {
+        if (_uiState.value.movies.isNotEmpty()) {
+            definingUiState(
+                isLoading = false,
+                isSuccess = true,
+                error = false,
+                errorMessage = null
+            )
+            return
+        }
+        val errorMsg =
+            if (moviesResult.exceptionOrNull() is ConnectException || genresResult.exceptionOrNull() is ConnectException) {
+                Constants.NO_INTERNET_CONNECTION
+            } else {
+                moviesResult.exceptionOrNull()?.message
+                    ?: genresResult.exceptionOrNull()?.message
+            } ?: Constants.UNKNOWN_ERROR
+        Log.e("MoviesViewModel", errorMsg)
+        definingUiState(
+            isLoading = false,
+            isSuccess = null,
+            error = true,
+            errorMessage = errorMsg
+        )
+    }
+
+    private fun fetchMoviesException(e: Exception) {
+        if (_uiState.value.movies.isNotEmpty()) {
+            definingUiState(
+                isLoading = false,
+                isSuccess = true,
+                error = false,
+                errorMessage = null
+            )
+            return
+        }
+        val errorMsg =
+            if (e is ConnectException) Constants.NO_INTERNET_CONNECTION else Constants.UNKNOWN_ERROR
+        Log.e("MoviesViewModel", errorMsg)
+        definingUiState(
+            isLoading = false,
+            isSuccess = null,
+            error = true,
+            errorMessage = errorMsg
+        )
+    }
+
+    private fun definingUiState(
+        isLoading: Boolean?,
+        isSuccess: Boolean?,
+        error: Boolean?,
+        errorMessage: String?
+    ) {
+        _uiState.value = _uiState.value.copy(
+            isLoading = isLoading ?: _uiState.value.isLoading,
+            isSuccess = isSuccess ?: _uiState.value.isSuccess,
+            error = error ?: _uiState.value.error,
+            errorMessage = errorMessage
+        )
     }
 
     private fun observeMovies() {

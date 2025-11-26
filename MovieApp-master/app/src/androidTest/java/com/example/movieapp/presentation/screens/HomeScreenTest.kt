@@ -6,6 +6,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.movieapp.core.Constants
 import com.example.movieapp.domain.model.movies.MovieData
 import com.example.movieapp.presentation.viewModel.MoviesViewModel
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
@@ -22,6 +23,41 @@ class HomeScreenTest {
     private val screenViewModel = mockk<ScreenSizingViewModel>(relaxed = true)
     private val moviesViewModel = mockk<MoviesViewModel>(relaxed = true)
     private val screenMetrics = ScreenSizingViewModel.ScreenMetrics(0.dp, 0.dp, 0)
+
+    private val fakeMovies = listOf(
+        MovieData(
+            adult = false,
+            backdropPath = "/teste.jpg",
+            genreIds = listOf(1),
+            id = 1,
+            originalLanguage = "en",
+            originalTitle = "Oppenheimer",
+            overview = "",
+            popularity = 0.0,
+            posterPath = "/teste.jpg",
+            releaseDate = "",
+            title = "Oppenheimer",
+            video = false,
+            voteAverage = 8.5,
+            voteCount = 1000
+        ),
+        MovieData(
+            adult = false,
+            backdropPath = "/teste.jpg",
+            genreIds = listOf(1),
+            id = 1,
+            originalLanguage = "en",
+            originalTitle = "Barbie",
+            overview = "",
+            popularity = 0.0,
+            posterPath = "/teste2.jpg",
+            releaseDate = "",
+            title = "Barbie",
+            video = false,
+            voteAverage = 8.5,
+            voteCount = 1000
+        )
+    )
 
     private fun launchHomeScreen(
         uiState: MoviesViewModel.MoviesUiState,
@@ -45,41 +81,6 @@ class HomeScreenTest {
     @Test
     fun homeScreen_whenSuccess_showsMoviesList() {
         // --- ARRANGE ---
-        val fakeMovies = listOf(
-            MovieData(
-                adult = false,
-                backdropPath = "/teste.jpg",
-                genreIds = listOf(1),
-                id = 1,
-                originalLanguage = "en",
-                originalTitle = "Oppenheimer",
-                overview = "",
-                popularity = 0.0,
-                posterPath = "/teste.jpg",
-                releaseDate = "",
-                title = "Oppenheimer",
-                video = false,
-                voteAverage = 8.5,
-                voteCount = 1000
-            ),
-            MovieData(
-                adult = false,
-                backdropPath = "/teste.jpg",
-                genreIds = listOf(1),
-                id = 1,
-                originalLanguage = "en",
-                originalTitle = "Barbie",
-                overview = "",
-                popularity = 0.0,
-                posterPath = "/teste2.jpg",
-                releaseDate = "",
-                title = "Barbie",
-                video = false,
-                voteAverage = 8.5,
-                voteCount = 1000
-            )
-        )
-
         val successState = MoviesViewModel.MoviesUiState(
             isLoading = false,
             isSuccess = true,
@@ -132,7 +133,32 @@ class HomeScreenTest {
             movies = emptyList()
         )
 
-        // --- ACT ---
+        // --- ASSERT ---
         composeTestRule.onNodeWithTag("ErrorComponent").assertIsDisplayed()
+    }
+
+    @Test
+    fun homeScreen_whenNoMoviesFound_butAlreadyHasMovies_showsMoviesList() {
+        // --- ARRANGE ---
+        val noMoreMovies = Exception(Constants.ERROR_FETCHING_MOVIES)
+
+        val errorState = MoviesViewModel.MoviesUiState(
+            isLoading = false,
+            error = true,
+            errorMessage = noMoreMovies.message,
+            isSuccess = true,
+            movies = fakeMovies
+        )
+
+        // --- ACT ---
+        launchHomeScreen(
+            uiState = errorState,
+            movies = errorState.movies
+        )
+
+        // --- ASSERT ---
+        composeTestRule.onNodeWithTag("MoviesContent").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription("Oppenheimer").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription("Barbie").assertIsDisplayed()
     }
 }
