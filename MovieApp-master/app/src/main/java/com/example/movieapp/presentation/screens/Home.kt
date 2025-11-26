@@ -52,10 +52,10 @@ fun HomeScreen(
     uiState: MoviesViewModel.MoviesUiState,
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel,
-    moviesList: ArrayList<MovieData>,
+    moviesList: List<MovieData>,
     filteredMovies: List<MovieData>,
     genreType: Int,
-    genresList: ArrayList<Genre>,
+    genresList: List<Genre>,
     navController: NavController,
     moviesViewModel: MoviesViewModel
 ) {

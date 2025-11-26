@@ -18,6 +18,14 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            merges += "META-INF/LICENSE.md"
+            merges += "META-INF/LICENSE-notice.md"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -82,4 +90,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test.v173)
+    androidTestImplementation(libs.androidx.compose.ui.ui.test.junit4)
+    debugImplementation(libs.androidx.compose.ui.ui.test.manifest)
+    androidTestImplementation(libs.mockk.android)
 }

@@ -14,6 +14,7 @@ composeBom = "2025.05.01"
 material3 = "1.4.0"
 materialIconsExtendedAndroid = "1.7.8"
 mockk = "1.13.8"
+mockkAndroid = "1.13.11"
 navigationCompose = "2.9.6"
 kotlinSerialization = "2.1.21"
 kotlinxSerializationCore = "1.8.1"
@@ -22,6 +23,8 @@ retrofit = "2.9.0"
 okhttp = "4.12.0"
 
 [libraries]
+androidx-compose-ui-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
+androidx-compose-ui-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-material-icons-extended-android = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtendedAndroid" }
 androidx-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
@@ -47,6 +50,7 @@ koin-test-junit4 = { module = "io.insert-koin:koin-test-junit4", version.ref = "
 kotlinx-coroutines-test-v173 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerializationCore" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockkAndroid" }
 retrofit-core = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-converter-moshi = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "retrofit" }
 okhttp-core = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
