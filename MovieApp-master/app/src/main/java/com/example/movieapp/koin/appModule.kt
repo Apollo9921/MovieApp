@@ -8,6 +8,7 @@ import com.example.movieapp.presentation.viewModel.MoviesViewModel
 import com.example.movieapp.presentation.viewModel.SearchMoviesViewModel
 import com.example.movieapp.domain.repository.ConnectivityObserver
 import com.example.movieapp.data.repository.NetworkConnectivityObserver
+import com.example.movieapp.domain.usecase.FormatMovieDetailsUseCase
 import com.example.movieapp.domain.usecase.GetGenresUseCase
 import com.example.movieapp.domain.usecase.GetMovieDetailsUseCase
 import com.example.movieapp.domain.usecase.GetMoviesUseCase
@@ -41,6 +42,11 @@ val appModule = module {
         GetSearchUseCase(get())
     }
 
+    single {
+        FormatMovieDetailsUseCase()
+    }
+
+
     single<ConnectivityObserver> {
         NetworkConnectivityObserver(androidContext())
     }
@@ -54,7 +60,7 @@ val appModule = module {
     }
 
     viewModel {
-        MovieDetailsViewModel(get(), get())
+        MovieDetailsViewModel(get(), get(), get())
     }
 
 }

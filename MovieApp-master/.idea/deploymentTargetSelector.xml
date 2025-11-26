@@ -8,7 +8,7 @@
       <SelectionState runConfigName="HomeScreenTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="homeScreen_whenSuccess_showsMoviesList()">
+      <SelectionState runConfigName="homeScreen_whenNoMoviesFound_butAlreadyHasMovies_showsMoviesList()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

@@ -4,8 +4,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieapp.core.Constants
-import com.example.movieapp.domain.model.details.MovieDetails
+import com.example.movieapp.domain.model.details.FormattedMovieDetails
 import com.example.movieapp.domain.repository.ConnectivityObserver
+import com.example.movieapp.domain.usecase.FormatMovieDetailsUseCase
 import com.example.movieapp.domain.usecase.GetMovieDetailsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -17,6 +18,7 @@ import kotlinx.coroutines.launch
 
 class MovieDetailsViewModel(
     private val getMovieDetailsUseCase: GetMovieDetailsUseCase,
+    private val formatMovieDetailsUseCase: FormatMovieDetailsUseCase,
     connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
@@ -28,7 +30,7 @@ class MovieDetailsViewModel(
         val isSuccess: Boolean = false,
         val error: Boolean = false,
         var errorMessage: String? = null,
-        var movieDetails: MovieDetails? = null,
+        var movieDetails: FormattedMovieDetails? = null,
         var movieId: Int = 0
     )
 
@@ -67,12 +69,14 @@ class MovieDetailsViewModel(
                     return@launch
                 }
                 val response = getMovieDetailsUseCase(movieId).first()
+                val movieDetails = response.getOrThrow()
+                val formattedDetails = formatMovieDetailsUseCase(movieDetails)
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     isSuccess = true,
                     errorMessage = null,
                     error = false,
-                    movieDetails = response.getOrNull()
+                    movieDetails = formattedDetails
                 )
             } catch (e: Exception) {
                 val errorMsg = e.message ?: Constants.UNKNOWN_ERROR

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -28,6 +27,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,7 +42,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.example.movieapp.R
 import com.example.movieapp.presentation.components.ErrorScreen
@@ -51,196 +50,186 @@ import com.example.movieapp.presentation.theme.Background
 import com.example.movieapp.presentation.theme.Black
 import com.example.movieapp.presentation.theme.Typography
 import com.example.movieapp.presentation.theme.White
-import com.example.movieapp.data.network.instance.MovieInstance
-import com.example.movieapp.domain.model.details.MovieDetails
 import com.example.movieapp.presentation.viewModel.MovieDetailsViewModel
-import com.example.movieapp.presentation.utils.formatVoteCount
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 import org.koin.androidx.compose.koinViewModel
-import java.text.DecimalFormat
 
 @Composable
-fun DetailsScreen(
-    navController: NavHostController,
+fun DetailsRoute(
     backStack: () -> Boolean,
     movieId: String?,
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
-    screenViewModel: ScreenSizingViewModel
+    screenViewModel: ScreenSizingViewModel,
+    viewModel: MovieDetailsViewModel = koinViewModel()
 ) {
-    val viewModel = koinViewModel<MovieDetailsViewModel>()
-    val uiState = viewModel.uiState.collectAsState()
-    uiState.value.movieId = Integer.parseInt(movieId ?: "0")
+    val uiState by viewModel.uiState.collectAsState()
+    uiState.movieId = Integer.parseInt(movieId ?: "0")
 
+    DetailsScreen(
+        uiState = uiState,
+        screenMetrics = screenMetrics,
+        screenViewModel = screenViewModel,
+        backStack = { backStack() }
+    )
+}
+
+@Composable
+fun DetailsScreen(
+    uiState: MovieDetailsViewModel.MovieDetailsUiState,
+    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
+    screenViewModel: ScreenSizingViewModel,
+    backStack: () -> Boolean
+) {
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .safeDrawingPadding(),
         topBar = {
             TopBar(
-                stringResource(R.string.details),
+                title = stringResource(R.string.details),
                 isBack = true,
                 backStack = { backStack() },
                 screenMetrics = screenMetrics,
                 screenViewModel = screenViewModel
             )
         },
-        content = {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Background)
-            ) {
-                when {
-                    uiState.value.isLoading == true -> {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Background),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(color = White, strokeWidth = 2.dp)
-                        }
-                    }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(Background),
+            contentAlignment = Alignment.Center
+        ) {
+            when {
+                uiState.isLoading -> {
+                    CircularProgressIndicator(color = White, strokeWidth = 2.dp)
+                }
 
-                    uiState.value.isSuccess == true -> {
-                        if (uiState.value.movieDetails == null) return@Box
-                        DetailsContent(
-                            it,
-                            uiState.value.movieDetails!!,
-                            screenMetrics,
-                            screenViewModel
-                        )
-                    }
+                uiState.isSuccess -> {
+                    DetailsContent(
+                        uiState = uiState,
+                        screenMetrics = screenMetrics,
+                        screenViewModel = screenViewModel
+                    )
+                }
 
-                    uiState.value.error == true -> {
-                        ErrorScreen(uiState.value.errorMessage, screenMetrics, screenViewModel)
-                    }
+                uiState.error -> {
+                    ErrorScreen(uiState.errorMessage, screenMetrics, screenViewModel)
                 }
             }
         }
-    )
+    }
 }
 
 @Composable
 private fun DetailsContent(
-    pv: PaddingValues,
-    movieDetails: MovieDetails,
+    uiState: MovieDetailsViewModel.MovieDetailsUiState,
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel
 ) {
     val titleSize = screenViewModel.calculateCustomWidth(baseSize = 20, screenMetrics).sp
     val label = screenViewModel.calculateCustomWidth(baseSize = 15, screenMetrics).sp
     val ratingTextSize = screenViewModel.calculateCustomWidth(baseSize = 14, screenMetrics).sp
-    val imageUrl = "${MovieInstance.BASE_URL_IMAGE}${movieDetails.posterPath}"
-    val formattedVoteAverage = DecimalFormat("#.#").format(movieDetails.voteAverage)
-    val releaseDate = movieDetails.releaseDate.split("-").first()
-    val genres = movieDetails.genres.joinToString(", ") { it.name }
-    val hours = movieDetails.runtime / 60
-    val minutes = movieDetails.runtime % 60
-    val runtime = "${hours}h ${minutes}m"
-    val languages = movieDetails.spokenLanguages.map { it.name }
-    val companies = movieDetails.productionCompanies.map { it.name }
     val scrollState = rememberScrollState()
-    val imageMaxHeight = 300.dp
-    val imageMaxHeightPx = with(LocalDensity.current) { imageMaxHeight.toPx() }
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
-            .padding(top = pv.calculateTopPadding()),
+            .verticalScroll(scrollState)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .padding(bottom = pv.calculateBottomPadding())
-        ) {
-            SectionImage(imageUrl, scrollState, imageMaxHeightPx, screenMetrics, screenViewModel)
-            Spacer(modifier = Modifier.padding(10.dp))
-            SectionDetails(movieDetails, titleSize, ratingTextSize, formattedVoteAverage)
-            Spacer(modifier = Modifier.padding(3.dp))
-            SectionReleaseDate(releaseDate, genres, runtime, label)
-            Spacer(modifier = Modifier.padding(10.dp))
-            SectionTitle("Overview", titleSize)
-            Spacer(modifier = Modifier.padding(3.dp))
-            SectionOverview(movieDetails, label)
-            Spacer(modifier = Modifier.padding(10.dp))
-            SectionTitle("Available Languages", titleSize)
-            Spacer(modifier = Modifier.padding(3.dp))
-            SectionList(languages, label)
-            Spacer(modifier = Modifier.padding(10.dp))
-            SectionTitle("Production Companies", titleSize)
-            Spacer(modifier = Modifier.padding(3.dp))
-            SectionList(companies, label)
-        }
+        SectionImage(
+            imageUrl = uiState.movieDetails?.posterUrl.toString(),
+            scrollState = scrollState,
+            screenMetrics = screenMetrics,
+            screenViewModel = screenViewModel
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        SectionDetails(
+            title = uiState.movieDetails?.title ?: "",
+            voteAverage = uiState.movieDetails?.voteAverage.toString(),
+            voteCount = uiState.movieDetails?.voteCount.toString(),
+            titleSize = titleSize,
+            ratingTextSize = ratingTextSize
+        )
+        Spacer(modifier = Modifier.height(3.dp))
+        SectionReleaseInfo(
+            releaseYear = uiState.movieDetails?.releaseYear.toString(),
+            genres = uiState.movieDetails?.genres.toString(),
+            runtime = uiState.movieDetails?.runtime.toString(),
+            labelSize = label
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        SectionTitle("Overview", titleSize)
+        Spacer(modifier = Modifier.height(3.dp))
+        SectionOverview(
+            overview = uiState.movieDetails?.overview ?: "",
+            labelSize = label
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        SectionList(
+            title = "Available Languages",
+            titleSize = titleSize,
+            list = uiState.movieDetails?.spokenLanguages ?: emptyList(),
+            label = label
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        SectionList(
+            title = "Production Companies",
+            titleSize = titleSize,
+            list = uiState.movieDetails?.productionCompanies ?: emptyList(),
+            label = label
+        )
+        Spacer(modifier = Modifier.height(20.dp))
     }
 }
+
 
 @Composable
 private fun SectionImage(
     imageUrl: String,
     scrollState: ScrollState,
-    imageMaxHeightPx: Float,
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel
 ) {
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-
-    val landscapeMaxHeight = screenViewModel.calculateCustomWidth(300, screenMetrics).dp
-    val landscapeMaxHeightPx = with(LocalDensity.current) { landscapeMaxHeight.toPx() }
-
-    val currentImageMaxHeightPx = if (isLandscape) {
-        landscapeMaxHeightPx
+    val density = LocalDensity.current
+    val imageMaxHeight = 300.dp
+    val imageMaxHeightPx = with(density) { imageMaxHeight.toPx() }
+    val parallaxFactor = 0.5f
+    val modifier = if (isLandscape) {
+        val landscapeMaxHeight = screenViewModel.calculateCustomWidth(300, screenMetrics).dp
+        Modifier
+            .fillMaxWidth()
+            .height(landscapeMaxHeight)
     } else {
-        imageMaxHeightPx
+        Modifier
+            .fillMaxWidth()
+            .aspectRatio(2f / 3f)
+    }.graphicsLayer {
+        translationY = -scrollState.value * parallaxFactor
+        val scrollProgress = (scrollState.value / imageMaxHeightPx).coerceIn(0f, 1f)
+        alpha = 1f - scrollProgress
     }
 
-    if (isLandscape) {
-        AsyncImage(
-            model = imageUrl,
-            placeholder = painterResource(R.drawable.ic_launcher_background),
-            error = painterResource(R.drawable.ic_launcher_background),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(with(LocalDensity.current) { currentImageMaxHeightPx.toDp() })
-                .graphicsLayer {
-                    val parallaxFactor = 0.5f
-                    translationY = -scrollState.value * parallaxFactor
-                    val scrollProgress = (scrollState.value / imageMaxHeightPx).coerceIn(0f, 1f)
-                    alpha = (1f - (scrollProgress * (1f - 0.0f))).coerceIn(0.0f, 1f)
-                }
-        )
-    } else {
-        AsyncImage(
-            model = imageUrl,
-            placeholder = painterResource(R.drawable.ic_launcher_background),
-            error = painterResource(R.drawable.ic_launcher_background),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(2f / 3f)
-                .graphicsLayer {
-                    val parallaxFactor = 0.5f
-                    translationY = -scrollState.value * parallaxFactor
-                    val scrollProgress = (scrollState.value / imageMaxHeightPx).coerceIn(0f, 1f)
-                    alpha = (1f - (scrollProgress * (1f - 0.0f))).coerceIn(0.0f, 1f)
-                }
-        )
-    }
-
+    AsyncImage(
+        model = imageUrl,
+        placeholder = painterResource(R.drawable.ic_launcher_background),
+        error = painterResource(R.drawable.ic_launcher_background),
+        contentDescription = "Movie Poster",
+        contentScale = ContentScale.Crop,
+        modifier = modifier
+    )
 }
 
 @Composable
 private fun SectionDetails(
-    movieDetails: MovieDetails,
+    title: String,
+    voteAverage: String,
+    voteCount: String,
     titleSize: TextUnit,
-    ratingTextSize: TextUnit,
-    formattedVoteAverage: String
+    ratingTextSize: TextUnit
 ) {
     Row(
         modifier = Modifier
@@ -250,88 +239,70 @@ private fun SectionDetails(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = movieDetails.title,
+            text = title,
             style = Typography.titleLarge.copy(fontSize = titleSize),
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
             modifier = Modifier.weight(1f)
         )
         Spacer(modifier = Modifier.padding(5.dp))
-        SectionRating(formattedVoteAverage, ratingTextSize, movieDetails)
+        SectionRating(voteAverage, voteCount, ratingTextSize)
     }
 }
 
 @Composable
 private fun SectionRating(
-    formattedVoteAverage: String,
-    ratingTextSize: TextUnit,
-    movieDetails: MovieDetails
+    voteAverage: String,
+    voteCount: String,
+    ratingTextSize: TextUnit
 ) {
+    if (voteAverage.isBlank() || voteCount.isBlank()) {
+        return
+    }
     Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(
             imageVector = Icons.Filled.Star,
-            contentDescription = null,
+            contentDescription = "Rating",
             tint = Color.Yellow,
             modifier = Modifier.padding(end = 4.dp)
         )
         Text(
-            text = "$formattedVoteAverage/10 ",
-            style = Typography.labelMedium.copy(
-                fontSize = ratingTextSize,
-                color = White
-            )
+            text = "$voteAverage/10 ",
+            style = Typography.labelMedium.copy(fontSize = ratingTextSize, color = White)
         )
         Text(
-            text = "(${formatVoteCount(movieDetails.voteCount)})",
-            style = Typography.labelMedium.copy(
-                fontSize = ratingTextSize,
-                color = Color.Gray
-            )
+            text = "($voteCount)",
+            style = Typography.labelMedium.copy(fontSize = ratingTextSize, color = Color.Gray)
         )
     }
 }
 
 @Composable
-private fun SectionReleaseDate(
-    releaseDate: String,
+private fun SectionReleaseInfo(
+    releaseYear: String,
     genres: String,
     runtime: String,
-    label: TextUnit
+    labelSize: TextUnit
 ) {
+    val items = listOf(releaseYear, genres, runtime).filter { it.isNotEmpty() }
     FlowRow(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(10.dp),
-        horizontalArrangement = Arrangement.spacedBy(3.dp),
-        verticalArrangement = Arrangement.spacedBy(3.dp),
-        maxLines = 1
+            .padding(horizontal = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        if (releaseDate.isNotEmpty()) {
+        items.forEachIndexed { index, item ->
             Text(
-                text = releaseDate,
-                style = Typography.labelMedium.copy(fontSize = label),
+                text = item,
+                style = Typography.labelMedium.copy(fontSize = labelSize)
             )
-            Text(
-                text = "•",
-                style = Typography.labelMedium.copy(fontSize = label)
-            )
-        }
-        if (genres.isNotEmpty()) {
-            Text(
-                text = genres,
-                style = Typography.labelMedium.copy(fontSize = label),
-                maxLines = 3
-            )
-            Text(
-                text = "•",
-                style = Typography.labelMedium.copy(fontSize = label)
-            )
-        }
-        if (runtime.isNotEmpty()) {
-            Text(
-                text = runtime,
-                style = Typography.labelMedium.copy(fontSize = label),
-            )
+            if (index < items.size - 1) {
+                Text(
+                    text = "•",
+                    style = Typography.labelMedium.copy(fontSize = labelSize)
+                )
+            }
         }
     }
 }
@@ -346,16 +317,19 @@ private fun SectionTitle(title: String, titleSize: TextUnit) {
 }
 
 @Composable
-private fun SectionList(list: List<String>, label: TextUnit) {
+private fun SectionList(title: String, titleSize: TextUnit, list: List<String>, label: TextUnit) {
+    if (list.isEmpty()) return
+    SectionTitle(title, titleSize)
+    Spacer(modifier = Modifier.height(3.dp))
     FlowRow(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(10.dp),
-        horizontalArrangement = Arrangement.spacedBy(3.dp),
-        verticalArrangement = Arrangement.spacedBy(3.dp)
+            .padding(horizontal = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        list.forEach { language ->
-            if (language.isNotEmpty()) {
+        list.forEach { item ->
+            if (item.isNotEmpty()) {
                 Box(
                     modifier = Modifier
                         .wrapContentSize()
@@ -363,7 +337,7 @@ private fun SectionList(list: List<String>, label: TextUnit) {
                         .background(Black)
                 ) {
                     Text(
-                        text = language,
+                        text = item,
                         style = Typography.labelMedium.copy(fontSize = label),
                         modifier = Modifier.padding(
                             horizontal = 10.dp,
@@ -377,10 +351,10 @@ private fun SectionList(list: List<String>, label: TextUnit) {
 }
 
 @Composable
-private fun SectionOverview(movieDetails: MovieDetails, label: TextUnit) {
+private fun SectionOverview(overview: String, labelSize: TextUnit) {
     Text(
-        text = movieDetails.overview,
-        style = Typography.labelMedium.copy(fontSize = label),
+        text = overview,
+        style = Typography.labelMedium.copy(fontSize = labelSize),
         modifier = Modifier.padding(horizontal = 10.dp)
     )
 }

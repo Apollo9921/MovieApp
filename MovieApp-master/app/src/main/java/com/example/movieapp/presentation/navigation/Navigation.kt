@@ -6,9 +6,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.movieapp.presentation.screens.HomeRoute
-import com.example.movieapp.presentation.screens.details.DetailsScreen
 import com.example.movieapp.presentation.screens.MoreScreen
 import com.example.movieapp.presentation.screens.SettingsScreen
+import com.example.movieapp.presentation.screens.details.DetailsRoute
 import com.example.movieapp.presentation.screens.more.SearchScreen
 import com.example.movieapp.presentation.utils.getScreenMetrics
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
@@ -53,12 +53,11 @@ fun Navigation() {
                 screenViewModel = screenViewModel
             )
         }
-        composable<Details> {
-            val movieId = navController.currentBackStackEntry?.arguments?.getString("movieId")
-            DetailsScreen(
-                movieId = movieId,
-                navController = navController,
+        composable<Details> { it ->
+            val movieId = it.arguments?.getString("movieId")
+            DetailsRoute(
                 backStack = navController::navigateUp,
+                movieId = movieId,
                 screenMetrics = screenMetrics,
                 screenViewModel = screenViewModel
             )
