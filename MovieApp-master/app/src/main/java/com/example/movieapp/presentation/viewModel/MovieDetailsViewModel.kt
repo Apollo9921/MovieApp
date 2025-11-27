@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieapp.core.Constants
 import com.example.movieapp.domain.model.details.FormattedMovieDetails
+import com.example.movieapp.domain.model.details.MovieDetails
 import com.example.movieapp.domain.repository.ConnectivityObserver
 import com.example.movieapp.domain.usecase.FormatMovieDetailsUseCase
 import com.example.movieapp.domain.usecase.GetMovieDetailsUseCase
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.net.ConnectException
 
 class MovieDetailsViewModel(
     private val getMovieDetailsUseCase: GetMovieDetailsUseCase,
@@ -43,14 +45,28 @@ class MovieDetailsViewModel(
             )
 
     init {
+        checkNetworkStatus()
+    }
+
+    private fun checkNetworkStatus() {
         viewModelScope.launch {
             networkStatus.collect { status ->
                 if (status == ConnectivityObserver.Status.Available && uiState.value.movieDetails == null) {
+                    definingUiState(
+                        isLoading = true,
+                        isSuccess = false,
+                        error = false,
+                        errorMessage = null,
+                        movieDetails = null
+                    )
                     fetchMovieDetails(uiState.value.movieId)
                 } else if (status == ConnectivityObserver.Status.Unavailable) {
-                    _uiState.value = _uiState.value.copy(
+                    definingUiState(
+                        isLoading = false,
+                        isSuccess = false,
                         error = true,
-                        errorMessage = Constants.NO_INTERNET_CONNECTION
+                        errorMessage = Constants.NO_INTERNET_CONNECTION,
+                        movieDetails = null
                     )
                 }
             }
@@ -60,33 +76,57 @@ class MovieDetailsViewModel(
     private fun fetchMovieDetails(movieId: Int) {
         viewModelScope.launch {
             try {
-                _uiState.value = _uiState.value.copy(isLoading = true, error = false)
-                if (networkStatus.value == ConnectivityObserver.Status.Unavailable) {
-                    _uiState.value = _uiState.value.copy(
-                        error = true,
-                        errorMessage = Constants.NO_INTERNET_CONNECTION
-                    )
-                    return@launch
-                }
                 val response = getMovieDetailsUseCase(movieId).first()
-                val movieDetails = response.getOrThrow()
-                val formattedDetails = formatMovieDetailsUseCase(movieDetails)
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    isSuccess = true,
-                    errorMessage = null,
-                    error = false,
-                    movieDetails = formattedDetails
-                )
+                if (response.isSuccess && response.getOrNull() != null) {
+                    fetchMoviesSuccess(response)
+                } else {
+                    fetchMovieDetailsFailure(response.exceptionOrNull() as Exception)
+                }
             } catch (e: Exception) {
-                val errorMsg = e.message ?: Constants.UNKNOWN_ERROR
-                Log.e("MovieDetailsViewModel", errorMsg)
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = true,
-                    errorMessage = Constants.UNKNOWN_ERROR
-                )
+                fetchMovieDetailsFailure(e)
             }
         }
+    }
+
+    private fun fetchMoviesSuccess(response: Result<MovieDetails>) {
+        Log.e("MovieDetailsViewModel", "Movie details fetched successfully")
+        val movieDetails = response.getOrThrow()
+        val formattedDetails = formatMovieDetailsUseCase(movieDetails)
+        definingUiState(
+            isLoading = false,
+            isSuccess = true,
+            error = false,
+            errorMessage = null,
+            movieDetails = formattedDetails
+        )
+    }
+
+    private fun fetchMovieDetailsFailure(e: Exception) {
+        val errorMsg =
+            if (e is ConnectException) Constants.NO_INTERNET_CONNECTION else Constants.UNKNOWN_ERROR
+        Log.e("MovieDetailsViewModel", errorMsg)
+        definingUiState(
+            isLoading = false,
+            isSuccess = false,
+            error = true,
+            errorMessage = errorMsg,
+            movieDetails = null
+        )
+    }
+
+    private fun definingUiState(
+        isLoading: Boolean?,
+        isSuccess: Boolean?,
+        error: Boolean?,
+        errorMessage: String?,
+        movieDetails: FormattedMovieDetails?
+    ) {
+        _uiState.value = _uiState.value.copy(
+            isLoading = isLoading ?: _uiState.value.isLoading,
+            isSuccess = isSuccess ?: _uiState.value.isSuccess,
+            error = error ?: _uiState.value.error,
+            errorMessage = errorMessage,
+            movieDetails = movieDetails ?: _uiState.value.movieDetails
+        )
     }
 }
