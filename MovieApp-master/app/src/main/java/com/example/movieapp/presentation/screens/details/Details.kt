@@ -21,7 +21,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -36,6 +35,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.example.movieapp.R
 import com.example.movieapp.presentation.components.ErrorScreen
+import com.example.movieapp.presentation.components.LoadingScreen
 import com.example.movieapp.presentation.components.TopBar
 import com.example.movieapp.presentation.theme.Background
 import com.example.movieapp.presentation.theme.Black
@@ -103,19 +104,25 @@ fun DetailsScreen(
         ) {
             when {
                 uiState.isLoading -> {
-                    CircularProgressIndicator(color = White, strokeWidth = 2.dp)
+                    Box(modifier = Modifier.testTag("LoadingComponent")) {
+                        LoadingScreen()
+                    }
                 }
 
                 uiState.isSuccess -> {
-                    DetailsContent(
-                        uiState = uiState,
-                        screenMetrics = screenMetrics,
-                        screenViewModel = screenViewModel
-                    )
+                    Box(modifier = Modifier.testTag("SuccessComponent")) {
+                        DetailsContent(
+                            uiState = uiState,
+                            screenMetrics = screenMetrics,
+                            screenViewModel = screenViewModel
+                        )
+                    }
                 }
 
                 uiState.error -> {
-                    ErrorScreen(uiState.errorMessage, screenMetrics, screenViewModel)
+                    Box(modifier = Modifier.testTag("ErrorComponent")) {
+                        ErrorScreen(uiState.errorMessage, screenMetrics, screenViewModel)
+                    }
                 }
             }
         }
@@ -137,6 +144,7 @@ private fun DetailsContent(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
+            .testTag("Content")
     ) {
         SectionImage(
             imageUrl = uiState.movieDetails?.posterUrl.toString(),
@@ -153,33 +161,42 @@ private fun DetailsContent(
             ratingTextSize = ratingTextSize
         )
         Spacer(modifier = Modifier.height(3.dp))
-        SectionReleaseInfo(
-            releaseYear = uiState.movieDetails?.releaseYear.toString(),
-            genres = uiState.movieDetails?.genres.toString(),
-            runtime = uiState.movieDetails?.runtime.toString(),
-            labelSize = label
-        )
+        Box(modifier = Modifier.testTag("SectionReleaseInfo")) {
+            SectionReleaseInfo(
+                releaseYear = uiState.movieDetails?.releaseYear.toString(),
+                genres = uiState.movieDetails?.genres.toString(),
+                runtime = uiState.movieDetails?.runtime.toString(),
+                labelSize = label
+            )
+        }
         Spacer(modifier = Modifier.height(10.dp))
-        SectionTitle("Overview", titleSize)
-        Spacer(modifier = Modifier.height(3.dp))
-        SectionOverview(
-            overview = uiState.movieDetails?.overview ?: "",
-            labelSize = label
-        )
+        Column(modifier = Modifier.testTag("SectionOverview")) {
+            if (uiState.movieDetails?.overview.isNullOrEmpty()) return@Column
+            SectionTitle("Overview", titleSize)
+            Spacer(modifier = Modifier.height(3.dp))
+            SectionOverview(
+                overview = uiState.movieDetails?.overview ?: "",
+                labelSize = label
+            )
+        }
         Spacer(modifier = Modifier.height(10.dp))
-        SectionList(
-            title = "Available Languages",
-            titleSize = titleSize,
-            list = uiState.movieDetails?.spokenLanguages ?: emptyList(),
-            label = label
-        )
+        Column(modifier = Modifier.testTag("SectionListLanguages")) {
+            SectionList(
+                title = "Available Languages",
+                titleSize = titleSize,
+                list = uiState.movieDetails?.spokenLanguages ?: emptyList(),
+                label = label
+            )
+        }
         Spacer(modifier = Modifier.height(10.dp))
-        SectionList(
-            title = "Production Companies",
-            titleSize = titleSize,
-            list = uiState.movieDetails?.productionCompanies ?: emptyList(),
-            label = label
-        )
+        Column(modifier = Modifier.testTag("SectionListCompanies")) {
+            SectionList(
+                title = "Production Companies",
+                titleSize = titleSize,
+                list = uiState.movieDetails?.productionCompanies ?: emptyList(),
+                label = label
+            )
+        }
         Spacer(modifier = Modifier.height(20.dp))
     }
 }
@@ -234,19 +251,24 @@ private fun SectionDetails(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 10.dp),
+            .padding(horizontal = 10.dp)
+            .testTag("SectionDetails"),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = title,
-            style = Typography.titleLarge.copy(fontSize = titleSize),
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 1,
-            modifier = Modifier.weight(1f)
-        )
-        Spacer(modifier = Modifier.padding(5.dp))
-        SectionRating(voteAverage, voteCount, ratingTextSize)
+        if (title.isNotBlank()) {
+            Text(
+                text = title,
+                style = Typography.titleLarge.copy(fontSize = titleSize),
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.padding(5.dp))
+        }
+        Box(modifier = Modifier.testTag("SectionRating")) {
+            SectionRating(voteAverage, voteCount, ratingTextSize)
+        }
     }
 }
 

@@ -19,6 +19,7 @@ fun ErrorScreen(
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel
 ) {
+    //TODO create a refresh button
     Box(
         modifier = Modifier
             .fillMaxSize()

@@ -92,6 +92,18 @@ class MovieDetailsViewModel(
         Log.e("MovieDetailsViewModel", "Movie details fetched successfully")
         val movieDetails = response.getOrThrow()
         val formattedDetails = formatMovieDetailsUseCase(movieDetails)
+        val checkIfDataNotEmpty = formatMovieDetailsUseCase.checkIfMovieDetailsNotEmpty(formattedDetails)
+        if (!checkIfDataNotEmpty) {
+            Log.e("MovieDetailsViewModel", Constants.NO_INFO_AVAILABLE)
+            definingUiState(
+                isLoading = false,
+                isSuccess = false,
+                error = true,
+                errorMessage = Constants.NO_INFO_AVAILABLE,
+                movieDetails = null
+            )
+            return
+        }
         definingUiState(
             isLoading = false,
             isSuccess = true,

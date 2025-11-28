@@ -35,4 +35,12 @@ class FormatMovieDetailsUseCase {
         val thousands = count / 1000.0
         return "${floor(thousands * 10).roundToInt() / 10.0}k"
     }
+
+    fun checkIfMovieDetailsNotEmpty(movieDetails: FormattedMovieDetails): Boolean {
+        return !(movieDetails.title.isBlank() == true && movieDetails.overview.isBlank() == true &&
+                movieDetails.voteAverage.isBlank() == true && movieDetails.voteCount.isBlank() == true &&
+                movieDetails.releaseYear.isBlank() == true && movieDetails.genres.isBlank() == true &&
+                movieDetails.runtime.isBlank() == true && movieDetails.spokenLanguages.isEmpty() == true &&
+                movieDetails.productionCompanies.isEmpty() == true)
+    }
 }

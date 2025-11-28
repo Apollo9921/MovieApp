@@ -6,4 +6,5 @@ object Constants {
     const val ERROR_FETCHING_MOVIES = "Error Fetching Movies"
     const val ERROR_FETCHING_GENRES = "Error Fetching Genres"
     const val NO_MOVIES_FOUND = "No Movies Found"
+    const val NO_INFO_AVAILABLE = "No Information Available"
 }
