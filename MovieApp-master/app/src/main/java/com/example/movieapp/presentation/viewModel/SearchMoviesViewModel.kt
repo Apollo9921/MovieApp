@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieapp.core.Constants
 import com.example.movieapp.domain.model.movies.MovieData
+import com.example.movieapp.domain.model.movies.Movies
 import com.example.movieapp.domain.repository.ConnectivityObserver
 import com.example.movieapp.domain.usecase.GetSearchUseCase
 import kotlinx.coroutines.FlowPreview
@@ -52,7 +53,7 @@ class SearchMoviesViewModel(
     fun onQueryChanged(newQuery: String) {
         _uiState.value = _uiState.value.copy(query = newQuery)
         if (_uiState.value.query.isEmpty() && networkStatus.value == ConnectivityObserver.Status.Unavailable) {
-            searchMoviesFailed(ConnectException())
+            searchMoviesException(ConnectException())
             return
         }
     }
@@ -93,14 +94,18 @@ class SearchMoviesViewModel(
                     errorMessage = null
                 )
                 if (networkStatus.value == ConnectivityObserver.Status.Unavailable) {
-                    searchMoviesFailed(ConnectException())
+                    searchMoviesException(ConnectException())
                     return@launch
                 }
                 val responseMovies = getSearchUseCase(query).first()
-                val moviesData = responseMovies.getOrNull()?.results ?: emptyList()
-                searchMoviesSuccess(moviesData)
+                if (responseMovies.isSuccess) {
+                    val moviesData = responseMovies.getOrNull()?.results ?: emptyList()
+                    searchMoviesSuccess(moviesData)
+                } else {
+                    searchMoviesFailure(responseMovies)
+                }
             } catch (e: Exception) {
-               searchMoviesFailed(e)
+                searchMoviesException(e)
             }
         }
     }
@@ -126,8 +131,22 @@ class SearchMoviesViewModel(
         )
     }
 
-    private fun searchMoviesFailed(e: Exception) {
-        val errorMsg = if (e is ConnectException) Constants.NO_INTERNET_CONNECTION else Constants.UNKNOWN_ERROR
+    private fun searchMoviesFailure(responseMovies: Result<Movies>) {
+        val errorMsg =
+            if (responseMovies.exceptionOrNull() is ConnectException) Constants.NO_INTERNET_CONNECTION
+            else responseMovies.exceptionOrNull()?.message ?: Constants.UNKNOWN_ERROR
+        Log.e("SearchMoviesViewModel", errorMsg)
+        definingUiState(
+            isLoading = false,
+            isSuccess = false,
+            error = true,
+            errorMessage = errorMsg
+        )
+    }
+
+    private fun searchMoviesException(e: Exception) {
+        val errorMsg =
+            if (e is ConnectException) Constants.NO_INTERNET_CONNECTION else Constants.UNKNOWN_ERROR
         Log.e("SearchMoviesViewModel", e.message ?: errorMsg)
         definingUiState(
             isLoading = false,
