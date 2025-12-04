@@ -9,7 +9,7 @@ import com.example.movieapp.presentation.screens.HomeRoute
 import com.example.movieapp.presentation.screens.MoreScreen
 import com.example.movieapp.presentation.screens.SettingsScreen
 import com.example.movieapp.presentation.screens.details.DetailsRoute
-import com.example.movieapp.presentation.screens.more.SearchScreen
+import com.example.movieapp.presentation.screens.more.SearchRoute
 import com.example.movieapp.presentation.utils.getScreenMetrics
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 
@@ -46,7 +46,7 @@ fun Navigation() {
             )
         }
         composable<Search> {
-            SearchScreen(
+            SearchRoute(
                 navController = navController,
                 backStack = navController::navigateUp,
                 screenMetrics = screenMetrics,

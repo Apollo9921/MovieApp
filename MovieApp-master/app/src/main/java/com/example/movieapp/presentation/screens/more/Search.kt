@@ -44,14 +44,34 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun SearchScreen(
+fun SearchRoute(
     navController: NavController,
     backStack: () -> Boolean,
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
-    screenViewModel: ScreenSizingViewModel
+    screenViewModel: ScreenSizingViewModel,
+    viewModel: SearchMoviesViewModel = koinViewModel()
 ) {
-    val viewModel = koinViewModel<SearchMoviesViewModel>()
-    val uiState = viewModel.uiState.collectAsState()
+   val uiState = viewModel.uiState.collectAsState().value
+
+   SearchScreen(
+       uiState = uiState,
+       navController = navController,
+       backStack = { backStack() },
+       screenMetrics = screenMetrics,
+       screenViewModel = screenViewModel,
+       viewModel = viewModel
+   )
+}
+
+@Composable
+fun SearchScreen(
+    uiState: SearchMoviesViewModel.SearchMovieUiState,
+    navController: NavController,
+    backStack: () -> Boolean,
+    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
+    screenViewModel: ScreenSizingViewModel,
+    viewModel: SearchMoviesViewModel
+) {
     val searchValue = remember { mutableStateOf("") }
 
     Scaffold(
@@ -60,7 +80,7 @@ fun SearchScreen(
             .safeDrawingPadding(),
         topBar = {
             TopBar(
-                stringResource(R.string.search),
+                title = stringResource(R.string.search),
                 isBack = true,
                 backStack = { backStack() },
                 screenMetrics = screenMetrics,
@@ -76,14 +96,14 @@ fun SearchScreen(
             ) {
                 SearchBar(screenMetrics, screenViewModel, viewModel, searchValue)
                 when {
-                    uiState.value.isLoading == true -> {
+                    uiState.isLoading == true -> {
                         LoadingScreen()
                     }
 
-                    uiState.value.isSuccess == true -> {
+                    uiState.isSuccess == true -> {
                         MoviesList(
                             pv = PaddingValues(0.dp),
-                            movies = uiState.value.moviesList,
+                            movies = uiState.moviesList,
                             genresList = arrayListOf(),
                             selectedGenreId = 0,
                             onMovieClick = { movieId ->
@@ -96,9 +116,9 @@ fun SearchScreen(
                         )
                     }
 
-                    uiState.value.isError == true -> {
+                    uiState.isError == true -> {
                         ErrorScreen(
-                            errorMessage = uiState.value.errorMessage,
+                            errorMessage = uiState.errorMessage,
                             screenMetrics = screenMetrics,
                             screenViewModel = screenViewModel,
                             onRefresh = { viewModel.onQueryChanged(searchValue.value) }
