@@ -29,10 +29,13 @@ fun ErrorScreen(
     errorMessage: String?,
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel,
+    showButton: Boolean = false,
     onRefresh: () -> Unit
 ) {
     var message = errorMessage
     if (message == null) message = Constants.UNKNOWN_ERROR
+    var isButtonToShow = showButton
+    if (message != Constants.NO_INTERNET_CONNECTION && message != Constants.NO_MOVIES_FOUND) isButtonToShow = true
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -47,7 +50,7 @@ fun ErrorScreen(
                 text = message,
                 textAlign = TextAlign.Center
             )
-            if (message != Constants.NO_INTERNET_CONNECTION) {
+            if (isButtonToShow) {
                 Spacer(modifier = Modifier.height(10.dp))
                 Button(
                     onClick = {
