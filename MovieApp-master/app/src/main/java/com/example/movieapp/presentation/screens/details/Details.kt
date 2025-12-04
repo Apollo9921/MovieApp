@@ -70,7 +70,8 @@ fun DetailsRoute(
         uiState = uiState,
         screenMetrics = screenMetrics,
         screenViewModel = screenViewModel,
-        backStack = { backStack() }
+        backStack = { backStack() },
+        onRefresh = { viewModel.fetchMovieDetails(uiState.movieId) }
     )
 }
 
@@ -79,7 +80,8 @@ fun DetailsScreen(
     uiState: MovieDetailsViewModel.MovieDetailsUiState,
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel,
-    backStack: () -> Boolean
+    backStack: () -> Boolean,
+    onRefresh: () -> Unit
 ) {
     Scaffold(
         modifier = Modifier
@@ -121,7 +123,12 @@ fun DetailsScreen(
 
                 uiState.error -> {
                     Box(modifier = Modifier.testTag("ErrorComponent")) {
-                        ErrorScreen(uiState.errorMessage, screenMetrics, screenViewModel)
+                        ErrorScreen(
+                            errorMessage = uiState.errorMessage,
+                            screenMetrics = screenMetrics,
+                            screenViewModel = screenViewModel,
+                            onRefresh = { onRefresh() }
+                        )
                     }
                 }
             }

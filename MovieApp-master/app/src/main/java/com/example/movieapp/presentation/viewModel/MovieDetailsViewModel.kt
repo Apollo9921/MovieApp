@@ -73,7 +73,7 @@ class MovieDetailsViewModel(
         }
     }
 
-    private fun fetchMovieDetails(movieId: Int) {
+    fun fetchMovieDetails(movieId: Int) {
         viewModelScope.launch {
             try {
                 val response = getMovieDetailsUseCase(movieId).first()

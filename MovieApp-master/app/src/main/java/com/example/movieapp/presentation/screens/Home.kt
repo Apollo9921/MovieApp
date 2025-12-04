@@ -118,7 +118,12 @@ fun HomeScreen(
 
                     uiState.error && uiState.errorMessage != null -> {
                         Box(modifier = Modifier.testTag("ErrorComponent")) {
-                            ErrorScreen(uiState.errorMessage!!, screenMetrics, screenViewModel)
+                            ErrorScreen(
+                                errorMessage = uiState.errorMessage!!,
+                                screenMetrics = screenMetrics,
+                                screenViewModel = screenViewModel,
+                                onRefresh = { moviesViewModel.fetchMovies() }
+                            )
                         }
                     }
                 }

@@ -17,6 +17,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,6 +52,7 @@ fun SearchScreen(
 ) {
     val viewModel = koinViewModel<SearchMoviesViewModel>()
     val uiState = viewModel.uiState.collectAsState()
+    val searchValue = remember { mutableStateOf("") }
 
     Scaffold(
         modifier = Modifier
@@ -72,7 +74,7 @@ fun SearchScreen(
                     .background(Background)
                     .padding(it)
             ) {
-                SearchBar(screenMetrics, screenViewModel, viewModel)
+                SearchBar(screenMetrics, screenViewModel, viewModel, searchValue)
                 when {
                     uiState.value.isLoading == true -> {
                         LoadingScreen()
@@ -95,7 +97,12 @@ fun SearchScreen(
                     }
 
                     uiState.value.isError == true -> {
-                        ErrorScreen(uiState.value.errorMessage, screenMetrics, screenViewModel)
+                        ErrorScreen(
+                            errorMessage = uiState.value.errorMessage,
+                            screenMetrics = screenMetrics,
+                            screenViewModel = screenViewModel,
+                            onRefresh = { viewModel.onQueryChanged(searchValue.value) }
+                        )
                     }
                 }
             }
@@ -108,9 +115,9 @@ fun SearchScreen(
 private fun SearchBar(
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel,
-    viewModel: SearchMoviesViewModel
+    viewModel: SearchMoviesViewModel,
+    searchValue: MutableState<String>
 ) {
-    val searchValue = remember { mutableStateOf("") }
     LaunchedEffect(searchValue.value) {
         snapshotFlow { searchValue.value }
             .debounce(500L)

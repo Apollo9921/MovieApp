@@ -42,7 +42,8 @@ class DetailsScreenTest {
                 uiState = uiState,
                 screenMetrics = screenMetrics,
                 screenViewModel = screenViewModel,
-                backStack = { navController.navigateUp() }
+                backStack = { navController.navigateUp() },
+                onRefresh = {}
             )
         }
     }
