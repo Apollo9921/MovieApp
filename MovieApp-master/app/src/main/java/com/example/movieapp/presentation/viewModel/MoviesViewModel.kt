@@ -78,7 +78,7 @@ class MoviesViewModel(
                         errorMessage = null
                     )
                     fetchMovies()
-                } else if (status == ConnectivityObserver.Status.Unavailable) {
+                } else if (status == ConnectivityObserver.Status.Unavailable && moviesList.isEmpty()) {
                     definingUiState(
                         isLoading = false,
                         isSuccess = false,
