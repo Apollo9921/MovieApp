@@ -20,7 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,16 +51,16 @@ fun SearchRoute(
     screenViewModel: ScreenSizingViewModel,
     viewModel: SearchMoviesViewModel = koinViewModel()
 ) {
-   val uiState = viewModel.uiState.collectAsState().value
+    val uiState = viewModel.uiState.collectAsState().value
 
-   SearchScreen(
-       uiState = uiState,
-       navController = navController,
-       backStack = { backStack() },
-       screenMetrics = screenMetrics,
-       screenViewModel = screenViewModel,
-       viewModel = viewModel
-   )
+    SearchScreen(
+        uiState = uiState,
+        navController = navController,
+        backStack = { backStack() },
+        screenMetrics = screenMetrics,
+        screenViewModel = screenViewModel,
+        viewModel = viewModel
+    )
 }
 
 @Composable
@@ -72,7 +72,7 @@ fun SearchScreen(
     screenViewModel: ScreenSizingViewModel,
     viewModel: SearchMoviesViewModel
 ) {
-    val searchValue = remember { mutableStateOf("") }
+    val searchValue = rememberSaveable { mutableStateOf("") }
 
     Scaffold(
         modifier = Modifier
@@ -94,7 +94,12 @@ fun SearchScreen(
                     .background(Background)
                     .padding(it)
             ) {
-                SearchBar(screenMetrics, screenViewModel, viewModel, searchValue)
+                SearchBar(
+                    screenMetrics = screenMetrics,
+                    screenViewModel = screenViewModel,
+                    viewModel = viewModel,
+                    searchValue = searchValue
+                )
                 when {
                     uiState.isLoading == true -> {
                         LoadingScreen()
