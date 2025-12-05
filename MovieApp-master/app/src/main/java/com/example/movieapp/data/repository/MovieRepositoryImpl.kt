@@ -8,32 +8,34 @@ import com.example.movieapp.domain.model.genres.GenresList
 import com.example.movieapp.domain.model.movies.Movies
 import com.example.movieapp.data.network.service.MovieService
 import com.example.movieapp.domain.repository.MoviesRepository
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class MovieRepositoryImpl(
-    private val movieService: MovieService
+    private val movieService: MovieService,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : MoviesRepository {
     override suspend fun fetchMovies(pageNumber: Int): Movies {
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             movieService.getMovies(pageNumber).toMovies()
         }
     }
 
     override suspend fun fetchGenres(): GenresList {
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             movieService.getGenres().toGenresList()
         }
     }
 
     override suspend fun searchMovie(query: String): Movies {
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             movieService.searchMovie(query).toMovies()
         }
     }
 
     override suspend fun getMovieDetails(movieId: Int): MovieDetails {
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             movieService.getMovieDetails(movieId).toMovieDetails()
         }
     }

@@ -13,9 +13,15 @@ import com.example.movieapp.domain.usecase.GetGenresUseCase
 import com.example.movieapp.domain.usecase.GetMovieDetailsUseCase
 import com.example.movieapp.domain.usecase.GetMoviesUseCase
 import com.example.movieapp.domain.usecase.GetSearchUseCase
+import kotlinx.coroutines.Dispatchers
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
+
+val dispatchersModule = module {
+    single(named("ioDispatcher")) { Dispatchers.IO }
+}
 
 val appModule = module {
     single {
@@ -23,7 +29,7 @@ val appModule = module {
     }
 
     single<MoviesRepository> {
-        MovieRepositoryImpl(get())
+        MovieRepositoryImpl(get(), get(named("ioDispatcher")))
     }
 
     single {
