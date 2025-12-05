@@ -2,6 +2,7 @@ package com.example.movieapp.presentation.screens.more
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -24,6 +25,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -102,32 +104,38 @@ fun SearchScreen(
                 )
                 when {
                     uiState.isLoading == true -> {
-                        LoadingScreen()
+                        Box(modifier = Modifier.testTag("LoadingComponent")) {
+                            LoadingScreen()
+                        }
                     }
 
                     uiState.isSuccess == true -> {
-                        MoviesList(
-                            pv = PaddingValues(0.dp),
-                            movies = uiState.moviesList,
-                            genresList = arrayListOf(),
-                            selectedGenreId = 0,
-                            onMovieClick = { movieId ->
-                                navController.navigate(Details(movieId = movieId))
-                            },
-                            onLoadMore = {},
-                            onGenreClick = {},
-                            screenMetrics = screenMetrics,
-                            screenViewModel = screenViewModel
-                        )
+                        Box(modifier = Modifier.testTag("MoviesContent")) {
+                            MoviesList(
+                                pv = PaddingValues(0.dp),
+                                movies = uiState.moviesList,
+                                genresList = arrayListOf(),
+                                selectedGenreId = 0,
+                                onMovieClick = { movieId ->
+                                    navController.navigate(Details(movieId = movieId))
+                                },
+                                onLoadMore = {},
+                                onGenreClick = {},
+                                screenMetrics = screenMetrics,
+                                screenViewModel = screenViewModel
+                            )
+                        }
                     }
 
                     uiState.isError == true -> {
-                        ErrorScreen(
-                            errorMessage = uiState.errorMessage,
-                            screenMetrics = screenMetrics,
-                            screenViewModel = screenViewModel,
-                            onRefresh = { viewModel.onQueryChanged(searchValue.value) }
-                        )
+                        Box(modifier = Modifier.testTag("ErrorComponent")) {
+                            ErrorScreen(
+                                errorMessage = uiState.errorMessage,
+                                screenMetrics = screenMetrics,
+                                screenViewModel = screenViewModel,
+                                onRefresh = { viewModel.onQueryChanged(searchValue.value) }
+                            )
+                        }
                     }
                 }
             }
