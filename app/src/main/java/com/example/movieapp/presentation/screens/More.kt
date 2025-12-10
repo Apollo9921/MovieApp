@@ -71,9 +71,11 @@ private fun MoreScreenOptions(
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel
 ) {
+    val search = stringResource(R.string.search)
+    val favourites = stringResource(R.string.favourites)
     val option: ArrayList<Pair<Int, String>> = arrayListOf()
-    option.add(Pair(R.drawable.search, stringResource(R.string.search)))
-    option.add(Pair(R.drawable.favourite, stringResource(R.string.favourites)))
+    option.add(Pair(R.drawable.search, search))
+    option.add(Pair(R.drawable.favourite, favourites))
 
     LazyVerticalGrid(
         modifier = Modifier
@@ -89,8 +91,9 @@ private fun MoreScreenOptions(
                     .wrapContentSize()
                     .padding(10.dp)
                     .clickable {
-                        // TODO Handle option click
-                        navController.navigate(Search)
+                        if (option[it].second == search) {
+                            navController.navigate(Search)
+                        }
                     },
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
