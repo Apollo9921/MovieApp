@@ -6,7 +6,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.movieapp.data.local.entity.MovieEntity
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MovieDao {
@@ -18,8 +17,8 @@ interface MovieDao {
     suspend fun deleteMovie(movie: MovieEntity)
 
     @Query("SELECT * FROM movies_table")
-    fun getFavoriteMovies(): Flow<List<MovieEntity>>
+    suspend fun getFavoriteMovies(): List<MovieEntity>
 
     @Query("SELECT EXISTS(SELECT 1 FROM movies_table WHERE id = :movieId)")
-    fun isMovieFavorite(movieId: Int): Flow<Boolean>
+    suspend fun isMovieFavorite(movieId: Int): Boolean
 }

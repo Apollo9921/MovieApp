@@ -14,9 +14,6 @@ import com.example.movieapp.domain.model.movies.MovieData
 import com.example.movieapp.domain.repository.MoviesRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class MovieRepositoryImpl(
@@ -51,7 +48,7 @@ class MovieRepositoryImpl(
     override suspend fun toggleFavoriteMovie(movie: MovieData) {
         val isMovieFavorite = isMovieFavorite(movie.id)
         withContext(ioDispatcher) {
-            if (isMovieFavorite.first() == true) {
+            if (isMovieFavorite) {
                 movieDao.deleteMovie(movie.toMovieEntity())
                 return@withContext
             }
@@ -59,13 +56,13 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun getFavoriteMovies(): Flow<List<MovieData>> {
+    override suspend fun getFavoriteMovies(): List<MovieData> {
         return movieDao.getFavoriteMovies().map { entitiesList ->
-            entitiesList.map { it.toMovieData() }
+            entitiesList.toMovieData()
         }
     }
 
-    override suspend fun isMovieFavorite(movieId: Int): Flow<Boolean> {
+    override suspend fun isMovieFavorite(movieId: Int): Boolean {
         return movieDao.isMovieFavorite(movieId)
     }
 }
