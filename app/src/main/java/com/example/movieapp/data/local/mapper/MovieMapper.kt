@@ -7,18 +7,18 @@ fun MovieEntity.toMovieData(): MovieData {
     return MovieData(
         id = id,
         title = title,
-        posterPath = posterPath,
-        voteAverage = voteAverage,
-        voteCount = voteCount,
-        releaseDate = releaseDate,
         overview = overview,
-        popularity = popularity,
-        backdropPath = backdropPath,
+        posterPath = posterPath,
+        voteAverage = voteAverage.toDouble(),
+        voteCount = voteCount.toInt(),
+        releaseDate = releaseDate,
         genreIds = emptyList(),
+        popularity = 0.0,
+        backdropPath = "",
         originalLanguage = originalLanguage,
         originalTitle = originalTitle,
-        adult = adult,
-        video = video
+        adult = false,
+        video = false
     )
 }
 
@@ -30,12 +30,13 @@ fun MovieData.toMovieEntity(): MovieEntity {
         voteAverage = voteAverage,
         voteCount = voteCount,
         releaseDate = releaseDate,
+        genreIds = 0,
         overview = overview,
-        popularity = popularity,
-        backdropPath = backdropPath,
         originalLanguage = originalLanguage,
         originalTitle = originalTitle,
         adult = adult,
-        video = video
+        video = video,
+        popularity = popularity,
+        backdropPath = backdropPath
     )
 }

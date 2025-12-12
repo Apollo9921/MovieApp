@@ -9,6 +9,7 @@ import com.example.movieapp.presentation.screens.HomeRoute
 import com.example.movieapp.presentation.screens.MoreScreen
 import com.example.movieapp.presentation.screens.SettingsScreen
 import com.example.movieapp.presentation.screens.details.DetailsRoute
+import com.example.movieapp.presentation.screens.more.FavoritesRoute
 import com.example.movieapp.presentation.screens.more.SearchRoute
 import com.example.movieapp.presentation.utils.getScreenMetrics
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
@@ -53,6 +54,16 @@ fun Navigation() {
                 screenViewModel = screenViewModel
             )
         }
+
+        composable<Favorites> {
+            FavoritesRoute(
+                navController = navController,
+                backStack = navController::navigateUp,
+                screenMetrics = screenMetrics,
+                screenViewModel = screenViewModel
+            )
+        }
+
         composable<Details> { it ->
             val movieId = it.arguments?.getString("movieId")
             DetailsRoute(

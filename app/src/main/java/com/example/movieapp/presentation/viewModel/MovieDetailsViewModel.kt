@@ -6,9 +6,12 @@ import androidx.lifecycle.viewModelScope
 import com.example.movieapp.core.Constants
 import com.example.movieapp.domain.model.details.FormattedMovieDetails
 import com.example.movieapp.domain.model.details.MovieDetails
+import com.example.movieapp.domain.model.movies.MovieData
 import com.example.movieapp.domain.repository.ConnectivityObserver
+import com.example.movieapp.domain.usecase.AddFavoritesUseCase
 import com.example.movieapp.domain.usecase.FormatMovieDetailsUseCase
 import com.example.movieapp.domain.usecase.GetMovieDetailsUseCase
+import com.example.movieapp.domain.usecase.IsMovieFavoriteUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +24,8 @@ import java.net.ConnectException
 class MovieDetailsViewModel(
     private val getMovieDetailsUseCase: GetMovieDetailsUseCase,
     private val formatMovieDetailsUseCase: FormatMovieDetailsUseCase,
+    private val addFavoritesUseCase: AddFavoritesUseCase,
+    private val isMovieFavoriteUseCase: IsMovieFavoriteUseCase,
     connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
@@ -32,8 +37,10 @@ class MovieDetailsViewModel(
         val isSuccess: Boolean = false,
         val error: Boolean = false,
         var errorMessage: String? = null,
+        val movieDetailsOriginal: MovieDetails? = null,
         var movieDetails: FormattedMovieDetails? = null,
-        var movieId: Int = 0
+        var movieId: Int = 0,
+        val isFavorite: Boolean = false
     )
 
     val networkStatus: StateFlow<ConnectivityObserver.Status> =
@@ -57,7 +64,8 @@ class MovieDetailsViewModel(
                         isSuccess = false,
                         error = false,
                         errorMessage = null,
-                        movieDetails = null
+                        movieDetails = null,
+                        movieDetailsOriginal = null
                     )
                     fetchMovieDetails(uiState.value.movieId)
                 } else if (status == ConnectivityObserver.Status.Unavailable) {
@@ -66,7 +74,8 @@ class MovieDetailsViewModel(
                         isSuccess = false,
                         error = true,
                         errorMessage = Constants.NO_INTERNET_CONNECTION,
-                        movieDetails = null
+                        movieDetails = null,
+                        movieDetailsOriginal = null
                     )
                 }
             }
@@ -100,15 +109,18 @@ class MovieDetailsViewModel(
                 isSuccess = false,
                 error = true,
                 errorMessage = Constants.NO_INFO_AVAILABLE,
-                movieDetails = null
+                movieDetails = null,
+                movieDetailsOriginal = movieDetails
             )
             return
         }
+        checkIfMovieIsFavorite(uiState.value.movieId)
         definingUiState(
             isLoading = false,
             isSuccess = true,
             error = false,
             errorMessage = null,
+            movieDetailsOriginal = movieDetails,
             movieDetails = formattedDetails
         )
     }
@@ -122,8 +134,31 @@ class MovieDetailsViewModel(
             isSuccess = false,
             error = true,
             errorMessage = errorMsg,
-            movieDetails = null
+            movieDetails = null,
+            movieDetailsOriginal = null
         )
+    }
+
+    fun toggleMovie(movie: MovieData) {
+        viewModelScope.launch {
+            val response = addFavoritesUseCase(movie).first()
+            if (response.isSuccess) {
+                Log.d("FavoritesViewModel", "Movie toggled to favorites: ${movie.title}")
+                checkIfMovieIsFavorite(movie.id)
+            } else {
+                Log.e("FavoritesViewModel", "Error toggled movie to favorites: ${response.exceptionOrNull()?.message}")
+            }
+        }
+    }
+
+    private fun checkIfMovieIsFavorite(movieId: Int) {
+        viewModelScope.launch {
+            isMovieFavoriteUseCase(movieId).collect { result ->
+                _uiState.value = _uiState.value.copy(
+                    isFavorite = result
+                )
+            }
+        }
     }
 
     private fun definingUiState(
@@ -131,14 +166,16 @@ class MovieDetailsViewModel(
         isSuccess: Boolean?,
         error: Boolean?,
         errorMessage: String?,
-        movieDetails: FormattedMovieDetails?
+        movieDetails: FormattedMovieDetails?,
+        movieDetailsOriginal: MovieDetails?
     ) {
         _uiState.value = _uiState.value.copy(
             isLoading = isLoading ?: _uiState.value.isLoading,
             isSuccess = isSuccess ?: _uiState.value.isSuccess,
             error = error ?: _uiState.value.error,
             errorMessage = errorMessage,
-            movieDetails = movieDetails ?: _uiState.value.movieDetails
+            movieDetails = movieDetails ?: _uiState.value.movieDetails,
+            movieDetailsOriginal = movieDetailsOriginal
         )
     }
 }

@@ -28,6 +28,7 @@ import androidx.navigation.NavController
 import com.example.movieapp.R
 import com.example.movieapp.presentation.components.BottomNavigationBar
 import com.example.movieapp.presentation.components.TopBar
+import com.example.movieapp.presentation.navigation.Favorites
 import com.example.movieapp.presentation.navigation.Search
 import com.example.movieapp.presentation.theme.Background
 import com.example.movieapp.presentation.theme.Typography
@@ -93,6 +94,8 @@ private fun MoreScreenOptions(
                     .clickable {
                         if (option[it].second == search) {
                             navController.navigate(Search)
+                        } else if (option[it].second == favourites) {
+                            navController.navigate(Favorites)
                         }
                     },
                 verticalArrangement = Arrangement.Center,

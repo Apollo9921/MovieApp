@@ -3,18 +3,14 @@ package com.example.movieapp.presentation.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieapp.domain.model.movies.MovieData
-import com.example.movieapp.domain.usecase.AddFavoritesUseCase
 import com.example.movieapp.domain.usecase.GetFavoriteMoviesUseCase
-import com.example.movieapp.domain.usecase.IsMovieFavoriteUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class FavoritesViewModel(
-    private val addFavoritesUseCase: AddFavoritesUseCase,
-    private val getFavoriteMoviesUseCase: GetFavoriteMoviesUseCase,
-    private val isMovieFavoriteUseCase: IsMovieFavoriteUseCase
+    private val getFavoriteMoviesUseCase: GetFavoriteMoviesUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FavoritesMoviesUiState())
@@ -26,26 +22,39 @@ class FavoritesViewModel(
         val isError: Boolean = false,
         var errorMessage: String? = null,
         var moviesList: List<MovieData> = emptyList(),
-        var query: String = ""
     )
 
-    fun toggleMovie(movie: MovieData) {
-        viewModelScope.launch {
-            addFavoritesUseCase(movie)
-        }
+    init {
+        getFavoriteMovies()
     }
 
     fun getFavoriteMovies() {
+        _uiState.value = _uiState.value.copy(
+            isLoading = true,
+            isSuccess = false,
+            isError = false,
+            errorMessage = null
+        )
         viewModelScope.launch {
             getFavoriteMoviesUseCase().collect { result ->
-                val moviesList = result.getOrNull() ?: emptyList()
-                _uiState.value = _uiState.value.copy(
-                    moviesList = moviesList,
-                    isSuccess = true,
-                    isLoading = false,
-                    isError = false,
-                    errorMessage = null
-                )
+                if (result.isSuccess) {
+                    val moviesList = result.getOrNull() ?: emptyList()
+                    _uiState.value = _uiState.value.copy(
+                        moviesList = moviesList,
+                        isSuccess = true,
+                        isLoading = false,
+                        isError = false,
+                        errorMessage = null
+                    )
+                } else if (result.isFailure || result.getOrNull().isNullOrEmpty()) {
+                    val errorMessage = result.exceptionOrNull()?.message
+                    _uiState.value = _uiState.value.copy(
+                        isSuccess = false,
+                        isLoading = false,
+                        isError = true,
+                        errorMessage = errorMessage
+                    )
+                }
             }
         }
     }

@@ -93,11 +93,11 @@ val appModule = module {
     }
 
     viewModel {
-        MovieDetailsViewModel(get(), get(), get())
+        MovieDetailsViewModel(get(), get(), get(), get(), get())
     }
 
     viewModel {
-        FavoritesViewModel(get(), get(), get())
+        FavoritesViewModel(get())
     }
 
 }
