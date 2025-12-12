@@ -1,5 +1,7 @@
 package com.example.movieapp.koin
 
+import androidx.room.Room
+import com.example.movieapp.data.local.database.AppDatabase
 import com.example.movieapp.data.network.instance.MovieInstance
 import com.example.movieapp.data.repository.MovieRepositoryImpl
 import com.example.movieapp.domain.repository.MoviesRepository
@@ -25,11 +27,21 @@ val dispatchersModule = module {
 
 val appModule = module {
     single {
+        Room.databaseBuilder(
+            androidContext(),
+            AppDatabase::class.java,
+            "movie_database"
+        ).build()
+    }
+
+    single { get<AppDatabase>().movieDao() }
+
+    single {
         MovieInstance.api
     }
 
     single<MoviesRepository> {
-        MovieRepositoryImpl(get(), get(named("ioDispatcher")))
+        MovieRepositoryImpl(get(), get(), get(named("ioDispatcher")))
     }
 
     single {

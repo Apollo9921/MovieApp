@@ -1,5 +1,8 @@
 package com.example.movieapp.data.repository
 
+import com.example.movieapp.data.local.dao.MovieDao
+import com.example.movieapp.data.local.mapper.toMovieData
+import com.example.movieapp.data.local.mapper.toMovieEntity
 import com.example.movieapp.data.network.mapper.toGenresList
 import com.example.movieapp.data.network.mapper.toMovieDetails
 import com.example.movieapp.data.network.mapper.toMovies
@@ -7,13 +10,18 @@ import com.example.movieapp.domain.model.details.MovieDetails
 import com.example.movieapp.domain.model.genres.GenresList
 import com.example.movieapp.domain.model.movies.Movies
 import com.example.movieapp.data.network.service.MovieService
+import com.example.movieapp.domain.model.movies.MovieData
 import com.example.movieapp.domain.repository.MoviesRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class MovieRepositoryImpl(
     private val movieService: MovieService,
+    private val movieDao: MovieDao,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : MoviesRepository {
     override suspend fun fetchMovies(pageNumber: Int): Movies {
@@ -38,5 +46,26 @@ class MovieRepositoryImpl(
         return withContext(ioDispatcher) {
             movieService.getMovieDetails(movieId).toMovieDetails()
         }
+    }
+
+    override suspend fun toggleFavoriteMovie(movie: MovieData) {
+        val isMovieFavorite = isMovieFavorite(movie.id)
+        withContext(ioDispatcher) {
+            if (isMovieFavorite.first() == true) {
+                movieDao.deleteMovie(movie.toMovieEntity())
+                return@withContext
+            }
+            movieDao.insertMovie(movie.toMovieEntity())
+        }
+    }
+
+    override suspend fun getFavoriteMovies(): Flow<List<MovieData>> {
+        return movieDao.getFavoriteMovies().map { entitiesList ->
+            entitiesList.map { it.toMovieData() }
+        }
+    }
+
+    override suspend fun isMovieFavorite(movieId: Int): Flow<Boolean> {
+        return movieDao.isMovieFavorite(movieId)
     }
 }
