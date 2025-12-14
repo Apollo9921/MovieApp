@@ -2,6 +2,7 @@ package com.example.movieapp.presentation.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,16 +12,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
 import com.example.movieapp.R
 import com.example.movieapp.data.network.instance.MovieInstance
@@ -28,26 +34,63 @@ import com.example.movieapp.domain.model.movies.MovieData
 import com.example.movieapp.presentation.theme.Background
 import com.example.movieapp.presentation.theme.Typography
 import com.example.movieapp.presentation.theme.White
+import com.example.movieapp.presentation.utils.rememberDragDropState
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 
 @Composable
 fun FavouritesListComponent(
     movieData: List<MovieData>,
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
-    screenViewModel: ScreenSizingViewModel
+    screenViewModel: ScreenSizingViewModel,
+    onMove: (Int, Int) -> Unit
 ) {
+    val lazyListState = rememberLazyListState()
+    val dragDropState = rememberDragDropState(lazyListState) { from, to ->
+        onMove(from, to)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Background)
+            .padding(horizontal = 5.dp)
     ) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            state = lazyListState,
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(dragDropState) {
+                    detectDragGesturesAfterLongPress(
+                        onDragStart = { offset -> dragDropState.onDragStart(offset) },
+                        onDragEnd = { dragDropState.onDragInterrupted() },
+                        onDragCancel = { dragDropState.onDragInterrupted() },
+                        onDrag = { change, dragAmount ->
+                            change.consume()
+                            dragDropState.onDrag(dragAmount)
+                        }
+                    )
+                },
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            items(movieData.size) {
+            itemsIndexed(
+                items = movieData,
+                key = { _, item -> item.id }
+            ) { index, movie ->
+                val dragging = movie.id == dragDropState.draggingItemKey
+                val itemModifier = if (dragging) {
+                    Modifier
+                        .zIndex(1f)
+                        .graphicsLayer {
+                            translationY = dragDropState.draggingItemOffset
+                            alpha = 0.8f
+                        }
+                } else {
+                    Modifier.zIndex(0f)
+                }
+
                 FavouritesListItem(
-                    movie = movieData[it],
+                    modifier = itemModifier,
+                    movie = movie,
                     screenMetrics = screenMetrics,
                     screenViewModel = screenViewModel
                 )
@@ -61,7 +104,8 @@ fun FavouritesListComponent(
 private fun FavouritesListItem(
     movie: MovieData,
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
-    screenViewModel: ScreenSizingViewModel
+    screenViewModel: ScreenSizingViewModel,
+    modifier: Modifier
 ) {
     val imageUrl = "${MovieInstance.BASE_URL_IMAGE}${movie.posterPath}"
     val titleSize = screenViewModel.calculateCustomWidth(baseSize = 20, screenMetrics).sp
@@ -71,9 +115,7 @@ private fun FavouritesListItem(
     val iconSize = screenViewModel.calculateCustomWidth(baseSize = 30, screenMetrics).dp
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 5.dp),
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AsyncImage(

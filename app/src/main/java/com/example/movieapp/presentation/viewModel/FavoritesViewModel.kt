@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.Collections
 
 class FavoritesViewModel(
     private val getFavoriteMoviesUseCase: GetFavoriteMoviesUseCase
@@ -57,5 +58,14 @@ class FavoritesViewModel(
                 }
             }
         }
+    }
+
+    fun moveMovie(from: Int, to: Int) {
+        val currentList = _uiState.value.moviesList
+        val updatedList = currentList.toMutableList()
+        Collections.swap(updatedList, from, to)
+        _uiState.value = _uiState.value.copy(
+            moviesList = updatedList
+        )
     }
 }
