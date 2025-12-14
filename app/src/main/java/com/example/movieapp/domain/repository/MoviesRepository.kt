@@ -13,4 +13,6 @@ interface MoviesRepository {
     suspend fun toggleFavoriteMovie(movie: MovieData)
     suspend fun getFavoriteMovies(): List<MovieData>
     suspend fun isMovieFavorite(movieId: Int): Boolean
+    suspend fun updateMoviePosition(newMoviesPosition: List<MovieData>)
+    suspend fun getMovieCount(): Int
 }

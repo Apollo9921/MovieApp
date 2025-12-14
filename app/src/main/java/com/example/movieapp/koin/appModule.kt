@@ -13,11 +13,13 @@ import com.example.movieapp.data.repository.NetworkConnectivityObserver
 import com.example.movieapp.domain.usecase.AddFavoritesUseCase
 import com.example.movieapp.domain.usecase.FormatMovieDetailsUseCase
 import com.example.movieapp.domain.usecase.GetFavoriteMoviesUseCase
+import com.example.movieapp.domain.usecase.GetFavoritesMoviesCountUseCase
 import com.example.movieapp.domain.usecase.GetGenresUseCase
 import com.example.movieapp.domain.usecase.GetMovieDetailsUseCase
 import com.example.movieapp.domain.usecase.GetMoviesUseCase
 import com.example.movieapp.domain.usecase.GetSearchUseCase
 import com.example.movieapp.domain.usecase.IsMovieFavoriteUseCase
+import com.example.movieapp.domain.usecase.UpdateFavoritesMoviesPositionUseCase
 import com.example.movieapp.presentation.viewModel.FavoritesViewModel
 import kotlinx.coroutines.Dispatchers
 import org.koin.android.ext.koin.androidContext
@@ -80,6 +82,14 @@ val appModule = module {
         IsMovieFavoriteUseCase(get())
     }
 
+    single {
+        GetFavoritesMoviesCountUseCase(get())
+    }
+
+    single {
+        UpdateFavoritesMoviesPositionUseCase(get())
+    }
+
     single<ConnectivityObserver> {
         NetworkConnectivityObserver(androidContext())
     }
@@ -93,11 +103,11 @@ val appModule = module {
     }
 
     viewModel {
-        MovieDetailsViewModel(get(), get(), get(), get(), get())
+        MovieDetailsViewModel(get(), get(), get(), get(), get(), get())
     }
 
     viewModel {
-        FavoritesViewModel(get())
+        FavoritesViewModel(get(), get())
     }
 
 }

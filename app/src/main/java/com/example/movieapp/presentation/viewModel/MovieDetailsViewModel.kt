@@ -10,6 +10,7 @@ import com.example.movieapp.domain.model.movies.MovieData
 import com.example.movieapp.domain.repository.ConnectivityObserver
 import com.example.movieapp.domain.usecase.AddFavoritesUseCase
 import com.example.movieapp.domain.usecase.FormatMovieDetailsUseCase
+import com.example.movieapp.domain.usecase.GetFavoritesMoviesCountUseCase
 import com.example.movieapp.domain.usecase.GetMovieDetailsUseCase
 import com.example.movieapp.domain.usecase.IsMovieFavoriteUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +27,7 @@ class MovieDetailsViewModel(
     private val formatMovieDetailsUseCase: FormatMovieDetailsUseCase,
     private val addFavoritesUseCase: AddFavoritesUseCase,
     private val isMovieFavoriteUseCase: IsMovieFavoriteUseCase,
+    private val getFavoritesMoviesCountUseCase: GetFavoritesMoviesCountUseCase,
     connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
@@ -40,7 +42,8 @@ class MovieDetailsViewModel(
         val movieDetailsOriginal: MovieDetails? = null,
         var movieDetails: FormattedMovieDetails? = null,
         var movieId: Int = 0,
-        val isFavorite: Boolean = false
+        val isFavorite: Boolean = false,
+        val favoritesCount: Int = 0
     )
 
     val networkStatus: StateFlow<ConnectivityObserver.Status> =
@@ -101,7 +104,8 @@ class MovieDetailsViewModel(
         Log.e("MovieDetailsViewModel", "Movie details fetched successfully")
         val movieDetails = response.getOrThrow()
         val formattedDetails = formatMovieDetailsUseCase(movieDetails)
-        val checkIfDataNotEmpty = formatMovieDetailsUseCase.checkIfMovieDetailsNotEmpty(formattedDetails)
+        val checkIfDataNotEmpty =
+            formatMovieDetailsUseCase.checkIfMovieDetailsNotEmpty(formattedDetails)
         if (!checkIfDataNotEmpty) {
             Log.e("MovieDetailsViewModel", Constants.NO_INFO_AVAILABLE)
             definingUiState(
@@ -115,6 +119,7 @@ class MovieDetailsViewModel(
             return
         }
         checkIfMovieIsFavorite(uiState.value.movieId)
+        getFavouriteMoviesCount()
         definingUiState(
             isLoading = false,
             isSuccess = true,
@@ -146,7 +151,10 @@ class MovieDetailsViewModel(
                 Log.d("FavoritesViewModel", "Movie toggled to favorites: ${movie.title}")
                 checkIfMovieIsFavorite(movie.id)
             } else {
-                Log.e("FavoritesViewModel", "Error toggled movie to favorites: ${response.exceptionOrNull()?.message}")
+                Log.e(
+                    "FavoritesViewModel",
+                    "Error toggled movie to favorites: ${response.exceptionOrNull()?.message}"
+                )
             }
         }
     }
@@ -158,6 +166,16 @@ class MovieDetailsViewModel(
                     isFavorite = result
                 )
             }
+        }
+    }
+
+    private fun getFavouriteMoviesCount() {
+        viewModelScope.launch {
+            val response = getFavoritesMoviesCountUseCase().first()
+            val favoritesCount = response.getOrNull() ?: 0
+            _uiState.value = _uiState.value.copy(
+                favoritesCount = favoritesCount
+            )
         }
     }
 

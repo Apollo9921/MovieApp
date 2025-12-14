@@ -65,4 +65,12 @@ class MovieRepositoryImpl(
     override suspend fun isMovieFavorite(movieId: Int): Boolean {
         return movieDao.isMovieFavorite(movieId)
     }
+
+    override suspend fun updateMoviePosition(newMoviesPosition: List<MovieData>) {
+        return movieDao.updateMoviePosition(newMoviesPosition.map { it.toMovieEntity() })
+    }
+
+    override suspend fun getMovieCount(): Int {
+        return  movieDao.getMovieCount()
+    }
 }

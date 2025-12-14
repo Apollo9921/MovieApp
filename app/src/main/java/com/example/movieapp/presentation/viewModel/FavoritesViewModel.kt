@@ -4,14 +4,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieapp.domain.model.movies.MovieData
 import com.example.movieapp.domain.usecase.GetFavoriteMoviesUseCase
+import com.example.movieapp.domain.usecase.UpdateFavoritesMoviesPositionUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.Collections
 
 class FavoritesViewModel(
-    private val getFavoriteMoviesUseCase: GetFavoriteMoviesUseCase
+    private val getFavoriteMoviesUseCase: GetFavoriteMoviesUseCase,
+    private val updateFavoritesMoviesPositionUseCase: UpdateFavoritesMoviesPositionUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FavoritesMoviesUiState())
@@ -63,9 +66,20 @@ class FavoritesViewModel(
     fun moveMovie(from: Int, to: Int) {
         val currentList = _uiState.value.moviesList
         val updatedList = currentList.toMutableList()
+        val positionDraggedMovie = currentList[from].voteCount
+        val positionMovie = currentList[to].voteCount
+        updatedList[from] = updatedList[from].copy(voteCount = positionMovie)
+        updatedList[to] = updatedList[to].copy(voteCount = positionDraggedMovie)
         Collections.swap(updatedList, from, to)
         _uiState.value = _uiState.value.copy(
             moviesList = updatedList
         )
+        updateMoviePosition()
+    }
+
+    private fun updateMoviePosition() {
+        viewModelScope.launch {
+            updateFavoritesMoviesPositionUseCase(uiState.value.moviesList).first()
+        }
     }
 }
