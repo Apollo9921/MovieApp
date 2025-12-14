@@ -19,3 +19,10 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+# Keep the class and its members involved in the drag and drop state
+-keep class com.example.movieapp.presentation.utils.DragDropState { *; }
+# A more specific rule to keep the method in question and constructors
+-keepclassmembers class com.example.movieapp.presentation.utils.DragDropState {
+  <init>(...);
+  *** getDraggingItemOffset$main(...);
+}
