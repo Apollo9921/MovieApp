@@ -9,14 +9,14 @@ fun MovieEntity.toMovieData(): MovieData {
         title = title,
         overview = overview,
         posterPath = posterPath,
-        voteAverage = voteAverage.toDouble(),
-        voteCount = voteCount.toInt(),
-        releaseDate = releaseDate,
+        voteAverage = 0.0,
+        voteCount = position,
+        releaseDate = "",
         genreIds = emptyList(),
         popularity = 0.0,
         backdropPath = "",
-        originalLanguage = originalLanguage,
-        originalTitle = originalTitle,
+        originalLanguage = "",
+        originalTitle = "",
         adult = false,
         video = false
     )
@@ -27,16 +27,7 @@ fun MovieData.toMovieEntity(): MovieEntity {
         id = id,
         title = title,
         posterPath = posterPath,
-        voteAverage = voteAverage,
-        voteCount = voteCount,
-        releaseDate = releaseDate,
-        genreIds = 0,
         overview = overview,
-        originalLanguage = originalLanguage,
-        originalTitle = originalTitle,
-        adult = adult,
-        video = video,
-        popularity = popularity,
-        backdropPath = backdropPath
+        position = voteCount
     )
 }
