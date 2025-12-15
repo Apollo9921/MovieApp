@@ -8,7 +8,7 @@ import com.example.movieapp.domain.model.details.FormattedMovieDetails
 import com.example.movieapp.domain.model.details.MovieDetails
 import com.example.movieapp.domain.model.movies.MovieData
 import com.example.movieapp.domain.repository.ConnectivityObserver
-import com.example.movieapp.domain.usecase.AddFavoritesUseCase
+import com.example.movieapp.domain.usecase.ToggleFavoriteUseCase
 import com.example.movieapp.domain.usecase.FormatMovieDetailsUseCase
 import com.example.movieapp.domain.usecase.GetFavoritesMoviesCountUseCase
 import com.example.movieapp.domain.usecase.GetMovieDetailsUseCase
@@ -25,7 +25,7 @@ import java.net.ConnectException
 class MovieDetailsViewModel(
     private val getMovieDetailsUseCase: GetMovieDetailsUseCase,
     private val formatMovieDetailsUseCase: FormatMovieDetailsUseCase,
-    private val addFavoritesUseCase: AddFavoritesUseCase,
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     private val isMovieFavoriteUseCase: IsMovieFavoriteUseCase,
     private val getFavoritesMoviesCountUseCase: GetFavoritesMoviesCountUseCase,
     connectivityObserver: ConnectivityObserver
@@ -146,7 +146,7 @@ class MovieDetailsViewModel(
 
     fun toggleMovie(movie: MovieData) {
         viewModelScope.launch {
-            val response = addFavoritesUseCase(movie).first()
+            val response = toggleFavoriteUseCase(movie).first()
             if (response.isSuccess) {
                 Log.d("FavoritesViewModel", "Movie toggled to favorites: ${movie.title}")
                 checkIfMovieIsFavorite(movie.id)

@@ -5,7 +5,7 @@ import com.example.movieapp.domain.repository.MoviesRepository
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 
-class AddFavoritesUseCase(
+class ToggleFavoriteUseCase(
     private val repository: MoviesRepository
 ) {
     operator fun invoke(movie: MovieData) = flow {

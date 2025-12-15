@@ -10,7 +10,7 @@ import com.example.movieapp.presentation.viewModel.MoviesViewModel
 import com.example.movieapp.presentation.viewModel.SearchMoviesViewModel
 import com.example.movieapp.domain.repository.ConnectivityObserver
 import com.example.movieapp.data.repository.NetworkConnectivityObserver
-import com.example.movieapp.domain.usecase.AddFavoritesUseCase
+import com.example.movieapp.domain.usecase.ToggleFavoriteUseCase
 import com.example.movieapp.domain.usecase.FormatMovieDetailsUseCase
 import com.example.movieapp.domain.usecase.GetFavoriteMoviesUseCase
 import com.example.movieapp.domain.usecase.GetFavoritesMoviesCountUseCase
@@ -71,7 +71,7 @@ val appModule = module {
     }
 
     single {
-        AddFavoritesUseCase(get())
+        ToggleFavoriteUseCase(get())
     }
 
     single {
