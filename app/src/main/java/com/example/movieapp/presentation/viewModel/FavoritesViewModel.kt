@@ -74,10 +74,9 @@ class FavoritesViewModel(
         _uiState.value = _uiState.value.copy(
             moviesList = updatedList
         )
-        updateMoviePosition()
     }
 
-    private fun updateMoviePosition() {
+    fun updateMoviePosition() {
         viewModelScope.launch {
             updateFavoritesMoviesPositionUseCase(uiState.value.moviesList).first()
         }

@@ -40,7 +40,8 @@ fun FavoritesRoute(
         screenMetrics = screenMetrics,
         screenViewModel = screenViewModel,
         onRefresh = { refresh() },
-        onMove = { from, to -> viewModel.moveMovie(from, to) }
+        onMove = { from, to -> viewModel.moveMovie(from, to) },
+        updateMoviePosition = { viewModel.updateMoviePosition() }
     )
 
 }
@@ -54,6 +55,7 @@ fun FavoritesScreen(
     screenViewModel: ScreenSizingViewModel,
     onRefresh: () -> Unit,
     onMove: (Int, Int) -> Unit,
+    updateMoviePosition: () -> Unit,
 ) {
     Scaffold(
         modifier = Modifier
@@ -87,9 +89,8 @@ fun FavoritesScreen(
                                 movieData = uiState.moviesList,
                                 screenMetrics = screenMetrics,
                                 screenViewModel = screenViewModel,
-                                onMove = { from, to ->
-                                    onMove(from, to)
-                                }
+                                onMove = { from, to -> onMove(from, to) },
+                                updateMoviePosition = { updateMoviePosition() }
                             )
                         }
                     }

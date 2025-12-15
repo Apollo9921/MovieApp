@@ -42,7 +42,8 @@ fun FavouritesListComponent(
     movieData: List<MovieData>,
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel,
-    onMove: (Int, Int) -> Unit
+    onMove: (Int, Int) -> Unit,
+    updateMoviePosition: () -> Unit
 ) {
     val lazyListState = rememberLazyListState()
     val dragDropState = rememberDragDropState(lazyListState) { from, to ->
@@ -62,7 +63,10 @@ fun FavouritesListComponent(
                 .pointerInput(dragDropState) {
                     detectDragGesturesAfterLongPress(
                         onDragStart = { offset -> dragDropState.onDragStart(offset) },
-                        onDragEnd = { dragDropState.onDragInterrupted() },
+                        onDragEnd = {
+                            dragDropState.onDragInterrupted()
+                            updateMoviePosition()
+                        },
                         onDragCancel = { dragDropState.onDragInterrupted() },
                         onDrag = { change, dragAmount ->
                             change.consume()
