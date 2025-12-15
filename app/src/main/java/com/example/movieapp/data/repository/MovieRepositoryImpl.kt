@@ -52,6 +52,9 @@ class MovieRepositoryImpl(
                 movieDao.deleteMovie(movie.toMovieEntity())
                 return@withContext
             }
+            val currentMovies = getFavoriteMovies()
+            val updatedMovies = currentMovies.map { it.copy(voteCount = it.voteCount + 1) }
+            updateMoviePosition(updatedMovies)
             movieDao.insertMovie(movie.toMovieEntity())
         }
     }

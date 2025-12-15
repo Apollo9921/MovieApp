@@ -10,7 +10,6 @@ import com.example.movieapp.domain.model.movies.MovieData
 import com.example.movieapp.domain.repository.ConnectivityObserver
 import com.example.movieapp.domain.usecase.ToggleFavoriteUseCase
 import com.example.movieapp.domain.usecase.FormatMovieDetailsUseCase
-import com.example.movieapp.domain.usecase.GetFavoritesMoviesCountUseCase
 import com.example.movieapp.domain.usecase.GetMovieDetailsUseCase
 import com.example.movieapp.domain.usecase.IsMovieFavoriteUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +26,6 @@ class MovieDetailsViewModel(
     private val formatMovieDetailsUseCase: FormatMovieDetailsUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     private val isMovieFavoriteUseCase: IsMovieFavoriteUseCase,
-    private val getFavoritesMoviesCountUseCase: GetFavoritesMoviesCountUseCase,
     connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
@@ -119,7 +117,6 @@ class MovieDetailsViewModel(
             return
         }
         checkIfMovieIsFavorite(uiState.value.movieId)
-        getFavouriteMoviesCount()
         definingUiState(
             isLoading = false,
             isSuccess = true,
@@ -166,16 +163,6 @@ class MovieDetailsViewModel(
                     isFavorite = result
                 )
             }
-        }
-    }
-
-    private fun getFavouriteMoviesCount() {
-        viewModelScope.launch {
-            val response = getFavoritesMoviesCountUseCase().first()
-            val favoritesCount = response.getOrNull() ?: 0
-            _uiState.value = _uiState.value.copy(
-                favoritesCount = favoritesCount
-            )
         }
     }
 

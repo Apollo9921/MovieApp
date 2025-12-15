@@ -103,7 +103,7 @@ val appModule = module {
     }
 
     viewModel {
-        MovieDetailsViewModel(get(), get(), get(), get(), get(), get())
+        MovieDetailsViewModel(get(), get(), get(), get(), get())
     }
 
     viewModel {

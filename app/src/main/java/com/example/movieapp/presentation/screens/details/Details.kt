@@ -80,7 +80,7 @@ fun DetailsRoute(
                     title = uiState.movieDetails?.title ?: "",
                     posterPath = uiState.movieDetails?.posterUrl ?: "",
                     voteAverage = uiState.movieDetailsOriginal?.voteAverage ?: 0.0,
-                    voteCount = uiState.favoritesCount,
+                    voteCount = 0,
                     releaseDate = uiState.movieDetails?.releaseYear ?: "",
                     overview = uiState.movieDetails?.overview ?: "",
                     popularity = 0.0,
