@@ -99,7 +99,7 @@ class MovieDetailsViewModelTest {
         )
         every { formatMovieDetailsUseCase.invoke(any()) } returns expectedFormattedDetails
         every { formatMovieDetailsUseCase.checkIfMovieDetailsNotEmpty(expectedFormattedDetails) } returns true
-        every { isMovieFavoriteUseCase(any()) } returns flowOf(false)
+        every { isMovieFavoriteUseCase.invoke(any()) } returns flowOf(Result.success(false))
 
 
         viewModel = MovieDetailsViewModel(

@@ -8,11 +8,11 @@ import kotlinx.coroutines.flow.flow
 class IsMovieFavoriteUseCase (
     private val repository: MoviesRepository
 ) {
-    operator fun invoke(movieId: Int) : Flow<Boolean> = flow {
+    operator fun invoke(movieId: Int) : Flow<Result<Boolean>> = flow {
         val isFavorite = repository.isMovieFavorite(movieId)
-        emit(isFavorite)
+        emit(Result.success(isFavorite))
     }.catch {
-        emit(false)
+        emit(Result.failure(it))
     }
 
 }

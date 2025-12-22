@@ -158,9 +158,18 @@ class MovieDetailsViewModel(
 
     private fun checkIfMovieIsFavorite(movieId: Int) {
         viewModelScope.launch {
-            isMovieFavoriteUseCase(movieId).collect { result ->
+            val response = isMovieFavoriteUseCase(movieId).first()
+            if (response.isSuccess) {
                 _uiState.value = _uiState.value.copy(
-                    isFavorite = result
+                    isFavorite = response.getOrNull() == true
+                )
+            } else {
+                Log.e(
+                    "FavoritesViewModel",
+                    "Error checking if movie is favorite: ${response.exceptionOrNull()?.message}"
+                )
+                _uiState.value = _uiState.value.copy(
+                    isFavorite = false
                 )
             }
         }
