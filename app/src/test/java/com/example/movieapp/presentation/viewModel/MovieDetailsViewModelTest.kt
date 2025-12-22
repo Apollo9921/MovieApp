@@ -9,6 +9,8 @@ import com.example.movieapp.domain.model.details.SpokenLanguage
 import com.example.movieapp.domain.repository.ConnectivityObserver
 import com.example.movieapp.domain.usecase.FormatMovieDetailsUseCase
 import com.example.movieapp.domain.usecase.GetMovieDetailsUseCase
+import com.example.movieapp.domain.usecase.IsMovieFavoriteUseCase
+import com.example.movieapp.domain.usecase.ToggleFavoriteUseCase
 import com.example.movieapp.utils.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.every
@@ -33,6 +35,8 @@ class MovieDetailsViewModelTest {
 
     private val getMovieDetailsUseCase = mockk<GetMovieDetailsUseCase>()
     private val formatMovieDetailsUseCase = mockk<FormatMovieDetailsUseCase>()
+    private val toggleFavoriteUseCase = mockk<ToggleFavoriteUseCase>()
+    private val isMovieFavoriteUseCase = mockk<IsMovieFavoriteUseCase>()
     private val connectivityObserver = mockk<ConnectivityObserver>()
 
     private lateinit var viewModel: MovieDetailsViewModel
@@ -95,9 +99,16 @@ class MovieDetailsViewModelTest {
         )
         every { formatMovieDetailsUseCase.invoke(any()) } returns expectedFormattedDetails
         every { formatMovieDetailsUseCase.checkIfMovieDetailsNotEmpty(expectedFormattedDetails) } returns true
+        every { isMovieFavoriteUseCase(any()) } returns flowOf(false)
 
 
-        viewModel = MovieDetailsViewModel(getMovieDetailsUseCase, formatMovieDetailsUseCase, connectivityObserver)
+        viewModel = MovieDetailsViewModel(
+            getMovieDetailsUseCase,
+            formatMovieDetailsUseCase,
+            toggleFavoriteUseCase,
+            isMovieFavoriteUseCase,
+            connectivityObserver
+        )
 
         // --- ACT---
         viewModel.uiState.value.movieId = 123
@@ -125,7 +136,13 @@ class MovieDetailsViewModelTest {
         val error = RuntimeException(Constants.UNKNOWN_ERROR)
         coEvery { getMovieDetailsUseCase(any()) } returns flowOf(Result.failure(error))
 
-        viewModel = MovieDetailsViewModel(getMovieDetailsUseCase, formatMovieDetailsUseCase, connectivityObserver)
+        viewModel = MovieDetailsViewModel(
+            getMovieDetailsUseCase,
+            formatMovieDetailsUseCase,
+            toggleFavoriteUseCase,
+            isMovieFavoriteUseCase,
+            connectivityObserver
+        )
 
         // --- ACT---
         viewModel.uiState.value.movieId = 123
@@ -150,7 +167,13 @@ class MovieDetailsViewModelTest {
         val errorMessage = Constants.NO_INTERNET_CONNECTION
         every { connectivityObserver.observe() } returns flowOf(ConnectivityObserver.Status.Unavailable)
 
-        viewModel = MovieDetailsViewModel(getMovieDetailsUseCase, formatMovieDetailsUseCase, connectivityObserver)
+        viewModel = MovieDetailsViewModel(
+            getMovieDetailsUseCase,
+            formatMovieDetailsUseCase,
+            toggleFavoriteUseCase,
+            isMovieFavoriteUseCase,
+            connectivityObserver
+        )
 
         // --- ACT ---
         viewModel.uiState.value.movieId = 123
@@ -201,7 +224,13 @@ class MovieDetailsViewModelTest {
         every { formatMovieDetailsUseCase.checkIfMovieDetailsNotEmpty(expectedFormattedMovieDetailsEmpty) } returns false
 
 
-        viewModel = MovieDetailsViewModel(getMovieDetailsUseCase, formatMovieDetailsUseCase, connectivityObserver)
+        viewModel = MovieDetailsViewModel(
+            getMovieDetailsUseCase,
+            formatMovieDetailsUseCase,
+            toggleFavoriteUseCase,
+            isMovieFavoriteUseCase,
+            connectivityObserver
+        )
 
         // --- ACT---
         viewModel.uiState.value.movieId = 123

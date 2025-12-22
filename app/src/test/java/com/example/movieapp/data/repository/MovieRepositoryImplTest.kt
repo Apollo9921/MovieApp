@@ -1,5 +1,6 @@
 package com.example.movieapp.data.repository
 
+import com.example.movieapp.data.local.dao.MovieDao
 import com.example.movieapp.data.network.dto.details.DetailsDTO
 import com.example.movieapp.data.network.dto.genres.GenreDTO
 import com.example.movieapp.data.network.dto.genres.GenresListDTO
@@ -17,11 +18,12 @@ import org.junit.Test
 class MovieRepositoryImplTest {
 
     private val movieService = mockk<MovieService>()
+    private val movieDao = mockk<MovieDao>()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    private val repository = MovieRepositoryImpl(movieService, testDispatcher)
+    private val repository = MovieRepositoryImpl(movieService, movieDao, testDispatcher)
 
     @Test
     fun `fetchMovies should call service and return mapped data`() = runTest {
