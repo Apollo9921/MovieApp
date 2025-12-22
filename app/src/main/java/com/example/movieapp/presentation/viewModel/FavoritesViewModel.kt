@@ -2,6 +2,7 @@ package com.example.movieapp.presentation.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.movieapp.core.Constants
 import com.example.movieapp.domain.model.movies.MovieData
 import com.example.movieapp.domain.usecase.GetFavoriteMoviesUseCase
 import com.example.movieapp.domain.usecase.UpdateFavoritesMoviesPositionUseCase
@@ -42,25 +43,42 @@ class FavoritesViewModel(
         viewModelScope.launch {
             getFavoriteMoviesUseCase().collect { result ->
                 if (result.isSuccess) {
-                    val moviesList = result.getOrNull() ?: emptyList()
-                    _uiState.value = _uiState.value.copy(
-                        moviesList = moviesList,
-                        isSuccess = true,
-                        isLoading = false,
-                        isError = false,
-                        errorMessage = null
-                    )
+                    getFavoritesMoviesSuccess(result)
                 } else if (result.isFailure || result.getOrNull().isNullOrEmpty()) {
-                    val errorMessage = result.exceptionOrNull()?.message
-                    _uiState.value = _uiState.value.copy(
-                        isSuccess = false,
-                        isLoading = false,
-                        isError = true,
-                        errorMessage = errorMessage
-                    )
+                    getFavoritesMoviesFailure(result)
                 }
             }
         }
+    }
+
+    private fun getFavoritesMoviesSuccess(result: Result<List<MovieData>>) {
+        val moviesList = result.getOrNull() ?: emptyList()
+        if (moviesList.isEmpty()) {
+            _uiState.value = _uiState.value.copy(
+                isSuccess = false,
+                isLoading = false,
+                isError = true,
+                errorMessage = Constants.NO_MOVIES_FOUND
+            )
+            return
+        }
+        _uiState.value = _uiState.value.copy(
+            moviesList = moviesList,
+            isSuccess = true,
+            isLoading = false,
+            isError = false,
+            errorMessage = null
+        )
+    }
+
+    private fun getFavoritesMoviesFailure(result: Result<List<MovieData>>) {
+        val errorMessage = result.exceptionOrNull()?.message
+        _uiState.value = _uiState.value.copy(
+            isSuccess = false,
+            isLoading = false,
+            isError = true,
+            errorMessage = errorMessage
+        )
     }
 
     fun moveMovie(from: Int, to: Int) {

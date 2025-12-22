@@ -101,7 +101,6 @@ fun FavoritesScreen(
                                 errorMessage = uiState.errorMessage!!,
                                 screenMetrics = screenMetrics,
                                 screenViewModel = screenViewModel,
-                                showButton = true,
                                 onRefresh = { onRefresh() }
                             )
                         }
