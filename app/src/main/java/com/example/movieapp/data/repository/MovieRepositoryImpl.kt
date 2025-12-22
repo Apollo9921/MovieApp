@@ -45,17 +45,23 @@ class MovieRepositoryImpl(
         }
     }
 
-    override suspend fun toggleFavoriteMovie(movie: MovieData) {
-        val isMovieFavorite = isMovieFavorite(movie.id)
+    override suspend fun toggleFavoriteMovie(movie: MovieData, isFavorite: Boolean) {
         withContext(ioDispatcher) {
-            if (isMovieFavorite) {
+            if (isFavorite) {
                 movieDao.deleteMovie(movie.toMovieEntity())
-                return@withContext
+                val remainingMovies = getFavoriteMovies()
+                val updatedMoviesWithNewPositions = remainingMovies.mapIndexed { index, movieData ->
+                    movieData.copy(voteCount = index)
+                }
+                if (updatedMoviesWithNewPositions.isNotEmpty()) {
+                    updateMoviePosition(updatedMoviesWithNewPositions)
+                }
+            } else {
+                val currentMovies = getFavoriteMovies()
+                val updatedMovies = currentMovies.map { it.copy(voteCount = it.voteCount + 1) }
+                updateMoviePosition(updatedMovies)
+                movieDao.insertMovie(movie.toMovieEntity())
             }
-            val currentMovies = getFavoriteMovies()
-            val updatedMovies = currentMovies.map { it.copy(voteCount = it.voteCount + 1) }
-            updateMoviePosition(updatedMovies)
-            movieDao.insertMovie(movie.toMovieEntity())
         }
     }
 

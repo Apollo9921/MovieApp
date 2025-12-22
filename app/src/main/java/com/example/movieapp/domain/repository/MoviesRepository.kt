@@ -10,7 +10,7 @@ interface MoviesRepository {
     suspend fun fetchGenres(): GenresList
     suspend fun searchMovie(query: String): Movies
     suspend fun getMovieDetails(movieId: Int): MovieDetails
-    suspend fun toggleFavoriteMovie(movie: MovieData)
+    suspend fun toggleFavoriteMovie(movie: MovieData, isFavorite: Boolean)
     suspend fun getFavoriteMovies(): List<MovieData>
     suspend fun isMovieFavorite(movieId: Int): Boolean
     suspend fun updateMoviePosition(newMoviesPosition: List<MovieData>)

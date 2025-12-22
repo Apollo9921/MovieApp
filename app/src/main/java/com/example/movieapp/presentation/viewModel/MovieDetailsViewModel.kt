@@ -143,13 +143,36 @@ class MovieDetailsViewModel(
 
     fun toggleMovie(movie: MovieData) {
         viewModelScope.launch {
-            toggleFavoriteUseCase(movie).collect { result ->
-                result.onSuccess {
-                    Log.d("MovieDetailsViewModel", "Movie toggled successfully")
-                    checkIfMovieIsFavorite(movie.id)
-                }.onFailure {
-                    Log.e("MovieDetailsViewModel", "Error toggling movie: ${it.message}")
-                }
+            Log.d("MovieDetailsViewModel", "Toggling movie: ${movie.title}")
+            val isFavorite = uiState.value.isFavorite
+            if (isFavorite) {
+                deleteMovie(movie, isFavorite)
+            } else {
+                insertMovie(movie, isFavorite)
+            }
+        }
+    }
+
+    private suspend fun deleteMovie(movie: MovieData, isFavorite: Boolean) {
+        Log.d("MovieDetailsViewModel", "Movie is already a favorite")
+        toggleFavoriteUseCase(movie, isFavorite).collect { result ->
+            result.onSuccess {
+                Log.d("MovieDetailsViewModel", "Movie toggled successfully")
+                _uiState.value = _uiState.value.copy(isFavorite = false)
+            }.onFailure {
+                Log.e("MovieDetailsViewModel", "Error toggling movie: ${it.message}")
+            }
+        }
+    }
+
+    private suspend fun insertMovie(movie: MovieData, isFavorite: Boolean) {
+        Log.d("MovieDetailsViewModel", "Movie is not a favorite")
+        toggleFavoriteUseCase(movie,isFavorite).collect { result ->
+            result.onSuccess {
+                Log.d("MovieDetailsViewModel", "Movie toggled successfully")
+                _uiState.value = _uiState.value.copy(isFavorite = true)
+            }.onFailure {
+                Log.e("MovieDetailsViewModel", "Error toggling movie: ${it.message}")
             }
         }
     }

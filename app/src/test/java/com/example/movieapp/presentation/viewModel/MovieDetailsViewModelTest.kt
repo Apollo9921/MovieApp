@@ -275,7 +275,7 @@ class MovieDetailsViewModelTest {
     @Test
     fun `toggle movie should add movie to favorites successfully`() = runTest {
         // --- ARRANGE ---
-        coEvery { isMovieFavoriteUseCase(movieData.id) } returns flowOf(Result.success(false))
+        coEvery { toggleFavoriteUseCase(movieData, false) } returns flowOf(Result.success(Unit))
 
         viewModel = MovieDetailsViewModel(
             getMovieDetailsUseCase,
@@ -284,9 +284,6 @@ class MovieDetailsViewModelTest {
             isMovieFavoriteUseCase,
             connectivityObserver
         )
-
-        coEvery { toggleFavoriteUseCase(movieData) } returns flowOf(Result.success(Unit))
-        coEvery { isMovieFavoriteUseCase(movieData.id) } returns flowOf(Result.success(true))
 
         // --- ACT ---
         viewModel.toggleMovie(movieData)
@@ -300,7 +297,7 @@ class MovieDetailsViewModelTest {
     @Test
     fun `toggle movie should remove movie to favorites successfully`() = runTest {
         // --- ARRANGE ---
-        coEvery { isMovieFavoriteUseCase.invoke(movieData.id) } returns flowOf(Result.success(true))
+        coEvery { toggleFavoriteUseCase(movieData, false) } returns flowOf(Result.success(Unit))
 
         viewModel = MovieDetailsViewModel(
             getMovieDetailsUseCase,
@@ -310,15 +307,23 @@ class MovieDetailsViewModelTest {
             connectivityObserver
         )
 
-        coEvery { toggleFavoriteUseCase(movieData) } returns flowOf(Result.success(Unit))
-        coEvery { isMovieFavoriteUseCase(movieData.id) } returns flowOf(Result.success(false))
-
         // --- ACT ---
         viewModel.toggleMovie(movieData)
         advanceUntilIdle()
 
         // --- ASSERT ---
         val state = viewModel.uiState.value
-        assertEquals(false, state.isFavorite)
+        assertEquals(true, state.isFavorite)
+
+        // -- ARRANGE ---
+        coEvery { toggleFavoriteUseCase(movieData, true) } returns flowOf(Result.success(Unit))
+
+        // --- ACT ---
+        viewModel.toggleMovie(movieData)
+        advanceUntilIdle()
+
+        // --- ASSERT ---
+        val state2 = viewModel.uiState.value
+        assertEquals(false, state2.isFavorite)
     }
 }

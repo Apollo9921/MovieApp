@@ -36,10 +36,10 @@ class ToggleFavoriteUseCaseTest {
     @Test
     fun `invoke should return success when repository returns data`() = runBlocking {
         // --- ARRANGE ---
-        coEvery { repository.toggleFavoriteMovie(fakeMovie) } returns Unit
+        coEvery { repository.toggleFavoriteMovie(fakeMovie, false) } returns Unit
 
         // --- ACT ---
-        val result = useCase(fakeMovie).first()
+        val result = useCase(fakeMovie, false).first()
 
         // --- ASSERT ---
         assertTrue("Success result", result.isSuccess)
@@ -50,10 +50,10 @@ class ToggleFavoriteUseCaseTest {
         // --- ARRANGE ---
         val expectedError = RuntimeException("Room Database Error")
 
-        coEvery { repository.toggleFavoriteMovie(fakeMovie) } throws expectedError
+        coEvery { repository.toggleFavoriteMovie(fakeMovie, false) } throws expectedError
 
         // --- ACT ---
-        val result = useCase(fakeMovie).first()
+        val result = useCase(fakeMovie, false).first()
 
         // --- ASSERT ---
         assertTrue("Failed result", result.isFailure)
