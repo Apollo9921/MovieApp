@@ -143,34 +143,33 @@ class MovieDetailsViewModel(
 
     fun toggleMovie(movie: MovieData) {
         viewModelScope.launch {
-            val response = toggleFavoriteUseCase(movie).first()
-            if (response.isSuccess) {
-                Log.d("FavoritesViewModel", "Movie toggled to favorites: ${movie.title}")
-                checkIfMovieIsFavorite(movie.id)
-            } else {
-                Log.e(
-                    "FavoritesViewModel",
-                    "Error toggled movie to favorites: ${response.exceptionOrNull()?.message}"
-                )
+            toggleFavoriteUseCase(movie).collect { result ->
+                result.onSuccess {
+                    Log.d("MovieDetailsViewModel", "Movie toggled successfully")
+                    checkIfMovieIsFavorite(movie.id)
+                }.onFailure {
+                    Log.e("MovieDetailsViewModel", "Error toggling movie: ${it.message}")
+                }
             }
         }
     }
 
     private fun checkIfMovieIsFavorite(movieId: Int) {
         viewModelScope.launch {
-            val response = isMovieFavoriteUseCase(movieId).first()
-            if (response.isSuccess) {
-                _uiState.value = _uiState.value.copy(
-                    isFavorite = response.getOrNull() == true
-                )
-            } else {
-                Log.e(
-                    "FavoritesViewModel",
-                    "Error checking if movie is favorite: ${response.exceptionOrNull()?.message}"
-                )
-                _uiState.value = _uiState.value.copy(
-                    isFavorite = false
-                )
+            isMovieFavoriteUseCase(movieId).collect { result ->
+                result.onSuccess {
+                    _uiState.value = _uiState.value.copy(
+                        isFavorite = result.getOrNull() == true
+                    )
+                }.onFailure {
+                    Log.e(
+                        "FavoritesViewModel",
+                        "Error checking if movie is favorite: ${result.exceptionOrNull()?.message}"
+                    )
+                    _uiState.value = _uiState.value.copy(
+                        isFavorite = false
+                    )
+                }
             }
         }
     }

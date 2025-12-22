@@ -6,6 +6,7 @@ import com.example.movieapp.domain.model.details.FormattedMovieDetails
 import com.example.movieapp.domain.model.details.MovieDetails
 import com.example.movieapp.domain.model.details.ProductionCompany
 import com.example.movieapp.domain.model.details.SpokenLanguage
+import com.example.movieapp.domain.model.movies.MovieData
 import com.example.movieapp.domain.repository.ConnectivityObserver
 import com.example.movieapp.domain.usecase.FormatMovieDetailsUseCase
 import com.example.movieapp.domain.usecase.GetMovieDetailsUseCase
@@ -31,7 +32,7 @@ import kotlin.test.assertEquals
 class MovieDetailsViewModelTest {
 
     @get:Rule
-    val mainDispatcherRule = MainDispatcherRule() // rule for testing coroutines\
+    val mainDispatcherRule = MainDispatcherRule() // rule for testing coroutines
 
     private val getMovieDetailsUseCase = mockk<GetMovieDetailsUseCase>()
     private val formatMovieDetailsUseCase = mockk<FormatMovieDetailsUseCase>()
@@ -70,11 +71,29 @@ class MovieDetailsViewModelTest {
         originCountry = emptyList()
     )
 
+    val movieData = MovieData(
+        adult = movieDetails.adult,
+        backdropPath = movieDetails.backdropPath,
+        genreIds = listOf(1, 2, 3),
+        id = movieDetails.id,
+        originalLanguage = movieDetails.originalLanguage,
+        originalTitle = movieDetails.originalTitle,
+        overview = movieDetails.overview,
+        popularity = movieDetails.popularity,
+        posterPath = movieDetails.posterPath,
+        releaseDate = movieDetails.releaseDate,
+        title = movieDetails.title,
+        video = movieDetails.video,
+        voteAverage = movieDetails.voteAverage,
+        voteCount = movieDetails.voteCount
+    )
+
     @Before
     fun setup() {
         mockkStatic(Log::class)
         // ignore the logs
         every { Log.e(any(), any()) } returns 0
+        every { Log.d(any(), any<String>()) } returns 0
 
         // simulate the connectivity status is available
         every { connectivityObserver.observe() } returns flowOf(ConnectivityObserver.Status.Available)
@@ -221,7 +240,11 @@ class MovieDetailsViewModelTest {
 
         coEvery { getMovieDetailsUseCase(any()) } returns flowOf(Result.success(movieDetailsEmpty))
         every { formatMovieDetailsUseCase.invoke(any()) } returns expectedFormattedMovieDetailsEmpty
-        every { formatMovieDetailsUseCase.checkIfMovieDetailsNotEmpty(expectedFormattedMovieDetailsEmpty) } returns false
+        every {
+            formatMovieDetailsUseCase.checkIfMovieDetailsNotEmpty(
+                expectedFormattedMovieDetailsEmpty
+            )
+        } returns false
 
 
         viewModel = MovieDetailsViewModel(
@@ -249,4 +272,53 @@ class MovieDetailsViewModelTest {
         assertEquals(Constants.NO_INFO_AVAILABLE, state.errorMessage)
     }
 
+    @Test
+    fun `toggle movie should add movie to favorites successfully`() = runTest {
+        // --- ARRANGE ---
+        coEvery { isMovieFavoriteUseCase(movieData.id) } returns flowOf(Result.success(false))
+
+        viewModel = MovieDetailsViewModel(
+            getMovieDetailsUseCase,
+            formatMovieDetailsUseCase,
+            toggleFavoriteUseCase,
+            isMovieFavoriteUseCase,
+            connectivityObserver
+        )
+
+        coEvery { toggleFavoriteUseCase(movieData) } returns flowOf(Result.success(Unit))
+        coEvery { isMovieFavoriteUseCase(movieData.id) } returns flowOf(Result.success(true))
+
+        // --- ACT ---
+        viewModel.toggleMovie(movieData)
+        advanceUntilIdle()
+
+        // --- ASSERT ---
+        val state = viewModel.uiState.value
+        assertTrue(state.isFavorite)
+    }
+
+    @Test
+    fun `toggle movie should remove movie to favorites successfully`() = runTest {
+        // --- ARRANGE ---
+        coEvery { isMovieFavoriteUseCase.invoke(movieData.id) } returns flowOf(Result.success(true))
+
+        viewModel = MovieDetailsViewModel(
+            getMovieDetailsUseCase,
+            formatMovieDetailsUseCase,
+            toggleFavoriteUseCase,
+            isMovieFavoriteUseCase,
+            connectivityObserver
+        )
+
+        coEvery { toggleFavoriteUseCase(movieData) } returns flowOf(Result.success(Unit))
+        coEvery { isMovieFavoriteUseCase(movieData.id) } returns flowOf(Result.success(false))
+
+        // --- ACT ---
+        viewModel.toggleMovie(movieData)
+        advanceUntilIdle()
+
+        // --- ASSERT ---
+        val state = viewModel.uiState.value
+        assertEquals(false, state.isFavorite)
+    }
 }
