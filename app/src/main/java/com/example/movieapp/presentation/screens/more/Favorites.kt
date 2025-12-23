@@ -32,6 +32,7 @@ fun FavoritesRoute(
 ) {
     val uiState = viewModel.uiState.collectAsState().value
     val refresh = { viewModel.getFavoriteMovies() }
+    val updatePosition = { viewModel.updateMoviePosition() }
 
     FavoritesScreen(
         uiState = uiState,
@@ -41,7 +42,7 @@ fun FavoritesRoute(
         screenViewModel = screenViewModel,
         onRefresh = { refresh() },
         onMove = { from, to -> viewModel.moveMovie(from, to) },
-        updateMoviePosition = { viewModel.updateMoviePosition() }
+        updateMoviePosition = { updatePosition() }
     )
 
 }
@@ -84,7 +85,7 @@ fun FavoritesScreen(
                     }
 
                     uiState.isSuccess -> {
-                        Box(modifier = Modifier.testTag("FavouritesContent")) {
+                        Box(modifier = Modifier.testTag("FavouritesComponent")) {
                             FavouritesListComponent(
                                 movieData = uiState.moviesList,
                                 screenMetrics = screenMetrics,
