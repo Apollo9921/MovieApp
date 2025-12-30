@@ -43,7 +43,8 @@ class DetailsScreenTest {
                 screenMetrics = screenMetrics,
                 screenViewModel = screenViewModel,
                 backStack = { navController.navigateUp() },
-                onRefresh = {}
+                onRefresh = {},
+                favoritesClick = {}
             )
         }
     }

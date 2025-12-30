@@ -1,5 +1,7 @@
 package com.example.movieapp.koin
 
+import androidx.room.Room
+import com.example.movieapp.data.local.database.AppDatabase
 import com.example.movieapp.data.network.instance.MovieInstance
 import com.example.movieapp.data.repository.MovieRepositoryImpl
 import com.example.movieapp.domain.repository.MoviesRepository
@@ -8,11 +10,17 @@ import com.example.movieapp.presentation.viewModel.MoviesViewModel
 import com.example.movieapp.presentation.viewModel.SearchMoviesViewModel
 import com.example.movieapp.domain.repository.ConnectivityObserver
 import com.example.movieapp.data.repository.NetworkConnectivityObserver
+import com.example.movieapp.domain.usecase.ToggleFavoriteUseCase
 import com.example.movieapp.domain.usecase.FormatMovieDetailsUseCase
+import com.example.movieapp.domain.usecase.GetFavoriteMoviesUseCase
+import com.example.movieapp.domain.usecase.GetFavoritesMoviesCountUseCase
 import com.example.movieapp.domain.usecase.GetGenresUseCase
 import com.example.movieapp.domain.usecase.GetMovieDetailsUseCase
 import com.example.movieapp.domain.usecase.GetMoviesUseCase
 import com.example.movieapp.domain.usecase.GetSearchUseCase
+import com.example.movieapp.domain.usecase.IsMovieFavoriteUseCase
+import com.example.movieapp.domain.usecase.UpdateFavoritesMoviesPositionUseCase
+import com.example.movieapp.presentation.viewModel.FavoritesViewModel
 import kotlinx.coroutines.Dispatchers
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -25,11 +33,21 @@ val dispatchersModule = module {
 
 val appModule = module {
     single {
+        Room.databaseBuilder(
+            androidContext(),
+            AppDatabase::class.java,
+            "movie_database"
+        ).build()
+    }
+
+    single { get<AppDatabase>().movieDao() }
+
+    single {
         MovieInstance.api
     }
 
     single<MoviesRepository> {
-        MovieRepositoryImpl(get(), get(named("ioDispatcher")))
+        MovieRepositoryImpl(get(), get(), get(named("ioDispatcher")))
     }
 
     single {
@@ -52,6 +70,25 @@ val appModule = module {
         FormatMovieDetailsUseCase()
     }
 
+    single {
+        ToggleFavoriteUseCase(get())
+    }
+
+    single {
+        GetFavoriteMoviesUseCase(get())
+    }
+
+    single {
+        IsMovieFavoriteUseCase(get())
+    }
+
+    single {
+        GetFavoritesMoviesCountUseCase(get())
+    }
+
+    single {
+        UpdateFavoritesMoviesPositionUseCase(get())
+    }
 
     single<ConnectivityObserver> {
         NetworkConnectivityObserver(androidContext())
@@ -66,7 +103,11 @@ val appModule = module {
     }
 
     viewModel {
-        MovieDetailsViewModel(get(), get(), get())
+        MovieDetailsViewModel(get(), get(), get(), get(), get())
+    }
+
+    viewModel {
+        FavoritesViewModel(get(), get())
     }
 
 }

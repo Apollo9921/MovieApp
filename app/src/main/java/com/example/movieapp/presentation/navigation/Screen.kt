@@ -7,3 +7,6 @@ data class Details(val movieId: String)
 
 @Serializable
 object Search
+
+@Serializable
+object Favorites
