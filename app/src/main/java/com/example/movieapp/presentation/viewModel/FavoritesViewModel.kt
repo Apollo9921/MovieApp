@@ -3,23 +3,43 @@ package com.example.movieapp.presentation.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieapp.core.Constants
+import com.example.movieapp.domain.model.genres.Genre
+import com.example.movieapp.domain.model.genres.GenresList
 import com.example.movieapp.domain.model.movies.MovieData
+import com.example.movieapp.domain.repository.ConnectivityObserver
 import com.example.movieapp.domain.usecase.GetFavoriteMoviesUseCase
+import com.example.movieapp.domain.usecase.GetGenresUseCase
 import com.example.movieapp.domain.usecase.UpdateFavoritesMoviesPositionUseCase
+import com.example.movieapp.presentation.interaction.GenreTypeSelected
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Collections
 
 class FavoritesViewModel(
     private val getFavoriteMoviesUseCase: GetFavoriteMoviesUseCase,
-    private val updateFavoritesMoviesPositionUseCase: UpdateFavoritesMoviesPositionUseCase
-) : ViewModel() {
+    private val updateFavoritesMoviesPositionUseCase: UpdateFavoritesMoviesPositionUseCase,
+    private val getGenresUseCase: GetGenresUseCase,
+    connectivityObserver: ConnectivityObserver
+) : ViewModel(), GenreTypeSelected {
 
     private val _uiState = MutableStateFlow(FavoritesMoviesUiState())
     val uiState: StateFlow<FavoritesMoviesUiState> = _uiState.asStateFlow()
+
+    private val _genreTypeSelected = MutableStateFlow(GenresState())
+    val genreTypeSelected: StateFlow<GenresState> = _genreTypeSelected.asStateFlow()
+
+    val networkStatus: StateFlow<ConnectivityObserver.Status> =
+        connectivityObserver.observe()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = ConnectivityObserver.Status.Unavailable
+            )
 
     data class FavoritesMoviesUiState(
         val isLoading: Boolean = false,
@@ -27,6 +47,13 @@ class FavoritesViewModel(
         val isError: Boolean = false,
         var errorMessage: String? = null,
         var moviesList: List<MovieData> = emptyList(),
+        var genresList: List<Genre> = emptyList(),
+        var filteredMovies: List<MovieData> = emptyList(),
+    )
+
+    data class GenresState(
+        val isSelected: Boolean = false,
+        val genresType: Int = 0
     )
 
     init {
@@ -41,18 +68,36 @@ class FavoritesViewModel(
             errorMessage = null
         )
         viewModelScope.launch {
-            getFavoriteMoviesUseCase().collect { result ->
-                if (result.isSuccess) {
-                    getFavoritesMoviesSuccess(result)
-                } else if (result.isFailure || result.getOrNull().isNullOrEmpty()) {
-                    getFavoritesMoviesFailure(result)
+            networkStatus.collect { status ->
+                val genresResult = getGenresUseCase().first()
+                if (status == ConnectivityObserver.Status.Unavailable && genresResult.getOrNull()?.genres.isNullOrEmpty() == true) {
+                    _uiState.value = _uiState.value.copy(
+                        isSuccess = false,
+                        isLoading = false,
+                        isError = true,
+                        errorMessage = Constants.NO_INTERNET_CONNECTION
+                    )
+                    return@collect
+                }
+                getFavoriteMoviesUseCase().collect { result ->
+                    if (result.isSuccess) {
+                        getFavoritesMoviesSuccess(result, genresResult)
+                    } else if (result.isFailure || result.getOrNull().isNullOrEmpty()) {
+                        getFavoritesMoviesFailure(result)
+                    }
                 }
             }
         }
     }
 
-    private fun getFavoritesMoviesSuccess(result: Result<List<MovieData>>) {
+    private fun getFavoritesMoviesSuccess(
+        result: Result<List<MovieData>>,
+        genresResult: Result<GenresList>
+    ) {
         val moviesList = result.getOrNull() ?: emptyList()
+        val genresList = genresResult.getOrNull()?.genres as ArrayList<Genre>
+        if (genresList.isNotEmpty() && genresList[0].id != 0) genresList.add(0, Genre(0, "All"))
+
         if (moviesList.isEmpty()) {
             _uiState.value = _uiState.value.copy(
                 isSuccess = false,
@@ -64,6 +109,7 @@ class FavoritesViewModel(
         }
         _uiState.value = _uiState.value.copy(
             moviesList = moviesList,
+            genresList = genresList,
             isSuccess = true,
             isLoading = false,
             isError = false,
@@ -97,6 +143,31 @@ class FavoritesViewModel(
     fun updateMoviePosition() {
         viewModelScope.launch {
             updateFavoritesMoviesPositionUseCase(uiState.value.moviesList).first()
+        }
+    }
+
+    override fun onGenreTypeSelected(genreId: Int) {
+        viewModelScope.launch {
+            if (genreId == 0) {
+                _genreTypeSelected.value = _genreTypeSelected.value.copy(
+                    isSelected = false,
+                    genresType = 0
+                )
+                _uiState.value = _uiState.value.copy(
+                    filteredMovies = emptyList()
+                )
+            } else {
+                _uiState.value.filteredMovies = _uiState.value.moviesList.filter { movie ->
+                    movie.genreIds.contains(genreId)
+                }
+                _genreTypeSelected.value = _genreTypeSelected.value.copy(
+                    isSelected = true,
+                    genresType = genreId
+                )
+                _uiState.value = _uiState.value.copy(
+                    filteredMovies = _uiState.value.filteredMovies
+                )
+            }
         }
     }
 }

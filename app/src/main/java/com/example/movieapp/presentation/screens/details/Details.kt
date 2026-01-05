@@ -44,7 +44,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.example.movieapp.R
-import com.example.movieapp.domain.model.movies.MovieData
 import com.example.movieapp.presentation.components.ErrorScreen
 import com.example.movieapp.presentation.components.LoadingScreen
 import com.example.movieapp.presentation.components.TopBar
@@ -73,26 +72,7 @@ fun DetailsRoute(
         screenViewModel = screenViewModel,
         backStack = { backStack() },
         onRefresh = { viewModel.fetchMovieDetails(uiState.movieId) },
-        favoritesClick = {
-            viewModel.toggleMovie(
-                MovieData(
-                    id = uiState.movieId,
-                    title = uiState.movieDetails?.title ?: "",
-                    posterPath = uiState.movieDetails?.posterUrl ?: "",
-                    voteAverage = uiState.movieDetailsOriginal?.voteAverage ?: 0.0,
-                    voteCount = 0,
-                    releaseDate = uiState.movieDetails?.releaseYear ?: "",
-                    overview = uiState.movieDetails?.overview ?: "",
-                    popularity = 0.0,
-                    backdropPath = "",
-                    genreIds = emptyList(),
-                    originalLanguage = "",
-                    originalTitle = "",
-                    adult = false,
-                    video = false
-                )
-            )
-        }
+        favoritesClick = { viewModel.toggleMovie() }
     )
 }
 

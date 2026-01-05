@@ -21,6 +21,8 @@ class MovieRepositoryImpl(
     private val movieDao: MovieDao,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : MoviesRepository {
+    private var cachedGenres: GenresList? = null
+
     override suspend fun fetchMovies(pageNumber: Int): Movies {
         return withContext(ioDispatcher) {
             movieService.getMovies(pageNumber).toMovies()
@@ -28,8 +30,12 @@ class MovieRepositoryImpl(
     }
 
     override suspend fun fetchGenres(): GenresList {
+        if (cachedGenres?.genres?.isNotEmpty() == true) cachedGenres?.let { return it }
+
         return withContext(ioDispatcher) {
-            movieService.getGenres().toGenresList()
+            val result = movieService.getGenres().toGenresList()
+            result.also { apiGenres -> cachedGenres = apiGenres }
+            return@withContext result
         }
     }
 
@@ -80,6 +86,6 @@ class MovieRepositoryImpl(
     }
 
     override suspend fun getMovieCount(): Int {
-        return  movieDao.getMovieCount()
+        return movieDao.getMovieCount()
     }
 }

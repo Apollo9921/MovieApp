@@ -141,7 +141,23 @@ class MovieDetailsViewModel(
         )
     }
 
-    fun toggleMovie(movie: MovieData) {
+    fun toggleMovie() {
+        val movie = MovieData(
+            id = _uiState.value.movieId,
+            title = _uiState.value.movieDetails?.title ?: "",
+            posterPath = _uiState.value.movieDetails?.posterUrl ?: "",
+            voteAverage = _uiState.value.movieDetailsOriginal?.voteAverage ?: 0.0,
+            voteCount = 0,
+            releaseDate = _uiState.value.movieDetails?.releaseYear ?: "",
+            overview = _uiState.value.movieDetails?.overview ?: "",
+            popularity = 0.0,
+            backdropPath = "",
+            genreIds = _uiState.value.movieDetailsOriginal?.genres?.map { it.id } ?: emptyList(),
+            originalLanguage = "",
+            originalTitle = "",
+            adult = false,
+            video = false
+        )
         viewModelScope.launch {
             Log.d("MovieDetailsViewModel", "Toggling movie: ${movie.title}")
             val isFavorite = uiState.value.isFavorite

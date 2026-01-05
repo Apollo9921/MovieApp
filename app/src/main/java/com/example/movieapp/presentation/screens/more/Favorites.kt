@@ -31,18 +31,22 @@ fun FavoritesRoute(
     viewModel: FavoritesViewModel = koinViewModel()
 ) {
     val uiState = viewModel.uiState.collectAsState().value
+    val genreTypeSelected = viewModel.genreTypeSelected.collectAsState().value
     val refresh = { viewModel.getFavoriteMovies() }
     val updatePosition = { viewModel.updateMoviePosition() }
+    val genreClicked = { it: Int -> viewModel.onGenreTypeSelected(it) }
 
     FavoritesScreen(
         uiState = uiState,
+        genreTypeSelected = genreTypeSelected,
         navController = navController,
         backStack = { backStack() },
         screenMetrics = screenMetrics,
         screenViewModel = screenViewModel,
         onRefresh = { refresh() },
         onMove = { from, to -> viewModel.moveMovie(from, to) },
-        updateMoviePosition = { updatePosition() }
+        updateMoviePosition = { updatePosition() },
+        onGenreClick = genreClicked
     )
 
 }
@@ -50,6 +54,7 @@ fun FavoritesRoute(
 @Composable
 fun FavoritesScreen(
     uiState: FavoritesViewModel.FavoritesMoviesUiState,
+    genreTypeSelected: FavoritesViewModel.GenresState,
     navController: NavController,
     backStack: () -> Boolean,
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
@@ -57,6 +62,7 @@ fun FavoritesScreen(
     onRefresh: () -> Unit,
     onMove: (Int, Int) -> Unit,
     updateMoviePosition: () -> Unit,
+    onGenreClick: (Int) -> Unit,
 ) {
     Scaffold(
         modifier = Modifier
@@ -88,6 +94,10 @@ fun FavoritesScreen(
                         Box(modifier = Modifier.testTag("FavouritesComponent")) {
                             FavouritesListComponent(
                                 movieData = uiState.moviesList,
+                                genreTypeSelected = genreTypeSelected,
+                                filterMovies = uiState.filteredMovies,
+                                genresList = uiState.genresList,
+                                onGenreClick = { genreId -> onGenreClick(genreId) },
                                 screenMetrics = screenMetrics,
                                 screenViewModel = screenViewModel,
                                 onMove = { from, to -> onMove(from, to) },

@@ -30,16 +30,22 @@ import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
 import com.example.movieapp.R
 import com.example.movieapp.data.network.instance.MovieInstance
+import com.example.movieapp.domain.model.genres.Genre
 import com.example.movieapp.domain.model.movies.MovieData
 import com.example.movieapp.presentation.theme.Background
 import com.example.movieapp.presentation.theme.Typography
 import com.example.movieapp.presentation.theme.White
 import com.example.movieapp.presentation.utils.rememberDragDropState
+import com.example.movieapp.presentation.viewModel.FavoritesViewModel
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 
 @Composable
 fun FavouritesListComponent(
     movieData: List<MovieData>,
+    genreTypeSelected: FavoritesViewModel.GenresState,
+    filterMovies: List<MovieData>,
+    genresList: List<Genre>,
+    onGenreClick: (Int) -> Unit,
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel,
     onMove: (Int, Int) -> Unit,
@@ -56,6 +62,18 @@ fun FavouritesListComponent(
             .background(Background)
             .padding(horizontal = 5.dp)
     ) {
+        if (genresList.isNotEmpty()) {
+            GenresListScreen(
+                genresList = genresList,
+                genreSelected = genreTypeSelected.genresType,
+                onGenreClick = { id ->
+                    onGenreClick(id)
+                },
+                screenMetrics = screenMetrics,
+                screenViewModel = screenViewModel
+            )
+            Spacer(Modifier.padding(5.dp))
+        }
         LazyColumn(
             state = lazyListState,
             modifier = Modifier
@@ -77,7 +95,7 @@ fun FavouritesListComponent(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             itemsIndexed(
-                items = movieData,
+                items = if (filterMovies.isNotEmpty() || genreTypeSelected.genresType != 0) filterMovies else movieData,
                 key = { _, item -> item.id }
             ) { index, movie ->
                 val dragging = movie.id == dragDropState.draggingItemKey
