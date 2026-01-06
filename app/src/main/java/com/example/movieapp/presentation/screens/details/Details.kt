@@ -51,6 +51,7 @@ import com.example.movieapp.presentation.theme.Background
 import com.example.movieapp.presentation.theme.Black
 import com.example.movieapp.presentation.theme.Typography
 import com.example.movieapp.presentation.theme.White
+import com.example.movieapp.presentation.utils.TopBarAction
 import com.example.movieapp.presentation.viewModel.MovieDetailsViewModel
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -94,11 +95,12 @@ fun DetailsScreen(
                 title = stringResource(R.string.details),
                 isBack = true,
                 backStack = { backStack() },
+                action = TopBarAction.Details(
+                    isFavorite = uiState.isFavorite,
+                    onClick = { favoritesClick() }
+                ),
                 screenMetrics = screenMetrics,
-                screenViewModel = screenViewModel,
-                hasFavoritesButton = true,
-                isFavorite = uiState.isFavorite,
-                favoritesClick = { favoritesClick() }
+                screenViewModel = screenViewModel
             )
         },
     ) { paddingValues ->

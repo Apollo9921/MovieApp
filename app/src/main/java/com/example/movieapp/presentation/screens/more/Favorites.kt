@@ -18,6 +18,7 @@ import com.example.movieapp.presentation.components.FavouritesListComponent
 import com.example.movieapp.presentation.components.LoadingScreen
 import com.example.movieapp.presentation.components.TopBar
 import com.example.movieapp.presentation.theme.Background
+import com.example.movieapp.presentation.utils.TopBarAction
 import com.example.movieapp.presentation.viewModel.FavoritesViewModel
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -72,6 +73,10 @@ fun FavoritesScreen(
             TopBar(
                 stringResource(R.string.favourites),
                 backStack = { backStack() },
+                action = TopBarAction.Favorite(
+                    iconRes = R.drawable.drag,
+                    onClick = {  }
+                ),
                 screenMetrics = screenMetrics,
                 screenViewModel = screenViewModel,
             )
