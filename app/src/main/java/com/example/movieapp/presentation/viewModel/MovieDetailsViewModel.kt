@@ -56,6 +56,10 @@ class MovieDetailsViewModel(
         checkNetworkStatus()
     }
 
+    fun setMovieId(movieId: String) {
+        _uiState.value = _uiState.value.copy(movieId = Integer.parseInt(movieId))
+    }
+
     private fun checkNetworkStatus() {
         viewModelScope.launch {
             networkStatus.collect { status ->

@@ -94,8 +94,13 @@ class FavoritesViewModel(
         genresResult: Result<GenresList>
     ) {
         val moviesList = result.getOrNull() ?: emptyList()
-        val genresList = genresResult.getOrNull()?.genres ?: emptyList()
-        if (genresList.isNotEmpty() && genresList[0].id != 0) genresList.toMutableList().add(0, Genre(0, "All"))
+        var genresList = genresResult.getOrNull()?.genres ?: emptyList()
+
+        if (genresList.isNotEmpty() && genresList[0].id != 0) {
+            val mutableGenres = genresList.toMutableList()
+            mutableGenres.add(0, Genre(0, "All"))
+            genresList = mutableGenres
+        }
 
         if (moviesList.isEmpty()) {
             _uiState.value = _uiState.value.copy(

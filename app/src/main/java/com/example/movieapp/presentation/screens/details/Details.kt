@@ -25,7 +25,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +41,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.example.movieapp.R
 import com.example.movieapp.presentation.components.ErrorScreen
@@ -63,8 +63,8 @@ fun DetailsRoute(
     screenViewModel: ScreenSizingViewModel,
     viewModel: MovieDetailsViewModel = koinViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    uiState.movieId = Integer.parseInt(movieId ?: "0")
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    viewModel.setMovieId(movieId ?: "")
 
     DetailsScreen(
         uiState = uiState,
