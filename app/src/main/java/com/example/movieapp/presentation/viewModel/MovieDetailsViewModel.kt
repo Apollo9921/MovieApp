@@ -37,10 +37,10 @@ class MovieDetailsViewModel(
         val isSuccess: Boolean = false,
         val error: Boolean = false,
         var errorMessage: String? = null,
-        val movieDetailsOriginal: MovieDetails? = null,
+        var movieDetailsOriginal: MovieDetails? = null,
         var movieDetails: FormattedMovieDetails? = null,
         var movieId: Int = 0,
-        val isFavorite: Boolean = false,
+        var isFavorite: Boolean = false,
         val favoritesCount: Int = 0
     )
 

@@ -52,7 +52,6 @@ class FavoritesViewModel(
     )
 
     data class GenresState(
-        val isSelected: Boolean = false,
         val genresType: Int = 0
     )
 
@@ -95,8 +94,8 @@ class FavoritesViewModel(
         genresResult: Result<GenresList>
     ) {
         val moviesList = result.getOrNull() ?: emptyList()
-        val genresList = genresResult.getOrNull()?.genres as ArrayList<Genre>
-        if (genresList.isNotEmpty() && genresList[0].id != 0) genresList.add(0, Genre(0, "All"))
+        val genresList = genresResult.getOrNull()?.genres ?: emptyList()
+        if (genresList.isNotEmpty() && genresList[0].id != 0) genresList.toMutableList().add(0, Genre(0, "All"))
 
         if (moviesList.isEmpty()) {
             _uiState.value = _uiState.value.copy(
@@ -150,7 +149,6 @@ class FavoritesViewModel(
         viewModelScope.launch {
             if (genreId == 0) {
                 _genreTypeSelected.value = _genreTypeSelected.value.copy(
-                    isSelected = false,
                     genresType = 0
                 )
                 _uiState.value = _uiState.value.copy(
@@ -161,7 +159,6 @@ class FavoritesViewModel(
                     movie.genreIds.contains(genreId)
                 }
                 _genreTypeSelected.value = _genreTypeSelected.value.copy(
-                    isSelected = true,
                     genresType = genreId
                 )
                 _uiState.value = _uiState.value.copy(
