@@ -89,7 +89,8 @@ fun DetailsRoute(
                     originalLanguage = "",
                     originalTitle = "",
                     adult = false,
-                    video = false
+                    video = false,
+                    page = 0
                 )
             )
         }

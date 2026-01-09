@@ -29,6 +29,7 @@ fun MovieDataDTO.toMovieData(): MovieData {
         title = title ?: "",
         video = video == true,
         voteAverage = voteAverage ?: 0.0,
-        voteCount = voteCount ?: 0
+        voteCount = voteCount ?: 0,
+        page = 0
     )
 }

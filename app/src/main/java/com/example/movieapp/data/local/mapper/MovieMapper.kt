@@ -18,7 +18,8 @@ fun MovieEntity.toMovieData(): MovieData {
         originalLanguage = "",
         originalTitle = "",
         adult = false,
-        video = false
+        video = false,
+        page = 0
     )
 }
 
