@@ -1,7 +1,6 @@
 package com.example.movieapp.presentation.viewModel
 
 import android.util.Log
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieapp.presentation.interaction.GenreTypeSelected
@@ -19,6 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.net.ConnectException
 
@@ -44,18 +44,15 @@ class MoviesViewModel(
 
     private var currentPage = 0
 
-    var moviesList = ArrayList<MovieData>()
-    var genresList = ArrayList<Genre>()
-    var filteredMovies = emptyList<MovieData>()
-    var genreType = mutableIntStateOf(0)
-
     data class MoviesUiState(
         val isLoading: Boolean = false,
         val isSuccess: Boolean = false,
         val error: Boolean = false,
         var errorMessage: String? = null,
         var movies: List<MovieData> = emptyList(),
+        var filteredMovies: List<MovieData> = emptyList(),
         val genres: GenresList = GenresList(emptyList()),
+        var genreType: Int = 0
     )
 
     sealed class GenresState {
@@ -64,116 +61,96 @@ class MoviesViewModel(
     }
 
     init {
-        fetchMoviesFistTime()
-    }
-
-    private fun fetchMoviesFistTime() {
-        viewModelScope.launch {
-            networkStatus.collect { status ->
-                if (status == ConnectivityObserver.Status.Available && moviesList.isEmpty()) {
-                    definingUiState(
-                        isLoading = true,
-                        isSuccess = null,
-                        error = false,
-                        errorMessage = null
-                    )
-                    fetchMovies()
-                } else if (status == ConnectivityObserver.Status.Unavailable && moviesList.isEmpty()) {
-                    definingUiState(
-                        isLoading = false,
-                        isSuccess = false,
-                        error = true,
-                        errorMessage = Constants.NO_INTERNET_CONNECTION
-                    )
-                }
-            }
-        }
+        definingUiState(
+            isLoading = true,
+            isSuccess = false,
+            error = false,
+            errorMessage = null
+        )
+        fetchMovies()
+        observeGenres()
     }
 
     fun fetchMovies() {
         viewModelScope.launch {
             try {
                 val pageToFetch = currentPage + 1
-                val moviesResult = getMoviesUseCase(pageToFetch).first()
+                val moviesResult = getMoviesUseCase(pageToFetch, _uiState.value.movies).first()
                 val genresResult = getGenresUseCase().first()
                 if (moviesResult.isSuccess && genresResult.isSuccess) {
-                   fetchMoviesSuccess(moviesResult, genresResult, pageToFetch)
+                    fetchMoviesSuccess(moviesResult, genresResult)
                 } else {
                     fetchMoviesFailure(moviesResult, genresResult)
                 }
             } catch (e: Exception) {
                 fetchMoviesException(e)
-            } finally {
-                observeMovies()
-                observeGenres()
             }
         }
     }
 
     private fun fetchMoviesSuccess(
         moviesResult: Result<Movies>,
-        genresResult: Result<GenresList>,
-        pageToFetch: Int
+        genresResult: Result<GenresList>
     ) {
         Log.e("MoviesViewModel", "Movies fetched successfully")
         if (moviesResult.getOrThrow().results.isEmpty()) {
             definingUiState(
                 isLoading = false,
-                isSuccess = null,
+                isSuccess = false,
                 error = true,
                 errorMessage = Constants.NO_MOVIES_FOUND
             )
         } else {
-            _uiState.value = _uiState.value.copy(
-                isLoading = false,
-                isSuccess = true,
-                errorMessage = null,
-                error = false,
-                genres = genresResult.getOrThrow(),
-                movies = moviesResult.getOrThrow().results,
-            )
+            val updatedMovies = moviesResult.getOrThrow().results
+            val genres = genresResult.getOrThrow().genres.toMutableList()
+            if (genres.firstOrNull()?.id != 0) {
+                genres.add(0, Genre(0, "All"))
+            }
+            val updatedGenres = genresResult.getOrThrow().copy(genres = genres)
+
+            _uiState.update { currentState ->
+                val totalList = (currentState.movies + updatedMovies).distinctBy { it.id }
+                currentState.copy(
+                    isLoading = false,
+                    isSuccess = true,
+                    movies = totalList,
+                    genres = updatedGenres
+                )
+            }
+            currentPage = moviesResult.getOrThrow().page
         }
-        currentPage = pageToFetch
     }
 
     private fun fetchMoviesFailure(moviesResult: Result<Movies>, genresResult: Result<GenresList>) {
-        if (_uiState.value.movies.isNotEmpty()) {
-            definingUiState(
-                isLoading = false,
-                isSuccess = true,
-                error = false,
-                errorMessage = null
-            )
-            return
-        }
+        val isNotEmpty = checkIfMoviesListIsNotEmpty()
+        if (isNotEmpty) return
         val errorMsg =
-            if (moviesResult.exceptionOrNull() is ConnectException || genresResult.exceptionOrNull() is ConnectException) {
+            if (networkStatus.value == ConnectivityObserver.Status.Unavailable &&
+                moviesResult.isFailure ||
+                networkStatus.value == ConnectivityObserver.Status.Unavailable &&
+                genresResult.isFailure
+            ) {
                 Constants.NO_INTERNET_CONNECTION
             } else {
-                moviesResult.exceptionOrNull()?.message
-                    ?: genresResult.exceptionOrNull()?.message
-            } ?: Constants.UNKNOWN_ERROR
+                Constants.UNKNOWN_ERROR
+            }
         Log.e("MoviesViewModel", errorMsg)
         definingUiState(
             isLoading = false,
-            isSuccess = null,
+            isSuccess = false,
             error = true,
             errorMessage = errorMsg
         )
     }
 
     private fun fetchMoviesException(e: Exception) {
-        if (_uiState.value.movies.isNotEmpty()) {
-            definingUiState(
-                isLoading = false,
-                isSuccess = true,
-                error = false,
-                errorMessage = null
-            )
-            return
-        }
+        val isNotEmpty = checkIfMoviesListIsNotEmpty()
+        if (isNotEmpty) return
         val errorMsg =
-            if (e is ConnectException) Constants.NO_INTERNET_CONNECTION else Constants.UNKNOWN_ERROR
+            if (networkStatus.value == ConnectivityObserver.Status.Unavailable || e is ConnectException)
+                Constants.NO_INTERNET_CONNECTION
+            else
+                Constants.UNKNOWN_ERROR
         Log.e("MoviesViewModel", errorMsg)
         definingUiState(
             isLoading = false,
@@ -197,32 +174,36 @@ class MoviesViewModel(
         )
     }
 
-    private fun observeMovies() {
-        val newMovies = ArrayList<MovieData>()
-        newMovies.addAll(moviesList)
-        newMovies.addAll(uiState.value.movies)
-        moviesList = newMovies.distinctBy { it.id } as ArrayList<MovieData>
-
-        val newGenresList = ArrayList<Genre>()
-        val sourceGenres = uiState.value.genres.genres
-        newGenresList.add(Genre(0, "All"))
-        newGenresList.addAll(sourceGenres)
-        genresList = newGenresList.distinctBy { it.name } as ArrayList<Genre>
+    private fun checkIfMoviesListIsNotEmpty(): Boolean {
+        if (_uiState.value.movies.isNotEmpty()) {
+            definingUiState(
+                isLoading = false,
+                isSuccess = true,
+                error = false,
+                errorMessage = null
+            )
+            return true
+        }
+        return false
     }
 
     private fun observeGenres() {
         viewModelScope.launch {
-            genreTypeSelected.collect {
-                when (it) {
+            genreTypeSelected.collect { state ->
+                val currentMovies = _uiState.value.movies
+                when (state) {
                     GenresState.NotSelected -> {
-                        genreType.intValue = 0
-                        filteredMovies = emptyList()
+                        _uiState.update { it.copy(filteredMovies = emptyList(), genreType = 0) }
                     }
 
                     is GenresState.Selected -> {
-                        genreType.intValue = it.genresType
-                        filteredMovies = moviesList.filter { movie ->
-                            movie.genreIds.contains(genreType.intValue)
+                        _uiState.update {
+                            it.copy(
+                                genreType = state.genresType,
+                                filteredMovies = currentMovies.filter { movie ->
+                                    movie.genreIds.contains(state.genresType)
+                                }
+                            )
                         }
                     }
                 }

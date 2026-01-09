@@ -2,12 +2,16 @@ package com.example.movieapp.data.repository
 
 import com.example.movieapp.data.local.dao.MovieDao
 import com.example.movieapp.data.local.entity.MovieEntity
+import com.example.movieapp.data.local.mapper.toGenreCacheEntity
+import com.example.movieapp.data.local.mapper.toMovieCacheEntity
 import com.example.movieapp.data.local.mapper.toMovieEntity
 import com.example.movieapp.data.network.dto.details.DetailsDTO
 import com.example.movieapp.data.network.dto.genres.GenreDTO
 import com.example.movieapp.data.network.dto.genres.GenresListDTO
 import com.example.movieapp.data.network.dto.movies.MovieDataDTO
 import com.example.movieapp.data.network.dto.movies.MoviesDTO
+import com.example.movieapp.data.network.mapper.toGenre
+import com.example.movieapp.data.network.mapper.toMovieData
 import com.example.movieapp.data.network.service.MovieService
 import com.example.movieapp.domain.model.movies.MovieData
 import io.mockk.coEvery
@@ -44,12 +48,14 @@ class MovieRepositoryImplTest {
         releaseDate = "",
         video = false,
         voteAverage = 0.0,
-        voteCount = 0
+        voteCount = 0,
+        page = 1
     )
 
     @Test
     fun `fetchMovies should call service and return mapped data`() = runTest {
         // --- ARRANGE ---
+        val page = 1
         val fakeMoviesDTO = MoviesDTO(
             page = 1,
             totalPages = 1,
@@ -74,16 +80,25 @@ class MovieRepositoryImplTest {
             )
         )
 
-        coEvery { movieService.getMovies(1) } returns fakeMoviesDTO
+        val cacheEntities = fakeMoviesDTO.results.map { it.toMovieData().toMovieCacheEntity(page) }
+
+        coEvery { movieService.getMovies(page) } returns fakeMoviesDTO
+        coEvery { movieDao.getMoviesCache() } returns emptyList()
+        coEvery { movieDao.clearMoviesCache() } returns Unit
+        coEvery { movieDao.insertMoviesCache(cacheEntities) } returns Unit
 
         // --- ACT ---
-        val result = repository.fetchMovies(1)
+        val result = repository.fetchMovies(page, emptyList())
 
         // --- ASSERT ---
         assertEquals(1, result.results.size)
         assertEquals("", result.results[0].posterPath)
         assertEquals(101, result.results[0].id)
     }
+
+    //TODO fetchMovies should call service and return cached data
+
+    //TODO fetchMovies should call service and return error
 
     @Test
     fun `fetchGenres should call service and return mapped data`() = runTest {
@@ -101,8 +116,10 @@ class MovieRepositoryImplTest {
                 )
             )
         )
+        val cacheEntities = fakeGenresDTO.genres.map { it.toGenre().toGenreCacheEntity() }
 
         coEvery { movieService.getGenres() } returns fakeGenresDTO
+        coEvery { movieDao.insertGenres(cacheEntities) } returns Unit
 
         // --- ACT ---
         val result = repository.fetchGenres()
@@ -112,6 +129,10 @@ class MovieRepositoryImplTest {
         assertEquals("Test Genre", result.genres[0].name)
         assertEquals(102, result.genres[1].id)
     }
+
+    //TODO fetchGenres should call service and return cached data
+
+    //TODO fetchGenres should call service and return error
 
     @Test
     fun `searchMovie should call service and return mapped data`() = runTest {

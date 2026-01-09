@@ -15,8 +15,6 @@ import com.example.movieapp.presentation.components.ErrorScreen
 import com.example.movieapp.presentation.components.MoviesList
 import androidx.navigation.NavController
 import com.example.movieapp.R
-import com.example.movieapp.domain.model.genres.Genre
-import com.example.movieapp.domain.model.movies.MovieData
 import com.example.movieapp.presentation.components.BottomNavigationBar
 import com.example.movieapp.presentation.components.LoadingScreen
 import com.example.movieapp.presentation.components.TopBar
@@ -33,17 +31,16 @@ fun HomeRoute(
     moviesViewModel: MoviesViewModel = koinViewModel()
 ) {
     val uiState = moviesViewModel.uiState.collectAsState().value
+    val fetchMovies = { moviesViewModel.fetchMovies() }
+    val genreSelected = { id: Int -> moviesViewModel.onGenreTypeSelected(id) }
 
     HomeScreen(
         uiState = uiState,
         screenMetrics = screenMetrics,
         screenViewModel = screenViewModel,
-        moviesList = moviesViewModel.moviesList,
-        filteredMovies = moviesViewModel.filteredMovies,
-        genreType = moviesViewModel.genreType.intValue,
-        genresList = moviesViewModel.genresList,
         navController = navController,
-        moviesViewModel = moviesViewModel
+        fetchMovies = fetchMovies,
+        genreSelected = genreSelected
     )
 }
 
@@ -52,12 +49,9 @@ fun HomeScreen(
     uiState: MoviesViewModel.MoviesUiState,
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel,
-    moviesList: List<MovieData>,
-    filteredMovies: List<MovieData>,
-    genreType: Int,
-    genresList: List<Genre>,
     navController: NavController,
-    moviesViewModel: MoviesViewModel
+    fetchMovies: () -> Unit,
+    genreSelected: (Int) -> Unit
 ) {
     Scaffold(
         modifier = Modifier
@@ -96,20 +90,18 @@ fun HomeScreen(
                         Box(modifier = Modifier.testTag("MoviesContent")) {
                             MoviesList(
                                 pv = it,
-                                movies = if (filteredMovies.isNotEmpty() || genreType != 0) filteredMovies else moviesList,
-                                genresList = genresList,
-                                selectedGenreId = genreType,
+                                movies = if (uiState.filteredMovies.isNotEmpty() || uiState.genreType != 0) uiState.filteredMovies else uiState.movies,
+                                genresList = uiState.genres.genres,
+                                selectedGenreId = uiState.genreType,
                                 onMovieClick = { movieId ->
                                     navController.navigate(Details(movieId = movieId))
                                 },
                                 onLoadMore = {
-                                    if (filteredMovies.isEmpty() && genreType == 0) {
-                                        moviesViewModel.fetchMovies()
+                                    if (uiState.filteredMovies.isEmpty() && uiState.genreType == 0) {
+                                        fetchMovies()
                                     }
                                 },
-                                onGenreClick = { id ->
-                                    moviesViewModel.onGenreTypeSelected(id)
-                                },
+                                onGenreClick = { id -> genreSelected(id) },
                                 screenMetrics = screenMetrics,
                                 screenViewModel = screenViewModel
                             )
@@ -122,7 +114,7 @@ fun HomeScreen(
                                 errorMessage = uiState.errorMessage!!,
                                 screenMetrics = screenMetrics,
                                 screenViewModel = screenViewModel,
-                                onRefresh = { moviesViewModel.fetchMovies() }
+                                onRefresh = { fetchMovies() }
                             )
                         }
                     }

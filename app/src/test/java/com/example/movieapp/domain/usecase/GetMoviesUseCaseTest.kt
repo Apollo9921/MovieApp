@@ -19,6 +19,7 @@ class GetMoviesUseCaseTest {
 
     @Test
     fun `invoke should return success list when repository returns data`() = runBlocking {
+        // --- ARRANGE ---
         val page = 1
         val fakeMovies = Movies(
             page = 1,
@@ -39,7 +40,8 @@ class GetMoviesUseCaseTest {
                     title = "Frankenstein",
                     video = false,
                     voteAverage = 7.84,
-                    voteCount = 1493
+                    voteCount = 1493,
+                    page = 1
                 ),
                 MovieData(
                     adult = true,
@@ -55,26 +57,32 @@ class GetMoviesUseCaseTest {
                     title = "Test",
                     video = false,
                     voteAverage = 7.84,
-                    voteCount = 2000
+                    voteCount = 2000,
+                    page = 1
                 )
             )
         )
+        coEvery { repository.fetchMovies(page, emptyList()) } returns fakeMovies
 
-        coEvery { repository.fetchMovies(page) } returns fakeMovies
-        val result = getMoviesUseCase(page).first()
+        // --- ACT ---
+        val result = getMoviesUseCase(page, emptyList()).first()
 
+        // --- ASSERT ---
         assertTrue("Success result", result.isSuccess)
         assertEquals(fakeMovies, result.getOrNull())
     }
 
     @Test
     fun `invoke should return failure when repository throws exception`() = runBlocking {
+        // --- ARRANGE ---
         val page = 1
         val expectedError = RuntimeException("API Error")
+        coEvery { repository.fetchMovies(page, emptyList()) } throws expectedError
 
-        coEvery { repository.fetchMovies(page) } throws expectedError
-        val result = getMoviesUseCase(page).first()
+        // --- ACT ---
+        val result = getMoviesUseCase(page ,emptyList()).first()
 
+        // --- ASSERT ---
         assertTrue("Failed result", result.isFailure)
         assertEquals("API Error", result.exceptionOrNull()?.message)
     }
