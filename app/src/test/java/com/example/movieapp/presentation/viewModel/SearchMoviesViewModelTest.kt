@@ -65,7 +65,8 @@ class SearchMoviesViewModelTest {
                     title = "Title",
                     video = false,
                     voteAverage = 7.5,
-                    voteCount = 100
+                    voteCount = 100,
+                    page = 1
                 ),
                 MovieData(
                     adult = false,
@@ -81,7 +82,8 @@ class SearchMoviesViewModelTest {
                     title = "Title",
                     video = false,
                     voteAverage = 7.5,
-                    voteCount = 100
+                    voteCount = 100,
+                    page = 1
                 )
             )
         )

@@ -30,7 +30,8 @@ class ToggleFavoriteUseCaseTest {
             originalLanguage = "",
             originalTitle = "",
             adult = false,
-            video = false
+            video = false,
+            page = 1
         )
 
     @Test

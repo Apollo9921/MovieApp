@@ -67,14 +67,15 @@ class MoviesViewModelTest {
                     title = "Title",
                     video = false,
                     voteAverage = 7.5,
-                    voteCount = 100
+                    voteCount = 100,
+                    page = 1
                 )
             )
         )
         val fakeGenres = GenresList(listOf(Genre(1, "Action")))
 
         // Teach the Mocks: When they called, return success with the fake data"
-        coEvery { getMoviesUseCase(any()) } returns flowOf(Result.success(fakeMovies))
+        coEvery { getMoviesUseCase(any(), any()) } returns flowOf(Result.success(fakeMovies))
         coEvery { getGenresUseCase() } returns flowOf(Result.success(fakeGenres))
 
         viewModel = MoviesViewModel(getMoviesUseCase, getGenresUseCase, connectivityObserver)
@@ -106,7 +107,7 @@ class MoviesViewModelTest {
         val error = RuntimeException(Constants.UNKNOWN_ERROR)
 
         // Teach the Mocks: When they called, return failure"
-        coEvery { getMoviesUseCase(any()) } returns flowOf(Result.failure(error))
+        coEvery { getMoviesUseCase(any(), any()) } returns flowOf(Result.failure(error))
         coEvery { getGenresUseCase() } returns flowOf(Result.success(GenresList(emptyList())))
 
         viewModel = MoviesViewModel(getMoviesUseCase, getGenresUseCase, connectivityObserver)
@@ -133,20 +134,18 @@ class MoviesViewModelTest {
     }
 
     @Test
-    fun `fetch movies but in the meantime occurs not having internet connection`() = runTest {
+    fun `fetch movies but without having internet connection`() = runTest {
         // --- Arrange ---
         val error = RuntimeException(Constants.NO_INTERNET_CONNECTION)
 
-        coEvery { getMoviesUseCase(any()) } returns flowOf(Result.failure(error))
+        coEvery { getMoviesUseCase(any(), any()) } returns flowOf(Result.failure(error))
         coEvery { getGenresUseCase() } returns flowOf(Result.failure(error))
+        every { connectivityObserver.observe() } returns flowOf(ConnectivityObserver.Status.Unavailable)
 
         viewModel = MoviesViewModel(getMoviesUseCase, getGenresUseCase, connectivityObserver)
 
         // --- ACT ---
         viewModel.fetchMovies()
-
-        every { connectivityObserver.observe() } returns flowOf(ConnectivityObserver.Status.Unavailable)
-
         advanceUntilIdle()
 
         // --- ASSERT ---
@@ -167,7 +166,7 @@ class MoviesViewModelTest {
         val fakeMovies = Movies(page = 1, totalPages = 1, totalResults = 1, results = listOf())
         val genreError = RuntimeException(Constants.UNKNOWN_ERROR)
 
-        coEvery { getMoviesUseCase(any()) } returns flowOf(Result.success(fakeMovies))
+        coEvery { getMoviesUseCase(any(), any()) } returns flowOf(Result.success(fakeMovies))
         coEvery { getGenresUseCase() } returns flowOf(Result.failure(genreError))
 
         viewModel = MoviesViewModel(getMoviesUseCase, getGenresUseCase, connectivityObserver)
@@ -195,7 +194,7 @@ class MoviesViewModelTest {
         val fakeMovies = Movies(page = 1, totalPages = 1, totalResults = 1, results = listOf())
         val fakeGenre = GenresList(listOf(Genre(1, "Action"), Genre(2, "Comedy")))
 
-        coEvery { getMoviesUseCase(any()) } returns flowOf(Result.success(fakeMovies))
+        coEvery { getMoviesUseCase(any(), any()) } returns flowOf(Result.success(fakeMovies))
         coEvery { getGenresUseCase() } returns flowOf(Result.success(fakeGenre))
 
         viewModel = MoviesViewModel(getMoviesUseCase, getGenresUseCase, connectivityObserver)
@@ -237,30 +236,27 @@ class MoviesViewModelTest {
                     title = "Title",
                     video = false,
                     voteAverage = 7.5,
-                    voteCount = 100
+                    voteCount = 100,
+                    page = 1
                 )
             )
         )
         val fakeGenre = GenresList(listOf(Genre(1, "Action"), Genre(2, "Comedy")))
-
-        coEvery { getMoviesUseCase(any()) } returns flowOf(Result.success(fakeMovies))
+        coEvery { getMoviesUseCase(any(), any()) } returns flowOf(Result.success(fakeMovies))
         coEvery { getGenresUseCase() } returns flowOf(Result.success(fakeGenre))
 
         viewModel = MoviesViewModel(getMoviesUseCase, getGenresUseCase, connectivityObserver)
 
         // --- ACT ---
         viewModel.fetchMovies()
-
         advanceUntilIdle()
 
-        // --- ARRANGE ---
+        // --- ARRANGE ---\
         val noMoreMovies = Exception(Constants.ERROR_FETCHING_MOVIES)
-
-        coEvery { getMoviesUseCase(any()) } returns flowOf(Result.failure(noMoreMovies))
+        coEvery { getMoviesUseCase(any(), any()) } returns flowOf(Result.failure(noMoreMovies))
 
         // --- ACT ---
         viewModel.fetchMovies()
-
         advanceUntilIdle()
 
         // --- ASSERT ---

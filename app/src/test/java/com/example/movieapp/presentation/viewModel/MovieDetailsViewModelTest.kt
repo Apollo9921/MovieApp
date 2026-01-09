@@ -85,7 +85,8 @@ class MovieDetailsViewModelTest {
         title = movieDetails.title,
         video = movieDetails.video,
         voteAverage = movieDetails.voteAverage,
-        voteCount = movieDetails.voteCount
+        voteCount = movieDetails.voteCount,
+        page = 1
     )
 
     @Before

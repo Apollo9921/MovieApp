@@ -122,9 +122,14 @@ class MoviesViewModel(
     }
 
     private fun fetchMoviesFailure(moviesResult: Result<Movies>, genresResult: Result<GenresList>) {
-        checkIfMoviesListIsNotEmpty()
+        val isNotEmpty = checkIfMoviesListIsNotEmpty()
+        if (isNotEmpty) return
         val errorMsg =
-            if (moviesResult.exceptionOrNull() is ConnectException || genresResult.exceptionOrNull() is ConnectException) {
+            if (networkStatus.value == ConnectivityObserver.Status.Unavailable &&
+                moviesResult.isFailure ||
+                networkStatus.value == ConnectivityObserver.Status.Unavailable &&
+                genresResult.isFailure
+            ) {
                 Constants.NO_INTERNET_CONNECTION
             } else {
                 Constants.UNKNOWN_ERROR
@@ -132,16 +137,20 @@ class MoviesViewModel(
         Log.e("MoviesViewModel", errorMsg)
         definingUiState(
             isLoading = false,
-            isSuccess = null,
+            isSuccess = false,
             error = true,
             errorMessage = errorMsg
         )
     }
 
     private fun fetchMoviesException(e: Exception) {
-        checkIfMoviesListIsNotEmpty()
+        val isNotEmpty = checkIfMoviesListIsNotEmpty()
+        if (isNotEmpty) return
         val errorMsg =
-            if (e is ConnectException) Constants.NO_INTERNET_CONNECTION else Constants.UNKNOWN_ERROR
+            if (networkStatus.value == ConnectivityObserver.Status.Unavailable || e is ConnectException)
+                Constants.NO_INTERNET_CONNECTION
+            else
+                Constants.UNKNOWN_ERROR
         Log.e("MoviesViewModel", errorMsg)
         definingUiState(
             isLoading = false,
@@ -165,7 +174,7 @@ class MoviesViewModel(
         )
     }
 
-    private fun checkIfMoviesListIsNotEmpty() {
+    private fun checkIfMoviesListIsNotEmpty(): Boolean {
         if (_uiState.value.movies.isNotEmpty()) {
             definingUiState(
                 isLoading = false,
@@ -173,8 +182,9 @@ class MoviesViewModel(
                 error = false,
                 errorMessage = null
             )
-            return
+            return true
         }
+        return false
     }
 
     private fun observeGenres() {
@@ -185,13 +195,16 @@ class MoviesViewModel(
                     GenresState.NotSelected -> {
                         _uiState.update { it.copy(filteredMovies = emptyList(), genreType = 0) }
                     }
+
                     is GenresState.Selected -> {
-                        _uiState.update { it.copy(
-                            genreType = state.genresType,
-                            filteredMovies = currentMovies.filter { movie ->
-                                movie.genreIds.contains(state.genresType)
-                            }
-                        )}
+                        _uiState.update {
+                            it.copy(
+                                genreType = state.genresType,
+                                filteredMovies = currentMovies.filter { movie ->
+                                    movie.genreIds.contains(state.genresType)
+                                }
+                            )
+                        }
                     }
                 }
             }
