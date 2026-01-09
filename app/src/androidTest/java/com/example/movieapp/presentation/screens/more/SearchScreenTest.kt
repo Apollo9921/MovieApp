@@ -37,7 +37,8 @@ class SearchScreenTest {
             title = "Oppenheimer",
             video = false,
             voteAverage = 8.5,
-            voteCount = 1000
+            voteCount = 1000,
+            page = 1
         ),
         MovieData(
             adult = false,
@@ -53,7 +54,8 @@ class SearchScreenTest {
             title = "Barbie",
             video = false,
             voteAverage = 8.5,
-            voteCount = 1000
+            voteCount = 1000,
+            page = 1
         )
     )
 
