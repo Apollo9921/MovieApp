@@ -49,6 +49,7 @@ class FavoritesViewModel(
         var moviesList: List<MovieData> = emptyList(),
         var genresList: List<Genre> = emptyList(),
         var filteredMovies: List<MovieData> = emptyList(),
+        var isDraggingEnabled: Boolean = false
     )
 
     data class GenresState(
@@ -148,6 +149,12 @@ class FavoritesViewModel(
         viewModelScope.launch {
             updateFavoritesMoviesPositionUseCase(uiState.value.moviesList).first()
         }
+    }
+
+    fun enableDragging(enable: Boolean) {
+        _uiState.value = _uiState.value.copy(
+            isDraggingEnabled = !enable
+        )
     }
 
     override fun onGenreTypeSelected(genreId: Int) {

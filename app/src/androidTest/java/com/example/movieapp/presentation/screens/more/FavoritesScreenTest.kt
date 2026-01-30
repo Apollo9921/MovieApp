@@ -73,7 +73,8 @@ class FavoritesScreenTest {
                 onRefresh = { },
                 onMove = { from, to -> },
                 updateMoviePosition = { },
-                onGenreClick = {}
+                onGenreClick = {},
+                enableDragging = {}
             )
         }
     }

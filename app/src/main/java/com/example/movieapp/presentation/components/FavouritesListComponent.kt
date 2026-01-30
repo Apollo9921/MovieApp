@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -49,7 +50,8 @@ fun FavouritesListComponent(
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel,
     onMove: (Int, Int) -> Unit,
-    updateMoviePosition: () -> Unit
+    updateMoviePosition: () -> Unit,
+    isDraggingEnabled: Boolean
 ) {
     val lazyListState = rememberLazyListState()
     val dragDropState = rememberDragDropState(lazyListState) { from, to ->
@@ -62,7 +64,7 @@ fun FavouritesListComponent(
             .background(Background)
             .padding(horizontal = 5.dp)
     ) {
-        if (genresList.isNotEmpty()) {
+        if (genresList.isNotEmpty() && !isDraggingEnabled) {
             GenresListScreen(
                 genresList = genresList,
                 genreSelected = genreTypeSelected.genresType,
@@ -79,6 +81,7 @@ fun FavouritesListComponent(
             modifier = Modifier
                 .fillMaxSize()
                 .pointerInput(dragDropState) {
+                    if (!isDraggingEnabled) return@pointerInput
                     detectDragGesturesAfterLongPress(
                         onDragStart = { offset -> dragDropState.onDragStart(offset) },
                         onDragEnd = {
@@ -94,8 +97,13 @@ fun FavouritesListComponent(
                 },
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            val itemToShow =
+                if (filterMovies.isNotEmpty() && !isDraggingEnabled || genreTypeSelected.genresType != 0 && !isDraggingEnabled)
+                    filterMovies
+                else
+                    movieData
             itemsIndexed(
-                items = if (filterMovies.isNotEmpty() || genreTypeSelected.genresType != 0) filterMovies else movieData,
+                items = itemToShow,
                 key = { _, item -> item.id }
             ) { index, movie ->
                 val dragging = movie.id == dragDropState.draggingItemKey
@@ -114,6 +122,7 @@ fun FavouritesListComponent(
                     modifier = itemModifier,
                     movie = movie,
                     screenMetrics = screenMetrics,
+                    isDraggingEnabled = isDraggingEnabled,
                     screenViewModel = screenViewModel
                 )
                 Spacer(Modifier.padding(5.dp))
@@ -127,6 +136,7 @@ private fun FavouritesListItem(
     movie: MovieData,
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel,
+    isDraggingEnabled: Boolean,
     modifier: Modifier
 ) {
     val imageUrl = "${MovieInstance.BASE_URL_IMAGE}${movie.posterPath}"
@@ -167,13 +177,16 @@ private fun FavouritesListItem(
             )
         }
         Spacer(Modifier.padding(5.dp))
-        Image(
-            painter = painterResource(id = R.drawable.drag),
-            contentDescription = null,
-            colorFilter = ColorFilter.tint(White),
-            modifier = Modifier
-                .weight(0.4f)
-                .size(iconSize)
-        )
+        if (isDraggingEnabled) {
+            Image(
+                painter = painterResource(id = R.drawable.drag),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(White),
+                modifier = Modifier
+                    .weight(0.4f)
+                    .size(iconSize)
+                    .testTag("DragComponent")
+            )
+        }
     }
 }

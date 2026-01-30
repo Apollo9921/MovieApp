@@ -36,6 +36,7 @@ fun FavoritesRoute(
     val refresh = { viewModel.getFavoriteMovies() }
     val updatePosition = { viewModel.updateMoviePosition() }
     val genreClicked = { it: Int -> viewModel.onGenreTypeSelected(it) }
+    val enableDragging = { viewModel.enableDragging(uiState.isDraggingEnabled) }
 
     FavoritesScreen(
         uiState = uiState,
@@ -47,7 +48,8 @@ fun FavoritesRoute(
         onRefresh = { refresh() },
         onMove = { from, to -> viewModel.moveMovie(from, to) },
         updateMoviePosition = { updatePosition() },
-        onGenreClick = genreClicked
+        onGenreClick = genreClicked,
+        enableDragging = enableDragging
     )
 
 }
@@ -64,6 +66,7 @@ fun FavoritesScreen(
     onMove: (Int, Int) -> Unit,
     updateMoviePosition: () -> Unit,
     onGenreClick: (Int) -> Unit,
+    enableDragging: () -> Unit,
 ) {
     Scaffold(
         modifier = Modifier
@@ -75,7 +78,7 @@ fun FavoritesScreen(
                 backStack = { backStack() },
                 action = TopBarAction.Favorite(
                     iconRes = R.drawable.drag,
-                    onClick = {  }
+                    onClick = { enableDragging() }
                 ),
                 screenMetrics = screenMetrics,
                 screenViewModel = screenViewModel,
@@ -106,7 +109,8 @@ fun FavoritesScreen(
                                 screenMetrics = screenMetrics,
                                 screenViewModel = screenViewModel,
                                 onMove = { from, to -> onMove(from, to) },
-                                updateMoviePosition = { updateMoviePosition() }
+                                updateMoviePosition = { updateMoviePosition() },
+                                isDraggingEnabled = uiState.isDraggingEnabled
                             )
                         }
                     }
