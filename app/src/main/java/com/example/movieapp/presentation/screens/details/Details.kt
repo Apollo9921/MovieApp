@@ -25,7 +25,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,16 +41,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.example.movieapp.R
-import com.example.movieapp.domain.model.movies.MovieData
 import com.example.movieapp.presentation.components.ErrorScreen
 import com.example.movieapp.presentation.components.LoadingScreen
 import com.example.movieapp.presentation.components.TopBar
+import com.example.movieapp.presentation.navigation.ResultStore
 import com.example.movieapp.presentation.theme.Background
 import com.example.movieapp.presentation.theme.Black
 import com.example.movieapp.presentation.theme.Typography
 import com.example.movieapp.presentation.theme.White
+import com.example.movieapp.presentation.utils.TopBarAction
 import com.example.movieapp.presentation.viewModel.MovieDetailsViewModel
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -60,12 +61,13 @@ import org.koin.androidx.compose.koinViewModel
 fun DetailsRoute(
     backStack: () -> Boolean,
     movieId: String?,
+    resultStore: ResultStore,
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel,
     viewModel: MovieDetailsViewModel = koinViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    uiState.movieId = Integer.parseInt(movieId ?: "0")
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    viewModel.setMovieId(movieId ?: "")
 
     DetailsScreen(
         uiState = uiState,
@@ -73,27 +75,8 @@ fun DetailsRoute(
         screenViewModel = screenViewModel,
         backStack = { backStack() },
         onRefresh = { viewModel.fetchMovieDetails(uiState.movieId) },
-        favoritesClick = {
-            viewModel.toggleMovie(
-                MovieData(
-                    id = uiState.movieId,
-                    title = uiState.movieDetails?.title ?: "",
-                    posterPath = uiState.movieDetails?.posterUrl ?: "",
-                    voteAverage = uiState.movieDetailsOriginal?.voteAverage ?: 0.0,
-                    voteCount = 0,
-                    releaseDate = uiState.movieDetails?.releaseYear ?: "",
-                    overview = uiState.movieDetails?.overview ?: "",
-                    popularity = 0.0,
-                    backdropPath = "",
-                    genreIds = emptyList(),
-                    originalLanguage = "",
-                    originalTitle = "",
-                    adult = false,
-                    video = false,
-                    page = 0
-                )
-            )
-        }
+        favoritesClick = { viewModel.toggleMovie() },
+        resultStore = resultStore
     )
 }
 
@@ -104,7 +87,8 @@ fun DetailsScreen(
     screenViewModel: ScreenSizingViewModel,
     backStack: () -> Boolean,
     onRefresh: () -> Unit,
-    favoritesClick: () -> Unit
+    favoritesClick: () -> Unit,
+    resultStore: ResultStore
 ) {
     Scaffold(
         modifier = Modifier
@@ -115,11 +99,15 @@ fun DetailsScreen(
                 title = stringResource(R.string.details),
                 isBack = true,
                 backStack = { backStack() },
+                action = TopBarAction.Details(
+                    isFavorite = uiState.isFavorite,
+                    onClick = {
+                        favoritesClick()
+                        resultStore.setResults("movie_id" ,uiState.movieId.toString())
+                    }
+                ),
                 screenMetrics = screenMetrics,
-                screenViewModel = screenViewModel,
-                hasFavoritesButton = true,
-                isFavorite = uiState.isFavorite,
-                favoritesClick = { favoritesClick() }
+                screenViewModel = screenViewModel
             )
         },
     ) { paddingValues ->

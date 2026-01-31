@@ -6,7 +6,6 @@ import com.example.movieapp.domain.model.details.FormattedMovieDetails
 import com.example.movieapp.domain.model.details.MovieDetails
 import com.example.movieapp.domain.model.details.ProductionCompany
 import com.example.movieapp.domain.model.details.SpokenLanguage
-import com.example.movieapp.domain.model.movies.MovieData
 import com.example.movieapp.domain.repository.ConnectivityObserver
 import com.example.movieapp.domain.usecase.FormatMovieDetailsUseCase
 import com.example.movieapp.domain.usecase.GetMovieDetailsUseCase
@@ -71,22 +70,17 @@ class MovieDetailsViewModelTest {
         originCountry = emptyList()
     )
 
-    val movieData = MovieData(
-        adult = movieDetails.adult,
-        backdropPath = movieDetails.backdropPath,
-        genreIds = listOf(1, 2, 3),
-        id = movieDetails.id,
-        originalLanguage = movieDetails.originalLanguage,
-        originalTitle = movieDetails.originalTitle,
-        overview = movieDetails.overview,
-        popularity = movieDetails.popularity,
-        posterPath = movieDetails.posterPath,
-        releaseDate = movieDetails.releaseDate,
-        title = movieDetails.title,
-        video = movieDetails.video,
-        voteAverage = movieDetails.voteAverage,
-        voteCount = movieDetails.voteCount,
-        page = 1
+    private val expectedFormattedDetails = FormattedMovieDetails(
+        title = "Title",
+        overview = "Overview",
+        posterUrl = "https://image.tmdb.org/t/p/w500/poster.jpg",
+        voteAverage = "7.5",
+        voteCount = "10",
+        releaseYear = "2023",
+        genres = "Action, Drama",
+        runtime = "2h 0m",
+        spokenLanguages = listOf("English"),
+        productionCompanies = listOf("A Company")
     )
 
     @Before
@@ -276,7 +270,9 @@ class MovieDetailsViewModelTest {
     @Test
     fun `toggle movie should add movie to favorites successfully`() = runTest {
         // --- ARRANGE ---
-        coEvery { toggleFavoriteUseCase(movieData, false) } returns flowOf(Result.success(Unit))
+        coEvery { toggleFavoriteUseCase(any(), false) } returns flowOf(Result.success(Unit))
+        coEvery { isMovieFavoriteUseCase(123) } returns flowOf(Result.success(false))
+        every { formatMovieDetailsUseCase.invoke(any()) } returns expectedFormattedDetails
 
         viewModel = MovieDetailsViewModel(
             getMovieDetailsUseCase,
@@ -287,8 +283,11 @@ class MovieDetailsViewModelTest {
         )
 
         // --- ACT ---
-        viewModel.toggleMovie(movieData)
-        advanceUntilIdle()
+        viewModel.uiState.value.movieId = 123
+        viewModel.uiState.value.movieDetails = expectedFormattedDetails
+        viewModel.uiState.value.isFavorite = false
+
+        viewModel.toggleMovie()
 
         // --- ASSERT ---
         val state = viewModel.uiState.value
@@ -298,7 +297,10 @@ class MovieDetailsViewModelTest {
     @Test
     fun `toggle movie should remove movie to favorites successfully`() = runTest {
         // --- ARRANGE ---
-        coEvery { toggleFavoriteUseCase(movieData, false) } returns flowOf(Result.success(Unit))
+        coEvery { toggleFavoriteUseCase(any(), true) } returns flowOf(Result.success(Unit))
+        coEvery { isMovieFavoriteUseCase(123) } returns flowOf(Result.success(true))
+        every { formatMovieDetailsUseCase.invoke(any()) } returns expectedFormattedDetails
+
 
         viewModel = MovieDetailsViewModel(
             getMovieDetailsUseCase,
@@ -309,22 +311,14 @@ class MovieDetailsViewModelTest {
         )
 
         // --- ACT ---
-        viewModel.toggleMovie(movieData)
-        advanceUntilIdle()
+        viewModel.uiState.value.movieId = 123
+        viewModel.uiState.value.movieDetails = expectedFormattedDetails
+        viewModel.uiState.value.isFavorite = true
+
+        viewModel.toggleMovie()
 
         // --- ASSERT ---
         val state = viewModel.uiState.value
-        assertEquals(true, state.isFavorite)
-
-        // -- ARRANGE ---
-        coEvery { toggleFavoriteUseCase(movieData, true) } returns flowOf(Result.success(Unit))
-
-        // --- ACT ---
-        viewModel.toggleMovie(movieData)
-        advanceUntilIdle()
-
-        // --- ASSERT ---
-        val state2 = viewModel.uiState.value
-        assertEquals(false, state2.isFavorite)
+        assertEquals(false, state.isFavorite)
     }
 }

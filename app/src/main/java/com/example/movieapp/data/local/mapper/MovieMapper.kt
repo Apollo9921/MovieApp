@@ -12,7 +12,7 @@ fun MovieEntity.toMovieData(): MovieData {
         voteAverage = 0.0,
         voteCount = position,
         releaseDate = "",
-        genreIds = emptyList(),
+        genreIds = genreIds,
         popularity = 0.0,
         backdropPath = "",
         originalLanguage = "",
@@ -29,6 +29,7 @@ fun MovieData.toMovieEntity(): MovieEntity {
         title = title,
         posterPath = posterPath,
         overview = overview,
+        genreIds = genreIds,
         position = voteCount
     )
 }

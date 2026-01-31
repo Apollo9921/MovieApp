@@ -59,18 +59,24 @@ class FavoritesScreenTest {
         )
     )
 
-    private fun launchFavoritesScreen(uiState: FavoritesViewModel.FavoritesMoviesUiState) {
+    private fun launchFavoritesScreen(
+        uiState: FavoritesViewModel.FavoritesMoviesUiState,
+        genreTypeSelected: FavoritesViewModel.GenresState
+    ) {
 
         composeTestRule.setContent {
             FavoritesScreen(
                 uiState = uiState,
+                genreTypeSelected = genreTypeSelected,
                 navController = navController,
                 backStack = { navController.navigateUp() },
                 screenMetrics = screenMetrics,
                 screenViewModel = screenViewModel,
                 onRefresh = { },
                 onMove = { from, to -> },
-                updateMoviePosition = { }
+                updateMoviePosition = { },
+                onGenreClick = {},
+                enableDragging = {}
             )
         }
     }
@@ -85,9 +91,10 @@ class FavoritesScreenTest {
             errorMessage = null,
             moviesList = fakeMovies
         )
+        val genreTypeSelected = FavoritesViewModel.GenresState(genresType = 0)
 
         // --- ACT ---
-        launchFavoritesScreen(uiState = successState)
+        launchFavoritesScreen(uiState = successState, genreTypeSelected = genreTypeSelected)
 
         // --- ASSERT ---
         composeTestRule.onNodeWithTag("FavouritesComponent").assertIsDisplayed()
@@ -103,9 +110,10 @@ class FavoritesScreenTest {
             errorMessage = Constants.NO_MOVIES_FOUND,
             moviesList = emptyList()
         )
+        val genreTypeSelected = FavoritesViewModel.GenresState(genresType = 0)
 
         // --- ACT ---
-        launchFavoritesScreen(uiState = empty)
+        launchFavoritesScreen(uiState = empty, genreTypeSelected = genreTypeSelected)
 
         // --- ASSERT ---
         composeTestRule.onNodeWithTag("ErrorComponent").assertIsDisplayed()
@@ -121,9 +129,10 @@ class FavoritesScreenTest {
             errorMessage = "Error message",
             moviesList = emptyList()
         )
+        val genreTypeSelected = FavoritesViewModel.GenresState(genresType = 0)
 
         // --- ACT ---
-        launchFavoritesScreen(uiState = errorState)
+        launchFavoritesScreen(uiState = errorState, genreTypeSelected = genreTypeSelected)
 
         // --- ASSERT ---
         composeTestRule.onNodeWithTag("ErrorComponent").assertIsDisplayed()
@@ -139,9 +148,10 @@ class FavoritesScreenTest {
             errorMessage = null,
             moviesList = emptyList()
         )
+        val genreTypeSelected = FavoritesViewModel.GenresState(genresType = 0)
 
         // --- ACT ---
-        launchFavoritesScreen(uiState = loadingState)
+        launchFavoritesScreen(uiState = loadingState, genreTypeSelected = genreTypeSelected)
 
         // --- ASSERT ---
         composeTestRule.onNodeWithTag("LoadingComponent").assertIsDisplayed()

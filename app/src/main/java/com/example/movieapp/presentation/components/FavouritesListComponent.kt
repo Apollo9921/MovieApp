@@ -2,6 +2,7 @@ package com.example.movieapp.presentation.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,6 +23,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -30,20 +32,28 @@ import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
 import com.example.movieapp.R
 import com.example.movieapp.data.network.instance.MovieInstance
+import com.example.movieapp.domain.model.genres.Genre
 import com.example.movieapp.domain.model.movies.MovieData
 import com.example.movieapp.presentation.theme.Background
 import com.example.movieapp.presentation.theme.Typography
 import com.example.movieapp.presentation.theme.White
 import com.example.movieapp.presentation.utils.rememberDragDropState
+import com.example.movieapp.presentation.viewModel.FavoritesViewModel
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 
 @Composable
 fun FavouritesListComponent(
     movieData: List<MovieData>,
+    genreTypeSelected: FavoritesViewModel.GenresState,
+    filterMovies: List<MovieData>,
+    genresList: List<Genre>,
+    onGenreClick: (Int) -> Unit,
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel,
     onMove: (Int, Int) -> Unit,
-    updateMoviePosition: () -> Unit
+    updateMoviePosition: () -> Unit,
+    isDraggingEnabled: Boolean,
+    goToDetails: (String) -> Unit
 ) {
     val lazyListState = rememberLazyListState()
     val dragDropState = rememberDragDropState(lazyListState) { from, to ->
@@ -56,11 +66,24 @@ fun FavouritesListComponent(
             .background(Background)
             .padding(horizontal = 5.dp)
     ) {
+        if (genresList.isNotEmpty() && !isDraggingEnabled) {
+            GenresListScreen(
+                genresList = genresList,
+                genreSelected = genreTypeSelected.genresType,
+                onGenreClick = { id ->
+                    onGenreClick(id)
+                },
+                screenMetrics = screenMetrics,
+                screenViewModel = screenViewModel
+            )
+            Spacer(Modifier.padding(5.dp))
+        }
         LazyColumn(
             state = lazyListState,
             modifier = Modifier
                 .fillMaxSize()
                 .pointerInput(dragDropState) {
+                    if (!isDraggingEnabled) return@pointerInput
                     detectDragGesturesAfterLongPress(
                         onDragStart = { offset -> dragDropState.onDragStart(offset) },
                         onDragEnd = {
@@ -76,8 +99,13 @@ fun FavouritesListComponent(
                 },
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            val itemToShow =
+                if (filterMovies.isNotEmpty() && !isDraggingEnabled || genreTypeSelected.genresType != 0 && !isDraggingEnabled)
+                    filterMovies
+                else
+                    movieData
             itemsIndexed(
-                items = movieData,
+                items = itemToShow,
                 key = { _, item -> item.id }
             ) { index, movie ->
                 val dragging = movie.id == dragDropState.draggingItemKey
@@ -96,6 +124,8 @@ fun FavouritesListComponent(
                     modifier = itemModifier,
                     movie = movie,
                     screenMetrics = screenMetrics,
+                    isDraggingEnabled = isDraggingEnabled,
+                    goToDetails = goToDetails,
                     screenViewModel = screenViewModel
                 )
                 Spacer(Modifier.padding(5.dp))
@@ -109,6 +139,8 @@ private fun FavouritesListItem(
     movie: MovieData,
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel,
+    isDraggingEnabled: Boolean,
+    goToDetails: (String) -> Unit,
     modifier: Modifier
 ) {
     val imageUrl = "${MovieInstance.BASE_URL_IMAGE}${movie.posterPath}"
@@ -119,7 +151,13 @@ private fun FavouritesListItem(
     val iconSize = screenViewModel.calculateCustomWidth(baseSize = 30, screenMetrics).dp
 
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable {
+                if (!isDraggingEnabled) {
+                    goToDetails(movie.id.toString())
+                }
+            },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AsyncImage(
@@ -149,13 +187,16 @@ private fun FavouritesListItem(
             )
         }
         Spacer(Modifier.padding(5.dp))
-        Image(
-            painter = painterResource(id = R.drawable.drag),
-            contentDescription = null,
-            colorFilter = ColorFilter.tint(White),
-            modifier = Modifier
-                .weight(0.4f)
-                .size(iconSize)
-        )
+        if (isDraggingEnabled) {
+            Image(
+                painter = painterResource(id = R.drawable.drag),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(White),
+                modifier = Modifier
+                    .weight(0.4f)
+                    .size(iconSize)
+                    .testTag("DragComponent")
+            )
+        }
     }
 }

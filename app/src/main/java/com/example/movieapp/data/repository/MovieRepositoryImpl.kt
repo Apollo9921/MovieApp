@@ -27,6 +27,8 @@ class MovieRepositoryImpl(
     private val movieDao: MovieDao,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : MoviesRepository {
+  private var cachedGenres: GenresList? = null
+  
     override suspend fun fetchMovies(pageNumber: Int, moviesList: List<MovieData>): Movies {
         return withContext(ioDispatcher) {
             try {
@@ -44,6 +46,8 @@ class MovieRepositoryImpl(
     }
 
     override suspend fun fetchGenres(): GenresList {
+        if (cachedGenres?.genres?.isNotEmpty() == true) cachedGenres?.let { return it }
+
         return withContext(ioDispatcher) {
             try {
                 val apiGenres = movieService.getGenres().toGenresList()

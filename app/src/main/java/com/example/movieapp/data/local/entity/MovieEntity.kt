@@ -10,5 +10,6 @@ data class MovieEntity(
     val title: String,
     val overview: String,
     val posterPath: String,
+    val genreIds: List<Int>,
     val position: Int
 )

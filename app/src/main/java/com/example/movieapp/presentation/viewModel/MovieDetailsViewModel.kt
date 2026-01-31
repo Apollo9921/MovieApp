@@ -37,10 +37,10 @@ class MovieDetailsViewModel(
         val isSuccess: Boolean = false,
         val error: Boolean = false,
         var errorMessage: String? = null,
-        val movieDetailsOriginal: MovieDetails? = null,
+        var movieDetailsOriginal: MovieDetails? = null,
         var movieDetails: FormattedMovieDetails? = null,
         var movieId: Int = 0,
-        val isFavorite: Boolean = false,
+        var isFavorite: Boolean = false,
         val favoritesCount: Int = 0
     )
 
@@ -54,6 +54,10 @@ class MovieDetailsViewModel(
 
     init {
         checkNetworkStatus()
+    }
+
+    fun setMovieId(movieId: String) {
+        _uiState.value = _uiState.value.copy(movieId = Integer.parseInt(movieId))
     }
 
     private fun checkNetworkStatus() {
@@ -141,7 +145,24 @@ class MovieDetailsViewModel(
         )
     }
 
-    fun toggleMovie(movie: MovieData) {
+    fun toggleMovie() {
+        val movie = MovieData(
+            id = _uiState.value.movieId,
+            title = _uiState.value.movieDetails?.title ?: "",
+            posterPath = _uiState.value.movieDetails?.posterUrl ?: "",
+            voteAverage = _uiState.value.movieDetailsOriginal?.voteAverage ?: 0.0,
+            voteCount = 0,
+            releaseDate = _uiState.value.movieDetails?.releaseYear ?: "",
+            overview = _uiState.value.movieDetails?.overview ?: "",
+            popularity = 0.0,
+            backdropPath = "",
+            genreIds = _uiState.value.movieDetailsOriginal?.genres?.map { it.id } ?: emptyList(),
+            originalLanguage = "",
+            originalTitle = "",
+            adult = false,
+            video = false,
+            page = 0
+        )
         viewModelScope.launch {
             Log.d("MovieDetailsViewModel", "Toggling movie: ${movie.title}")
             val isFavorite = uiState.value.isFavorite

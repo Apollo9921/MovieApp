@@ -78,7 +78,7 @@ val appModule = module {
     }
 
     viewModel {
-        FavoritesViewModel(get(), get())
+        FavoritesViewModel(get(), get(), get(), get())
     }
 
 }

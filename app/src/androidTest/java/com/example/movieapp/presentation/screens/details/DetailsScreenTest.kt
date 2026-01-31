@@ -44,7 +44,8 @@ class DetailsScreenTest {
                 screenViewModel = screenViewModel,
                 backStack = { navController.navigateUp() },
                 onRefresh = {},
-                favoritesClick = {}
+                favoritesClick = {},
+                resultStore = mockk(relaxed = true)
             )
         }
     }

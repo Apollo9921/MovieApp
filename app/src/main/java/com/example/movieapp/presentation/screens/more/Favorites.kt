@@ -17,7 +17,10 @@ import com.example.movieapp.presentation.components.ErrorScreen
 import com.example.movieapp.presentation.components.FavouritesListComponent
 import com.example.movieapp.presentation.components.LoadingScreen
 import com.example.movieapp.presentation.components.TopBar
+import com.example.movieapp.presentation.navigation.Details
+import com.example.movieapp.presentation.navigation.ResultStore
 import com.example.movieapp.presentation.theme.Background
+import com.example.movieapp.presentation.utils.TopBarAction
 import com.example.movieapp.presentation.viewModel.FavoritesViewModel
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -28,21 +31,33 @@ fun FavoritesRoute(
     backStack: () -> Boolean,
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel,
-    viewModel: FavoritesViewModel = koinViewModel()
+    viewModel: FavoritesViewModel = koinViewModel(),
+    resultStore: ResultStore
 ) {
     val uiState = viewModel.uiState.collectAsState().value
+    val genreTypeSelected = viewModel.genreTypeSelected.collectAsState().value
     val refresh = { viewModel.getFavoriteMovies() }
     val updatePosition = { viewModel.updateMoviePosition() }
+    val genreClicked = { it: Int -> viewModel.onGenreTypeSelected(it) }
+    val enableDragging = { viewModel.enableDragging(uiState.isDraggingEnabled) }
+    val removedMovieId = resultStore.getResult<String>("movie_id")
+    if (removedMovieId != null) {
+        viewModel.getFavoriteMovies()
+        resultStore.removeResult("movie_id")
+    }
 
     FavoritesScreen(
         uiState = uiState,
-        navController = navController,
+        genreTypeSelected = genreTypeSelected,
         backStack = { backStack() },
+        navController = navController,
         screenMetrics = screenMetrics,
         screenViewModel = screenViewModel,
         onRefresh = { refresh() },
         onMove = { from, to -> viewModel.moveMovie(from, to) },
-        updateMoviePosition = { updatePosition() }
+        updateMoviePosition = { updatePosition() },
+        onGenreClick = genreClicked,
+        enableDragging = enableDragging
     )
 
 }
@@ -50,6 +65,7 @@ fun FavoritesRoute(
 @Composable
 fun FavoritesScreen(
     uiState: FavoritesViewModel.FavoritesMoviesUiState,
+    genreTypeSelected: FavoritesViewModel.GenresState,
     navController: NavController,
     backStack: () -> Boolean,
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
@@ -57,6 +73,8 @@ fun FavoritesScreen(
     onRefresh: () -> Unit,
     onMove: (Int, Int) -> Unit,
     updateMoviePosition: () -> Unit,
+    onGenreClick: (Int) -> Unit,
+    enableDragging: () -> Unit,
 ) {
     Scaffold(
         modifier = Modifier
@@ -66,6 +84,10 @@ fun FavoritesScreen(
             TopBar(
                 stringResource(R.string.favourites),
                 backStack = { backStack() },
+                action = TopBarAction.Favorite(
+                    iconRes = R.drawable.drag,
+                    onClick = { enableDragging() }
+                ),
                 screenMetrics = screenMetrics,
                 screenViewModel = screenViewModel,
             )
@@ -88,10 +110,16 @@ fun FavoritesScreen(
                         Box(modifier = Modifier.testTag("FavouritesComponent")) {
                             FavouritesListComponent(
                                 movieData = uiState.moviesList,
+                                genreTypeSelected = genreTypeSelected,
+                                filterMovies = uiState.filteredMovies,
+                                genresList = uiState.genresList,
+                                onGenreClick = { genreId -> onGenreClick(genreId) },
                                 screenMetrics = screenMetrics,
                                 screenViewModel = screenViewModel,
                                 onMove = { from, to -> onMove(from, to) },
-                                updateMoviePosition = { updateMoviePosition() }
+                                updateMoviePosition = { updateMoviePosition() },
+                                isDraggingEnabled = uiState.isDraggingEnabled,
+                                goToDetails = { movieId: String -> navController.navigate(Details(movieId = movieId)) }
                             )
                         }
                     }
