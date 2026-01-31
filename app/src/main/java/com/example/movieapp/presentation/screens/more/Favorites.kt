@@ -17,6 +17,8 @@ import com.example.movieapp.presentation.components.ErrorScreen
 import com.example.movieapp.presentation.components.FavouritesListComponent
 import com.example.movieapp.presentation.components.LoadingScreen
 import com.example.movieapp.presentation.components.TopBar
+import com.example.movieapp.presentation.navigation.Details
+import com.example.movieapp.presentation.navigation.ResultStore
 import com.example.movieapp.presentation.theme.Background
 import com.example.movieapp.presentation.utils.TopBarAction
 import com.example.movieapp.presentation.viewModel.FavoritesViewModel
@@ -29,7 +31,8 @@ fun FavoritesRoute(
     backStack: () -> Boolean,
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel,
-    viewModel: FavoritesViewModel = koinViewModel()
+    viewModel: FavoritesViewModel = koinViewModel(),
+    resultStore: ResultStore
 ) {
     val uiState = viewModel.uiState.collectAsState().value
     val genreTypeSelected = viewModel.genreTypeSelected.collectAsState().value
@@ -37,12 +40,17 @@ fun FavoritesRoute(
     val updatePosition = { viewModel.updateMoviePosition() }
     val genreClicked = { it: Int -> viewModel.onGenreTypeSelected(it) }
     val enableDragging = { viewModel.enableDragging(uiState.isDraggingEnabled) }
+    val removedMovieId = resultStore.getResult<String>("movie_id")
+    if (removedMovieId != null) {
+        viewModel.getFavoriteMovies()
+        resultStore.removeResult("movie_id")
+    }
 
     FavoritesScreen(
         uiState = uiState,
         genreTypeSelected = genreTypeSelected,
-        navController = navController,
         backStack = { backStack() },
+        navController = navController,
         screenMetrics = screenMetrics,
         screenViewModel = screenViewModel,
         onRefresh = { refresh() },
@@ -110,7 +118,8 @@ fun FavoritesScreen(
                                 screenViewModel = screenViewModel,
                                 onMove = { from, to -> onMove(from, to) },
                                 updateMoviePosition = { updateMoviePosition() },
-                                isDraggingEnabled = uiState.isDraggingEnabled
+                                isDraggingEnabled = uiState.isDraggingEnabled,
+                                goToDetails = { movieId: String -> navController.navigate(Details(movieId = movieId)) }
                             )
                         }
                     }

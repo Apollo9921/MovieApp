@@ -2,6 +2,7 @@ package com.example.movieapp.presentation.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -51,7 +52,8 @@ fun FavouritesListComponent(
     screenViewModel: ScreenSizingViewModel,
     onMove: (Int, Int) -> Unit,
     updateMoviePosition: () -> Unit,
-    isDraggingEnabled: Boolean
+    isDraggingEnabled: Boolean,
+    goToDetails: (String) -> Unit
 ) {
     val lazyListState = rememberLazyListState()
     val dragDropState = rememberDragDropState(lazyListState) { from, to ->
@@ -123,6 +125,7 @@ fun FavouritesListComponent(
                     movie = movie,
                     screenMetrics = screenMetrics,
                     isDraggingEnabled = isDraggingEnabled,
+                    goToDetails = goToDetails,
                     screenViewModel = screenViewModel
                 )
                 Spacer(Modifier.padding(5.dp))
@@ -137,6 +140,7 @@ private fun FavouritesListItem(
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel,
     isDraggingEnabled: Boolean,
+    goToDetails: (String) -> Unit,
     modifier: Modifier
 ) {
     val imageUrl = "${MovieInstance.BASE_URL_IMAGE}${movie.posterPath}"
@@ -147,7 +151,13 @@ private fun FavouritesListItem(
     val iconSize = screenViewModel.calculateCustomWidth(baseSize = 30, screenMetrics).dp
 
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable {
+                if (!isDraggingEnabled) {
+                    goToDetails(movie.id.toString())
+                }
+            },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AsyncImage(

@@ -47,6 +47,7 @@ import com.example.movieapp.R
 import com.example.movieapp.presentation.components.ErrorScreen
 import com.example.movieapp.presentation.components.LoadingScreen
 import com.example.movieapp.presentation.components.TopBar
+import com.example.movieapp.presentation.navigation.ResultStore
 import com.example.movieapp.presentation.theme.Background
 import com.example.movieapp.presentation.theme.Black
 import com.example.movieapp.presentation.theme.Typography
@@ -60,6 +61,7 @@ import org.koin.androidx.compose.koinViewModel
 fun DetailsRoute(
     backStack: () -> Boolean,
     movieId: String?,
+    resultStore: ResultStore,
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel,
     viewModel: MovieDetailsViewModel = koinViewModel()
@@ -73,7 +75,8 @@ fun DetailsRoute(
         screenViewModel = screenViewModel,
         backStack = { backStack() },
         onRefresh = { viewModel.fetchMovieDetails(uiState.movieId) },
-        favoritesClick = { viewModel.toggleMovie() }
+        favoritesClick = { viewModel.toggleMovie() },
+        resultStore = resultStore
     )
 }
 
@@ -84,7 +87,8 @@ fun DetailsScreen(
     screenViewModel: ScreenSizingViewModel,
     backStack: () -> Boolean,
     onRefresh: () -> Unit,
-    favoritesClick: () -> Unit
+    favoritesClick: () -> Unit,
+    resultStore: ResultStore
 ) {
     Scaffold(
         modifier = Modifier
@@ -97,7 +101,10 @@ fun DetailsScreen(
                 backStack = { backStack() },
                 action = TopBarAction.Details(
                     isFavorite = uiState.isFavorite,
-                    onClick = { favoritesClick() }
+                    onClick = {
+                        favoritesClick()
+                        resultStore.setResults("movie_id" ,uiState.movieId.toString())
+                    }
                 ),
                 screenMetrics = screenMetrics,
                 screenViewModel = screenViewModel

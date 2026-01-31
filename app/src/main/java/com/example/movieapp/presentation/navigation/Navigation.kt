@@ -21,6 +21,7 @@ fun Navigation() {
     val navController: NavHostController = rememberNavController()
     val screenMetrics = getScreenMetrics()
 
+    val resultStore = rememberResultStore()
     NavHost(
         navController = navController,
         startDestination = BottomNavItem.Home.route
@@ -60,7 +61,8 @@ fun Navigation() {
                 navController = navController,
                 backStack = navController::navigateUp,
                 screenMetrics = screenMetrics,
-                screenViewModel = screenViewModel
+                screenViewModel = screenViewModel,
+                resultStore = resultStore
             )
         }
 
@@ -70,7 +72,8 @@ fun Navigation() {
                 backStack = navController::navigateUp,
                 movieId = movieId,
                 screenMetrics = screenMetrics,
-                screenViewModel = screenViewModel
+                screenViewModel = screenViewModel,
+                resultStore = resultStore
             )
         }
     }

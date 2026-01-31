@@ -65,8 +65,7 @@ class FavoritesScreenTest {
         composeTestRule.setContent {
             FavoritesScreen(
                 uiState = uiState,
-                genreTypeSelected = genreTypeSelected,
-                navController = navController,
+                genreTypeSelected = genreTypeSelected,,
                 backStack = { navController.navigateUp() },
                 screenMetrics = screenMetrics,
                 screenViewModel = screenViewModel,
@@ -74,7 +73,8 @@ class FavoritesScreenTest {
                 onMove = { from, to -> },
                 updateMoviePosition = { },
                 onGenreClick = {},
-                enableDragging = {}
+                enableDragging = {},
+                removedMovieId
             )
         }
     }
