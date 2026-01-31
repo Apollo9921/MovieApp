@@ -16,7 +16,7 @@
       <SelectionState runConfigName="favoritesScreen_whenEnableDragging_enableDragging()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="Tests in 'com.example.movieapp'">
+      <SelectionState runConfigName="Tests in 'com.example.movieapp.presentation.screens'">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

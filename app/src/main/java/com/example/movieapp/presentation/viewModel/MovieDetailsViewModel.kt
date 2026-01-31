@@ -160,7 +160,8 @@ class MovieDetailsViewModel(
             originalLanguage = "",
             originalTitle = "",
             adult = false,
-            video = false
+            video = false,
+            page = 0
         )
         viewModelScope.launch {
             Log.d("MovieDetailsViewModel", "Toggling movie: ${movie.title}")
