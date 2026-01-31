@@ -96,8 +96,6 @@ class MovieRepositoryImplTest {
         assertEquals(101, result.results[0].id)
     }
 
-    //TODO fetchMovies should call service and return cached data
-
     //TODO fetchMovies should call service and return error
 
     @Test
@@ -129,8 +127,6 @@ class MovieRepositoryImplTest {
         assertEquals("Test Genre", result.genres[0].name)
         assertEquals(102, result.genres[1].id)
     }
-
-    //TODO fetchGenres should call service and return cached data
 
     //TODO fetchGenres should call service and return error
 
