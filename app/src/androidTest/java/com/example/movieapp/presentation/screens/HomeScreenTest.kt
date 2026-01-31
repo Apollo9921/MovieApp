@@ -21,7 +21,6 @@ class HomeScreenTest {
 
     private val navController = mockk<NavController>(relaxed = true)
     private val screenViewModel = mockk<ScreenSizingViewModel>(relaxed = true)
-    private val moviesViewModel = mockk<MoviesViewModel>(relaxed = true)
     private val screenMetrics = ScreenSizingViewModel.ScreenMetrics(0.dp, 0.dp, 0)
 
     private val fakeMovies = listOf(
@@ -39,7 +38,8 @@ class HomeScreenTest {
             title = "Oppenheimer",
             video = false,
             voteAverage = 8.5,
-            voteCount = 1000
+            voteCount = 1000,
+            page = 1
         ),
         MovieData(
             adult = false,
@@ -55,25 +55,20 @@ class HomeScreenTest {
             title = "Barbie",
             video = false,
             voteAverage = 8.5,
-            voteCount = 1000
+            voteCount = 1000,
+            page = 1
         )
     )
 
-    private fun launchHomeScreen(
-        uiState: MoviesViewModel.MoviesUiState,
-        movies: List<MovieData> = emptyList()
-    ) {
+    private fun launchHomeScreen(uiState: MoviesViewModel.MoviesUiState) {
         composeTestRule.setContent {
             HomeScreen(
                 uiState = uiState,
                 screenMetrics = screenMetrics,
                 screenViewModel = screenViewModel,
-                moviesList = movies,
-                filteredMovies = emptyList(),
-                genreType = 0,
-                genresList = emptyList(),
-                navController = navController,
-                moviesViewModel = moviesViewModel
+                fetchMovies = {},
+                genreSelected = {},
+                navController = navController
             )
         }
     }
@@ -88,10 +83,7 @@ class HomeScreenTest {
         )
 
         // --- ACT ---
-        launchHomeScreen(
-            uiState = successState,
-            movies = fakeMovies
-        )
+        launchHomeScreen(uiState = successState)
 
         // --- ASSERT ---
         composeTestRule.onNodeWithTag("MoviesContent").assertIsDisplayed()
@@ -108,10 +100,7 @@ class HomeScreenTest {
         )
 
         // --- ACT ---
-        launchHomeScreen(
-            uiState = loadingState,
-            movies = emptyList()
-        )
+        launchHomeScreen(uiState = loadingState)
 
         // --- ASSERT ---
         composeTestRule.onNodeWithTag("LoadingComponent").assertIsDisplayed()
@@ -128,10 +117,7 @@ class HomeScreenTest {
         )
 
         // --- ACT ---
-        launchHomeScreen(
-            uiState = errorState,
-            movies = emptyList()
-        )
+        launchHomeScreen(uiState = errorState)
 
         // --- ASSERT ---
         composeTestRule.onNodeWithTag("ErrorComponent").assertIsDisplayed()
@@ -151,10 +137,7 @@ class HomeScreenTest {
         )
 
         // --- ACT ---
-        launchHomeScreen(
-            uiState = errorState,
-            movies = errorState.movies
-        )
+        launchHomeScreen(uiState = errorState)
 
         // --- ASSERT ---
         composeTestRule.onNodeWithTag("MoviesContent").assertIsDisplayed()

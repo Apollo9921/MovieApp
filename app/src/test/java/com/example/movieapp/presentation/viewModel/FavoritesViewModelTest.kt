@@ -53,7 +53,8 @@ class FavoritesViewModelTest {
             originalLanguage = "",
             originalTitle = "",
             adult = false,
-            video = false
+            video = false,
+            page = 1
         ),
         MovieData(
             id = 2,
@@ -69,7 +70,8 @@ class FavoritesViewModelTest {
             originalLanguage = "",
             originalTitle = "",
             adult = false,
-            video = false
+            video = false,
+            page = 1
         )
     )
     private val fakeGenres = GenresList(listOf(Genre(1, "Adventure")))

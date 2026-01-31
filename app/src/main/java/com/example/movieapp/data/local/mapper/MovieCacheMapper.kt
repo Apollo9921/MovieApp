@@ -1,16 +1,16 @@
 package com.example.movieapp.data.local.mapper
 
-import com.example.movieapp.data.local.entity.MovieEntity
+import com.example.movieapp.data.local.entity.MovieCacheEntity
 import com.example.movieapp.domain.model.movies.MovieData
 
-fun MovieEntity.toMovieData(): MovieData {
+fun MovieCacheEntity.toMovieCacheData(): MovieData {
     return MovieData(
         id = id,
         title = title,
-        overview = overview,
+        overview = "",
         posterPath = posterPath,
         voteAverage = 0.0,
-        voteCount = position,
+        voteCount = 0,
         releaseDate = "",
         genreIds = genreIds,
         popularity = 0.0,
@@ -19,17 +19,16 @@ fun MovieEntity.toMovieData(): MovieData {
         originalTitle = "",
         adult = false,
         video = false,
-        page = 0
+        page = page
     )
 }
 
-fun MovieData.toMovieEntity(): MovieEntity {
-    return MovieEntity(
+fun MovieData.toMovieCacheEntity(page: Int): MovieCacheEntity {
+    return MovieCacheEntity(
         id = id,
         title = title,
         posterPath = posterPath,
-        overview = overview,
         genreIds = genreIds,
-        position = voteCount
+        page = page
     )
 }

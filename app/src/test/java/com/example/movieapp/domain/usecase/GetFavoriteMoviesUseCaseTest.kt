@@ -33,7 +33,8 @@ class GetFavoriteMoviesUseCaseTest {
                 originalLanguage = "",
                 originalTitle = "",
                 adult = false,
-                video = false
+                video = false,
+                page = 1
             ),
             MovieData(
                 id = 2,
@@ -49,7 +50,8 @@ class GetFavoriteMoviesUseCaseTest {
                 originalLanguage = "",
                 originalTitle = "",
                 adult = false,
-                video = false
+                video = false,
+                page = 1
             )
         )
 

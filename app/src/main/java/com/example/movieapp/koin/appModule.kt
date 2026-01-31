@@ -50,45 +50,16 @@ val appModule = module {
         MovieRepositoryImpl(get(), get(), get(named("ioDispatcher")))
     }
 
-    single {
-        GetMoviesUseCase(get())
-    }
-
-    single {
-        GetGenresUseCase(get())
-    }
-
-    single {
-        GetMovieDetailsUseCase(get())
-    }
-
-    single {
-        GetSearchUseCase(get())
-    }
-
-    single {
-        FormatMovieDetailsUseCase()
-    }
-
-    single {
-        ToggleFavoriteUseCase(get())
-    }
-
-    single {
-        GetFavoriteMoviesUseCase(get())
-    }
-
-    single {
-        IsMovieFavoriteUseCase(get())
-    }
-
-    single {
-        GetFavoritesMoviesCountUseCase(get())
-    }
-
-    single {
-        UpdateFavoritesMoviesPositionUseCase(get())
-    }
+    factory { GetMoviesUseCase(get()) }
+    factory { GetGenresUseCase(get()) }
+    factory { GetMovieDetailsUseCase(get()) }
+    factory { GetSearchUseCase(get()) }
+    factory { FormatMovieDetailsUseCase() }
+    factory { ToggleFavoriteUseCase(get()) }
+    factory { GetFavoriteMoviesUseCase(get()) }
+    factory { IsMovieFavoriteUseCase(get()) }
+    factory { GetFavoritesMoviesCountUseCase(get()) }
+    factory { UpdateFavoritesMoviesPositionUseCase(get()) }
 
     single<ConnectivityObserver> {
         NetworkConnectivityObserver(androidContext())
