@@ -69,6 +69,27 @@ class MoviesViewModel(
         )
         fetchMovies()
         observeGenres()
+        checkNetworkStatus()
+    }
+
+    private fun checkNetworkStatus() {
+        viewModelScope.launch {
+            networkStatus.collect { status ->
+                if (
+                    status == ConnectivityObserver.Status.Available &&
+                    _uiState.value.errorMessage == Constants.NO_INTERNET_CONNECTION &&
+                    _uiState.value.movies.isEmpty()
+                ) {
+                    definingUiState(
+                        isLoading = true,
+                        isSuccess = false,
+                        error = false,
+                        errorMessage = null
+                    )
+                    fetchMovies()
+                }
+            }
+        }
     }
 
     fun fetchMovies() {
