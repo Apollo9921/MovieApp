@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,9 +35,9 @@ import com.example.movieapp.R
 import com.example.movieapp.data.network.instance.MovieInstance
 import com.example.movieapp.domain.model.genres.Genre
 import com.example.movieapp.domain.model.movies.MovieData
-import com.example.movieapp.presentation.theme.Background
 import com.example.movieapp.presentation.theme.Typography
 import com.example.movieapp.presentation.theme.White
+import com.example.movieapp.presentation.theme.toTextColor
 import com.example.movieapp.presentation.utils.rememberDragDropState
 import com.example.movieapp.presentation.viewModel.FavoritesViewModel
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
@@ -63,7 +64,7 @@ fun FavouritesListComponent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
+            .background(MaterialTheme.colorScheme.onBackground)
             .padding(horizontal = 5.dp)
     ) {
         if (genresList.isNotEmpty() && !isDraggingEnabled) {
@@ -176,12 +177,14 @@ private fun FavouritesListItem(
         ) {
             Text(
                 style = Typography.titleLarge.copy(fontSize = titleSize),
-                text = movie.title
+                text = movie.title,
+                color = MaterialTheme.toTextColor()
             )
             Spacer(Modifier.padding(5.dp))
             Text(
                 style = Typography.labelMedium.copy(fontSize = overviewSize),
                 text = movie.overview,
+                color = MaterialTheme.toTextColor(),
                 maxLines = 4,
                 overflow = TextOverflow.Ellipsis
             )
@@ -191,7 +194,7 @@ private fun FavouritesListItem(
             Image(
                 painter = painterResource(id = R.drawable.drag),
                 contentDescription = null,
-                colorFilter = ColorFilter.tint(White),
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
                 modifier = Modifier
                     .weight(0.4f)
                     .size(iconSize)

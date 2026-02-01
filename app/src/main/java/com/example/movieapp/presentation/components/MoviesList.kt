@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,7 +39,11 @@ import com.example.movieapp.data.network.instance.MovieInstance
 import com.example.movieapp.domain.model.genres.Genre
 import com.example.movieapp.domain.model.movies.MovieData
 import com.example.movieapp.presentation.theme.Background
+import com.example.movieapp.presentation.theme.Black
+import com.example.movieapp.presentation.theme.BottomBarBackground
+import com.example.movieapp.presentation.theme.BrightYellow
 import com.example.movieapp.presentation.theme.White
+import com.example.movieapp.presentation.theme.toTextColor
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 
 @Composable
@@ -83,7 +88,7 @@ fun MoviesList(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
+            .background(MaterialTheme.colorScheme.onBackground)
             .padding(pv)
     ) {
         if (genresList.isNotEmpty()) {
@@ -146,6 +151,7 @@ private fun DisplayMoviePosition(
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel
 ) {
+    val isHighContrast = MaterialTheme.colorScheme.primary == BrightYellow
     val bottomSize = screenViewModel.calculateCustomHeight(baseSize = 50, screenMetrics).dp
     Box(
         modifier = Modifier
@@ -155,7 +161,7 @@ private fun DisplayMoviePosition(
     ) {
         FloatingActionButton(
             onClick = { },
-            containerColor = White,
+            containerColor = if (isHighContrast) BrightYellow else BottomBarBackground,
             contentColor = Background,
             shape = CircleShape,
             modifier = Modifier
@@ -166,13 +172,13 @@ private fun DisplayMoviePosition(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Text(text = "$moviePosition")
+                    Text(text = "$moviePosition", color = if (isHighContrast) Black else White)
                     HorizontalDivider(
                         thickness = 2.dp,
-                        color = Background,
+                        color = if (isHighContrast) Black else White,
                         modifier = Modifier.width(20.dp)
                     )
-                    Text(text = "$moviesSize")
+                    Text(text = "$moviesSize", color = if (isHighContrast) Black else White)
                 }
             }
         )

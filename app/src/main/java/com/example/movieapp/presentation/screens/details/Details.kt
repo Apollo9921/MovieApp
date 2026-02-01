@@ -22,6 +22,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,10 +49,11 @@ import com.example.movieapp.presentation.components.ErrorScreen
 import com.example.movieapp.presentation.components.LoadingScreen
 import com.example.movieapp.presentation.components.TopBar
 import com.example.movieapp.presentation.navigation.ResultStore
-import com.example.movieapp.presentation.theme.Background
 import com.example.movieapp.presentation.theme.Black
+import com.example.movieapp.presentation.theme.BrightYellow
 import com.example.movieapp.presentation.theme.Typography
 import com.example.movieapp.presentation.theme.White
+import com.example.movieapp.presentation.theme.toTextColor
 import com.example.movieapp.presentation.utils.TopBarAction
 import com.example.movieapp.presentation.viewModel.MovieDetailsViewModel
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
@@ -115,7 +117,7 @@ fun DetailsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Background),
+                .background(MaterialTheme.colorScheme.onBackground),
             contentAlignment = Alignment.Center
         ) {
             when {
@@ -280,6 +282,7 @@ private fun SectionDetails(
         if (title.isNotBlank()) {
             Text(
                 text = title,
+                color = MaterialTheme.toTextColor(),
                 style = Typography.titleLarge.copy(fontSize = titleSize),
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
@@ -311,10 +314,12 @@ private fun SectionRating(
         )
         Text(
             text = "$voteAverage/10 ",
+            color = MaterialTheme.toTextColor(),
             style = Typography.labelMedium.copy(fontSize = ratingTextSize, color = White)
         )
         Text(
             text = "($voteCount)",
+            color = MaterialTheme.toTextColor(),
             style = Typography.labelMedium.copy(fontSize = ratingTextSize, color = Color.Gray)
         )
     }
@@ -338,11 +343,13 @@ private fun SectionReleaseInfo(
         items.forEachIndexed { index, item ->
             Text(
                 text = item,
+                color = MaterialTheme.toTextColor(),
                 style = Typography.labelMedium.copy(fontSize = labelSize)
             )
             if (index < items.size - 1) {
                 Text(
                     text = "•",
+                    color = MaterialTheme.toTextColor(),
                     style = Typography.labelMedium.copy(fontSize = labelSize)
                 )
             }
@@ -354,6 +361,7 @@ private fun SectionReleaseInfo(
 private fun SectionTitle(title: String, titleSize: TextUnit) {
     Text(
         text = title,
+        color = MaterialTheme.toTextColor(),
         style = Typography.titleLarge.copy(fontSize = titleSize),
         modifier = Modifier.padding(horizontal = 10.dp)
     )
@@ -362,6 +370,7 @@ private fun SectionTitle(title: String, titleSize: TextUnit) {
 @Composable
 private fun SectionList(title: String, titleSize: TextUnit, list: List<String>, label: TextUnit) {
     if (list.isEmpty()) return
+    val isHighContrast = MaterialTheme.colorScheme.primary == BrightYellow
     SectionTitle(title, titleSize)
     Spacer(modifier = Modifier.height(3.dp))
     FlowRow(
@@ -377,10 +386,11 @@ private fun SectionList(title: String, titleSize: TextUnit, list: List<String>, 
                     modifier = Modifier
                         .wrapContentSize()
                         .clip(RoundedCornerShape(5.dp))
-                        .background(Black)
+                        .background(if (isHighContrast) BrightYellow else Black)
                 ) {
                     Text(
                         text = item,
+                        color = if (isHighContrast) Black else White,
                         style = Typography.labelMedium.copy(fontSize = label),
                         modifier = Modifier.padding(
                             horizontal = 10.dp,
@@ -397,6 +407,7 @@ private fun SectionList(title: String, titleSize: TextUnit, list: List<String>, 
 private fun SectionOverview(overview: String, labelSize: TextUnit) {
     Text(
         text = overview,
+        color = MaterialTheme.toTextColor(),
         style = Typography.labelMedium.copy(fontSize = labelSize),
         modifier = Modifier.padding(horizontal = 10.dp)
     )

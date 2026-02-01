@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -25,6 +26,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.movieapp.presentation.theme.BottomBarBackground
 import com.example.movieapp.presentation.theme.White
 import com.example.movieapp.presentation.navigation.BottomNavItem
+import com.example.movieapp.presentation.theme.Black
+import com.example.movieapp.presentation.theme.BrightYellow
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 
 @Composable
@@ -43,6 +46,8 @@ fun BottomNavigationBar(
     val bottomBarHeight = 60.dp
     val bottomSize = screenViewModel.calculateCustomHeight(baseSize = 50, screenMetrics).dp
 
+    val isHighContrast = MaterialTheme.colorScheme.primary == BrightYellow
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -55,7 +60,7 @@ fun BottomNavigationBar(
             modifier = Modifier
                 .width(screenWidthDp)
                 .clip(CircleShape)
-                .background(BottomBarBackground),
+                .background(if (isHighContrast) BrightYellow else BottomBarBackground),
             contentAlignment = Alignment.BottomCenter
         ) {
             val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -70,7 +75,15 @@ fun BottomNavigationBar(
                     Icon(
                         imageVector = item.icon,
                         contentDescription = item.route,
-                        tint = if (currentRoute == item.route) White else Color.Gray,
+                        tint = if (currentRoute == item.route) {
+                            if (isHighContrast) {
+                                Black
+                            } else {
+                                White
+                            }
+                        } else {
+                            Color.Gray
+                        },
                         modifier = Modifier
                             .size(25.dp)
                             .clickable {

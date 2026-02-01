@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -35,7 +36,7 @@ import com.example.movieapp.presentation.components.LoadingScreen
 import com.example.movieapp.presentation.components.MoviesList
 import com.example.movieapp.presentation.components.TopBar
 import com.example.movieapp.presentation.navigation.Details
-import com.example.movieapp.presentation.theme.Background
+import com.example.movieapp.presentation.theme.Black
 import com.example.movieapp.presentation.theme.White
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 import com.example.movieapp.presentation.viewModel.SearchMoviesViewModel
@@ -93,7 +94,7 @@ fun SearchScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Background)
+                    .background(MaterialTheme.colorScheme.onBackground)
                     .padding(it)
             ) {
                 SearchBar(
@@ -172,7 +173,7 @@ private fun SearchBar(
         TextField(
             value = searchValue.value,
             onValueChange = { searchValue.value = it },
-            label = { Text(text = stringResource(R.string.search_hint)) },
+            label = { Text(text = stringResource(R.string.search_hint), color = Black) },
             shape = RoundedCornerShape(20.dp),
             maxLines = 1,
             singleLine = true,
@@ -180,8 +181,8 @@ private fun SearchBar(
                 focusedContainerColor = White,
                 unfocusedContainerColor = White,
                 disabledContainerColor = White,
-                focusedIndicatorColor = Background,
-                unfocusedIndicatorColor = Background,
+                focusedIndicatorColor = Black,
+                unfocusedIndicatorColor = Black,
             ),
             modifier = Modifier.width(
                 screenViewModel.calculateCustomWidth(

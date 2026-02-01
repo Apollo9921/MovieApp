@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,9 +31,9 @@ import com.example.movieapp.presentation.components.BottomNavigationBar
 import com.example.movieapp.presentation.components.TopBar
 import com.example.movieapp.presentation.navigation.Favorites
 import com.example.movieapp.presentation.navigation.Search
-import com.example.movieapp.presentation.theme.Background
 import com.example.movieapp.presentation.theme.Typography
 import com.example.movieapp.presentation.theme.White
+import com.example.movieapp.presentation.theme.toTextColor
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 
 @Composable
@@ -81,7 +82,7 @@ private fun MoreScreenOptions(
     LazyVerticalGrid(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
+            .background(MaterialTheme.colorScheme.onBackground)
             .padding(horizontal = 10.dp, vertical = 10.dp),
         contentPadding = pv,
         columns = GridCells.Fixed(2)
@@ -105,14 +106,15 @@ private fun MoreScreenOptions(
                 Image(
                     painter = painterResource(id = option[it].first),
                     contentDescription = null,
-                    colorFilter = ColorFilter.tint(White),
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
                     modifier = Modifier.size(iconSize)
                 )
                 Spacer(modifier = Modifier.padding(10.dp))
                 val titleSize = screenViewModel.calculateCustomWidth(baseSize = 20, screenMetrics).sp
                 Text(
                     style = Typography.displayMedium.copy(fontSize = titleSize),
-                    text = option[it].second
+                    text = option[it].second,
+                    color = MaterialTheme.toTextColor(),
                 )
             }
         }

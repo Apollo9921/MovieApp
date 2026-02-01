@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,10 +19,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.movieapp.R
-import com.example.movieapp.presentation.theme.Red
-import com.example.movieapp.presentation.theme.TopBarBackground
 import com.example.movieapp.presentation.theme.Typography
-import com.example.movieapp.presentation.theme.White
+import com.example.movieapp.presentation.theme.toTextColor
 import com.example.movieapp.presentation.utils.TopBarAction
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 
@@ -39,7 +38,7 @@ fun TopBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(TopBarBackground)
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 10.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -49,13 +48,14 @@ fun TopBar(
                 Image(
                     painter = painterResource(id = R.drawable.back),
                     contentDescription = "Back",
-                    colorFilter = ColorFilter.tint(White),
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
                     modifier = Modifier.clickable { backStack() }
                 )
                 Spacer(modifier = Modifier.padding(10.dp))
             }
             Text(
                 style = Typography.titleLarge.copy(fontSize = titleSize),
+                color = MaterialTheme.toTextColor(),
                 text = title,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -75,7 +75,7 @@ private fun RenderAction(action: TopBarAction) {
                     id = if (action.isFavorite) R.drawable.favorite else R.drawable.favorite_border
                 ),
                 contentDescription = "Favorite",
-                colorFilter = ColorFilter.tint(Red),
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onError),
                 modifier = Modifier.clickable { action.onClick() }
             )
         }
@@ -83,7 +83,7 @@ private fun RenderAction(action: TopBarAction) {
             Image(
                 painter = painterResource(id = action.iconRes),
                 contentDescription = null,
-                colorFilter = ColorFilter.tint(White),
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
                 modifier = Modifier.clickable { action.onClick() }
             )
         }

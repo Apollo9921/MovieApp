@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,9 +20,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.movieapp.domain.model.genres.Genre
 import com.example.movieapp.presentation.theme.Black
+import com.example.movieapp.presentation.theme.BrightYellow
 import com.example.movieapp.presentation.theme.Selected
 import com.example.movieapp.presentation.theme.TopBarBackground
 import com.example.movieapp.presentation.theme.Typography
+import com.example.movieapp.presentation.theme.White
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 
 @Composable
@@ -32,6 +35,7 @@ fun GenresListScreen(
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel
 ) {
+    val isHighContrast = MaterialTheme.colorScheme.primary == BrightYellow
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -48,7 +52,11 @@ fun GenresListScreen(
                         onGenreClick(genre.id)
                     },
                 colors = CardDefaults.cardColors(
-                    containerColor = if (genreSelected == genre.id) Selected else TopBarBackground,
+                    containerColor = if (genreSelected == genre.id) {
+                        if (isHighContrast) BrightYellow else Selected
+                    } else {
+                        if (isHighContrast) White else TopBarBackground
+                    },
                 ),
                 elevation = CardDefaults.cardElevation(
                     defaultElevation = 6.dp
@@ -59,6 +67,7 @@ fun GenresListScreen(
                 Text(
                     style = Typography.labelMedium.copy(fontSize = label),
                     text = genre.name,
+                    color = if (isHighContrast) Black else White,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(7.dp)
                 )

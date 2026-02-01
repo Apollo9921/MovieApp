@@ -10,6 +10,7 @@ import com.example.movieapp.presentation.viewModel.MoviesViewModel
 import com.example.movieapp.presentation.viewModel.SearchMoviesViewModel
 import com.example.movieapp.domain.repository.ConnectivityObserver
 import com.example.movieapp.data.repository.NetworkConnectivityObserver
+import com.example.movieapp.data.repository.SettingsRepositoryImpl
 import com.example.movieapp.domain.usecase.ToggleFavoriteUseCase
 import com.example.movieapp.domain.usecase.FormatMovieDetailsUseCase
 import com.example.movieapp.domain.usecase.GetFavoriteMoviesUseCase
@@ -21,6 +22,7 @@ import com.example.movieapp.domain.usecase.GetSearchUseCase
 import com.example.movieapp.domain.usecase.IsMovieFavoriteUseCase
 import com.example.movieapp.domain.usecase.UpdateFavoritesMoviesPositionUseCase
 import com.example.movieapp.presentation.viewModel.FavoritesViewModel
+import com.example.movieapp.presentation.viewModel.SettingsViewModel
 import kotlinx.coroutines.Dispatchers
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -49,6 +51,8 @@ val appModule = module {
     single<MoviesRepository> {
         MovieRepositoryImpl(get(), get(), get(named("ioDispatcher")))
     }
+
+    single { SettingsRepositoryImpl(androidContext()) }
 
     factory { GetMoviesUseCase(get()) }
     factory { GetGenresUseCase(get()) }
@@ -79,6 +83,10 @@ val appModule = module {
 
     viewModel {
         FavoritesViewModel(get(), get(), get(), get())
+    }
+
+    viewModel {
+        SettingsViewModel(get())
     }
 
 }
