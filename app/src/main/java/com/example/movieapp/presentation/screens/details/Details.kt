@@ -40,9 +40,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.example.movieapp.R
@@ -51,7 +49,6 @@ import com.example.movieapp.presentation.components.LoadingScreen
 import com.example.movieapp.presentation.components.TopBar
 import com.example.movieapp.presentation.navigation.ResultStore
 import com.example.movieapp.presentation.theme.Black
-import com.example.movieapp.presentation.theme.Typography
 import com.example.movieapp.presentation.theme.White
 import com.example.movieapp.presentation.theme.toTextColor
 import com.example.movieapp.presentation.utils.TopBarAction
@@ -105,11 +102,9 @@ fun DetailsScreen(
                     isFavorite = uiState.isFavorite,
                     onClick = {
                         favoritesClick()
-                        resultStore.setResults("movie_id" ,uiState.movieId.toString())
+                        resultStore.setResults("movie_id", uiState.movieId.toString())
                     }
-                ),
-                screenMetrics = screenMetrics,
-                screenViewModel = screenViewModel
+                )
             )
         },
     ) { paddingValues ->
@@ -141,8 +136,6 @@ fun DetailsScreen(
                     Box(modifier = Modifier.testTag("ErrorComponent")) {
                         ErrorScreen(
                             errorMessage = uiState.errorMessage,
-                            screenMetrics = screenMetrics,
-                            screenViewModel = screenViewModel,
                             onRefresh = { onRefresh() }
                         )
                     }
@@ -158,9 +151,6 @@ private fun DetailsContent(
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel
 ) {
-    val titleSize = screenViewModel.calculateCustomWidth(baseSize = 20, screenMetrics).sp
-    val label = screenViewModel.calculateCustomWidth(baseSize = 15, screenMetrics).sp
-    val ratingTextSize = screenViewModel.calculateCustomWidth(baseSize = 14, screenMetrics).sp
     val scrollState = rememberScrollState()
 
     Column(
@@ -179,45 +169,37 @@ private fun DetailsContent(
         SectionDetails(
             title = uiState.movieDetails?.title ?: "",
             voteAverage = uiState.movieDetails?.voteAverage.toString(),
-            voteCount = uiState.movieDetails?.voteCount.toString(),
-            titleSize = titleSize,
-            ratingTextSize = ratingTextSize
+            voteCount = uiState.movieDetails?.voteCount.toString()
         )
         Spacer(modifier = Modifier.height(3.dp))
         Box(modifier = Modifier.testTag("SectionReleaseInfo")) {
             SectionReleaseInfo(
                 releaseYear = uiState.movieDetails?.releaseYear.toString(),
                 genres = uiState.movieDetails?.genres.toString(),
-                runtime = uiState.movieDetails?.runtime.toString(),
-                labelSize = label
+                runtime = uiState.movieDetails?.runtime.toString()
             )
         }
         Spacer(modifier = Modifier.height(10.dp))
         Column(modifier = Modifier.testTag("SectionOverview")) {
             if (uiState.movieDetails?.overview.isNullOrEmpty()) return@Column
-            SectionTitle("Overview", titleSize)
+            SectionTitle("Overview")
             Spacer(modifier = Modifier.height(3.dp))
             SectionOverview(
-                overview = uiState.movieDetails?.overview ?: "",
-                labelSize = label
+                overview = uiState.movieDetails?.overview ?: ""
             )
         }
         Spacer(modifier = Modifier.height(10.dp))
         Column(modifier = Modifier.testTag("SectionListLanguages")) {
             SectionList(
                 title = "Available Languages",
-                titleSize = titleSize,
-                list = uiState.movieDetails?.spokenLanguages ?: emptyList(),
-                label = label
+                list = uiState.movieDetails?.spokenLanguages ?: emptyList()
             )
         }
         Spacer(modifier = Modifier.height(10.dp))
         Column(modifier = Modifier.testTag("SectionListCompanies")) {
             SectionList(
                 title = "Production Companies",
-                titleSize = titleSize,
-                list = uiState.movieDetails?.productionCompanies ?: emptyList(),
-                label = label
+                list = uiState.movieDetails?.productionCompanies ?: emptyList()
             )
         }
         Spacer(modifier = Modifier.height(20.dp))
@@ -267,9 +249,7 @@ private fun SectionImage(
 private fun SectionDetails(
     title: String,
     voteAverage: String,
-    voteCount: String,
-    titleSize: TextUnit,
-    ratingTextSize: TextUnit
+    voteCount: String
 ) {
     Row(
         modifier = Modifier
@@ -283,7 +263,7 @@ private fun SectionDetails(
             Text(
                 text = title,
                 color = MaterialTheme.toTextColor(),
-                style = Typography.titleLarge.copy(fontSize = titleSize),
+                style = MaterialTheme.typography.titleLarge,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
                 modifier = Modifier.weight(1f)
@@ -291,7 +271,7 @@ private fun SectionDetails(
             Spacer(modifier = Modifier.padding(5.dp))
         }
         Box(modifier = Modifier.testTag("SectionRating")) {
-            SectionRating(voteAverage, voteCount, ratingTextSize)
+            SectionRating(voteAverage, voteCount)
         }
     }
 }
@@ -299,8 +279,7 @@ private fun SectionDetails(
 @Composable
 private fun SectionRating(
     voteAverage: String,
-    voteCount: String,
-    ratingTextSize: TextUnit
+    voteCount: String
 ) {
     if (voteAverage.isBlank() || voteCount.isBlank()) {
         return
@@ -315,12 +294,12 @@ private fun SectionRating(
         Text(
             text = "$voteAverage/10 ",
             color = MaterialTheme.toTextColor(),
-            style = Typography.labelMedium.copy(fontSize = ratingTextSize, color = White)
+            style = MaterialTheme.typography.labelMedium
         )
         Text(
             text = "($voteCount)",
             color = MaterialTheme.toTextColor(),
-            style = Typography.labelMedium.copy(fontSize = ratingTextSize, color = Color.Gray)
+            style = MaterialTheme.typography.labelMedium
         )
     }
 }
@@ -329,8 +308,7 @@ private fun SectionRating(
 private fun SectionReleaseInfo(
     releaseYear: String,
     genres: String,
-    runtime: String,
-    labelSize: TextUnit
+    runtime: String
 ) {
     val items = listOf(releaseYear, genres, runtime).filter { it.isNotEmpty() }
     FlowRow(
@@ -344,13 +322,13 @@ private fun SectionReleaseInfo(
             Text(
                 text = item,
                 color = MaterialTheme.toTextColor(),
-                style = Typography.labelMedium.copy(fontSize = labelSize)
+                style = MaterialTheme.typography.labelMedium
             )
             if (index < items.size - 1) {
                 Text(
                     text = "•",
                     color = MaterialTheme.toTextColor(),
-                    style = Typography.labelMedium.copy(fontSize = labelSize)
+                    style = MaterialTheme.typography.labelMedium
                 )
             }
         }
@@ -358,19 +336,19 @@ private fun SectionReleaseInfo(
 }
 
 @Composable
-private fun SectionTitle(title: String, titleSize: TextUnit) {
+private fun SectionTitle(title: String) {
     Text(
         text = title,
         color = MaterialTheme.toTextColor(),
-        style = Typography.titleLarge.copy(fontSize = titleSize),
+        style = MaterialTheme.typography.titleLarge,
         modifier = Modifier.padding(horizontal = 10.dp)
     )
 }
 
 @Composable
-private fun SectionList(title: String, titleSize: TextUnit, list: List<String>, label: TextUnit) {
+private fun SectionList(title: String, list: List<String>) {
     if (list.isEmpty()) return
-    SectionTitle(title, titleSize)
+    SectionTitle(title)
     Spacer(modifier = Modifier.height(3.dp))
     FlowRow(
         modifier = Modifier
@@ -395,7 +373,7 @@ private fun SectionList(title: String, titleSize: TextUnit, list: List<String>, 
                     Text(
                         text = item,
                         color = White,
-                        style = Typography.labelMedium.copy(fontSize = label),
+                        style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(
                             horizontal = 10.dp,
                             vertical = 5.dp
@@ -408,11 +386,11 @@ private fun SectionList(title: String, titleSize: TextUnit, list: List<String>, 
 }
 
 @Composable
-private fun SectionOverview(overview: String, labelSize: TextUnit) {
+private fun SectionOverview(overview: String) {
     Text(
         text = overview,
         color = MaterialTheme.toTextColor(),
-        style = Typography.labelMedium.copy(fontSize = labelSize),
+        style = MaterialTheme.typography.labelMedium,
         modifier = Modifier.padding(horizontal = 10.dp)
     )
 }

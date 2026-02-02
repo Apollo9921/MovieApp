@@ -18,24 +18,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.movieapp.domain.model.genres.Genre
 import com.example.movieapp.presentation.theme.Black
 import com.example.movieapp.presentation.theme.Selected
 import com.example.movieapp.presentation.theme.TextHighContrast
 import com.example.movieapp.presentation.theme.TopBarBackground
-import com.example.movieapp.presentation.theme.Typography
 import com.example.movieapp.presentation.theme.White
 import com.example.movieapp.presentation.theme.YellowHighContrast
-import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 
 @Composable
 fun GenresListScreen(
     genresList: List<Genre> = emptyList(),
     genreSelected: Int,
-    onGenreClick: (Int) -> Unit,
-    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
-    screenViewModel: ScreenSizingViewModel
+    onGenreClick: (Int) -> Unit
 ) {
     val isHighContrast = MaterialTheme.colorScheme.primary == TextHighContrast
     LazyRow(
@@ -65,9 +60,8 @@ fun GenresListScreen(
                 ),
                 border = BorderStroke(2.dp, Black)
             ) {
-                val label = screenViewModel.calculateCustomWidth(baseSize = 15, screenMetrics).sp
                 Text(
-                    style = Typography.labelMedium.copy(fontSize = label),
+                    style = MaterialTheme.typography.labelMedium,
                     text = genre.name,
                     fontWeight = FontWeight.Bold,
                     color = if (isHighContrast) Black else White,

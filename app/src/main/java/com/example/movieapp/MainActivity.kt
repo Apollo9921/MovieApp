@@ -30,7 +30,11 @@ class MainActivity : ComponentActivity() {
             KoinAndroidContext {
                 val settingsViewModel = koinViewModel<SettingsViewModel>()
                 val isHighContrast = settingsViewModel.isHighContrastEnabled.collectAsState()
-                MovieAppTheme(highContrast = isHighContrast.value) {
+                val fontScale = settingsViewModel.fontScale.collectAsState()
+                MovieAppTheme(
+                    highContrast = isHighContrast.value,
+                    fontScale = fontScale.value
+                ) {
                     val context = LocalContext.current
                     val localConnectivityObserver = remember { NetworkConnectivityObserver(context) }
                     val currentStatus: State<ConnectivityObserver.Status> = localConnectivityObserver.observe()

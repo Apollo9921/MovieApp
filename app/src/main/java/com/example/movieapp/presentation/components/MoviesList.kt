@@ -60,6 +60,7 @@ fun MoviesList(
 ) {
     val imageLoadingStates = remember { mutableStateMapOf<String, AsyncImagePainter.State>() }
     var allImagesLoaded by remember { mutableStateOf(false) }
+    val fontScale = MaterialTheme.typography.titleLarge.fontSize.value
 
     val lazyGridState = rememberLazyGridState()
     val moviePosition by remember {
@@ -97,15 +98,13 @@ fun MoviesList(
                 genreSelected = selectedGenreId,
                 onGenreClick = { id ->
                     onGenreClick(id)
-                },
-                screenMetrics = screenMetrics,
-                screenViewModel = screenViewModel
+                }
             )
         }
 
         LazyVerticalGrid(
             state = lazyGridState,
-            columns = GridCells.Fixed(3)
+            columns = GridCells.Fixed(if (fontScale > 20.0f) 2 else 3)
         ) {
             items(movies.size) { index ->
                 val movie = movies[index]

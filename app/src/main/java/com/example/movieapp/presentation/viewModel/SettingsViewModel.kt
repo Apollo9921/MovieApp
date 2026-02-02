@@ -17,9 +17,24 @@ class SettingsViewModel(private val repository: SettingsRepositoryImpl) : ViewMo
             initialValue = false
         )
 
+    val fontScale: StateFlow<Float> = repository.fontScale
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = 1.0f
+        )
+
+
     fun onHighContrastToggled(enabled: Boolean) {
         viewModelScope.launch {
             repository.toggleHighContrast(enabled)
+        }
+    }
+
+
+    fun onFontScaleChanged(newScale: Float) {
+        viewModelScope.launch {
+            repository.updateFontScale(newScale)
         }
     }
 }

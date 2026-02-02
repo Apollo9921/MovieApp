@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -28,15 +29,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
 import com.example.movieapp.R
 import com.example.movieapp.data.network.instance.MovieInstance
 import com.example.movieapp.domain.model.genres.Genre
 import com.example.movieapp.domain.model.movies.MovieData
-import com.example.movieapp.presentation.theme.Typography
-import com.example.movieapp.presentation.theme.White
 import com.example.movieapp.presentation.theme.toTextColor
 import com.example.movieapp.presentation.utils.rememberDragDropState
 import com.example.movieapp.presentation.viewModel.FavoritesViewModel
@@ -73,9 +71,7 @@ fun FavouritesListComponent(
                 genreSelected = genreTypeSelected.genresType,
                 onGenreClick = { id ->
                     onGenreClick(id)
-                },
-                screenMetrics = screenMetrics,
-                screenViewModel = screenViewModel
+                }
             )
             Spacer(Modifier.padding(5.dp))
         }
@@ -145,11 +141,13 @@ private fun FavouritesListItem(
     modifier: Modifier
 ) {
     val imageUrl = "${MovieInstance.BASE_URL_IMAGE}${movie.posterPath}"
-    val titleSize = screenViewModel.calculateCustomWidth(baseSize = 20, screenMetrics).sp
-    val overviewSize = screenViewModel.calculateCustomWidth(baseSize = 14, screenMetrics).sp
-    val imageSizeWidth = screenViewModel.calculateCustomWidth(baseSize = 100, screenMetrics).dp
-    val imageSizeHeight = screenViewModel.calculateCustomWidth(baseSize = 150, screenMetrics).dp
+    val baseFontSize = 20f
+    val currentFontSize = MaterialTheme.typography.titleLarge.fontSize.value
+    val fontScaleMultiplier = currentFontSize / baseFontSize
     val iconSize = screenViewModel.calculateCustomWidth(baseSize = 30, screenMetrics).dp
+    val imageSizeWidth = (screenViewModel.calculateCustomWidth(100, screenMetrics) * fontScaleMultiplier).dp
+    val imageSizeHeight = (screenViewModel.calculateCustomWidth(150, screenMetrics) * fontScaleMultiplier).dp
+
 
     Row(
         modifier = modifier
@@ -169,20 +167,20 @@ private fun FavouritesListItem(
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .width(imageSizeWidth)
-                .size(imageSizeHeight)
+                .height(imageSizeHeight)
         )
         Spacer(Modifier.padding(10.dp))
         Column(
             modifier = Modifier.weight(1f)
         ) {
             Text(
-                style = Typography.titleLarge.copy(fontSize = titleSize),
+                style = MaterialTheme.typography.titleLarge,
                 text = movie.title,
                 color = MaterialTheme.toTextColor()
             )
             Spacer(Modifier.padding(5.dp))
             Text(
-                style = Typography.labelMedium.copy(fontSize = overviewSize),
+                style = MaterialTheme.typography.labelMedium,
                 text = movie.overview,
                 color = MaterialTheme.toTextColor(),
                 maxLines = 4,

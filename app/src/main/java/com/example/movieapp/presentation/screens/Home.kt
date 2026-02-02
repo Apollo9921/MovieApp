@@ -61,9 +61,7 @@ fun HomeScreen(
             TopBar(
                 stringResource(R.string.home),
                 isBack = false,
-                backStack = { false },
-                screenMetrics = screenMetrics,
-                screenViewModel = screenViewModel
+                backStack = { false }
             )
         },
         bottomBar = {
@@ -112,8 +110,6 @@ fun HomeScreen(
                         Box(modifier = Modifier.testTag("ErrorComponent")) {
                             ErrorScreen(
                                 errorMessage = uiState.errorMessage!!,
-                                screenMetrics = screenMetrics,
-                                screenViewModel = screenViewModel,
                                 onRefresh = { fetchMovies() }
                             )
                         }

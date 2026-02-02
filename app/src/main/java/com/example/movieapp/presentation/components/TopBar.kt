@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,24 +18,18 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.movieapp.R
-import com.example.movieapp.presentation.theme.Typography
 import com.example.movieapp.presentation.theme.toTextColor
 import com.example.movieapp.presentation.utils.TopBarAction
-import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 
 @Composable
 fun TopBar(
     title: String,
     isBack: Boolean = true,
     backStack: () -> Unit,
-    action: TopBarAction = TopBarAction.None,
-    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
-    screenViewModel: ScreenSizingViewModel
+    action: TopBarAction = TopBarAction.None
 ) {
-    val titleSize = screenViewModel.calculateCustomWidth(baseSize = 20, screenMetrics).sp
-
+    val fontScale = MaterialTheme.typography.titleLarge.fontSize.value
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -49,12 +44,14 @@ fun TopBar(
                     painter = painterResource(id = R.drawable.back),
                     contentDescription = "Back",
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
-                    modifier = Modifier.clickable { backStack() }
+                    modifier = Modifier
+                        .size((fontScale).dp)
+                        .clickable { backStack() }
                 )
                 Spacer(modifier = Modifier.padding(10.dp))
             }
             Text(
-                style = Typography.titleLarge.copy(fontSize = titleSize),
+                style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.toTextColor(),
                 text = title,
                 maxLines = 1,
@@ -68,6 +65,7 @@ fun TopBar(
 
 @Composable
 private fun RenderAction(action: TopBarAction) {
+    val fontScale = MaterialTheme.typography.titleLarge.fontSize.value
     when (action) {
         is TopBarAction.Details -> {
             Image(
@@ -76,7 +74,9 @@ private fun RenderAction(action: TopBarAction) {
                 ),
                 contentDescription = "Favorite",
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onError),
-                modifier = Modifier.clickable { action.onClick() }
+                modifier = Modifier
+                    .size((fontScale).dp)
+                    .clickable { action.onClick() }
             )
         }
         is TopBarAction.Favorite -> {
@@ -84,7 +84,9 @@ private fun RenderAction(action: TopBarAction) {
                 painter = painterResource(id = action.iconRes),
                 contentDescription = null,
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
-                modifier = Modifier.clickable { action.onClick() }
+                modifier = Modifier
+                    .size((fontScale).dp)
+                    .clickable { action.onClick() }
             )
         }
         TopBarAction.None -> {  }

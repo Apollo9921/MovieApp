@@ -85,9 +85,7 @@ fun SearchScreen(
             TopBar(
                 title = stringResource(R.string.search),
                 isBack = true,
-                backStack = { backStack() },
-                screenMetrics = screenMetrics,
-                screenViewModel = screenViewModel
+                backStack = { backStack() }
             )
         },
         content = {
@@ -132,8 +130,6 @@ fun SearchScreen(
                         Box(modifier = Modifier.testTag("ErrorComponent")) {
                             ErrorScreen(
                                 errorMessage = uiState.errorMessage,
-                                screenMetrics = screenMetrics,
-                                screenViewModel = screenViewModel,
                                 onRefresh = { viewModel.onQueryChanged(searchValue.value) }
                             )
                         }

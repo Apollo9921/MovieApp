@@ -24,15 +24,12 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.movieapp.R
 import com.example.movieapp.presentation.components.BottomNavigationBar
 import com.example.movieapp.presentation.components.TopBar
 import com.example.movieapp.presentation.navigation.Favorites
 import com.example.movieapp.presentation.navigation.Search
-import com.example.movieapp.presentation.theme.Typography
-import com.example.movieapp.presentation.theme.White
 import com.example.movieapp.presentation.theme.toTextColor
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 
@@ -50,9 +47,7 @@ fun MoreScreen(
             TopBar(
                 stringResource(R.string.more),
                 isBack = false,
-                backStack = { false },
-                screenMetrics = screenMetrics,
-                screenViewModel = screenViewModel
+                backStack = { false }
             )
         },
         bottomBar = { BottomNavigationBar(
@@ -110,9 +105,8 @@ private fun MoreScreenOptions(
                     modifier = Modifier.size(iconSize)
                 )
                 Spacer(modifier = Modifier.padding(10.dp))
-                val titleSize = screenViewModel.calculateCustomWidth(baseSize = 20, screenMetrics).sp
                 Text(
-                    style = Typography.displayMedium.copy(fontSize = titleSize),
+                    style = MaterialTheme.typography.titleLarge,
                     text = option[it].second,
                     color = MaterialTheme.toTextColor(),
                 )

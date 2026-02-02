@@ -88,8 +88,6 @@ fun FavoritesScreen(
                     iconRes = R.drawable.drag,
                     onClick = { enableDragging() }
                 ),
-                screenMetrics = screenMetrics,
-                screenViewModel = screenViewModel,
             )
         },
         content = {
@@ -128,8 +126,6 @@ fun FavoritesScreen(
                         Box(modifier = Modifier.testTag("ErrorComponent")) {
                             ErrorScreen(
                                 errorMessage = uiState.errorMessage!!,
-                                screenMetrics = screenMetrics,
-                                screenViewModel = screenViewModel,
                                 onRefresh = { onRefresh() }
                             )
                         }

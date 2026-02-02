@@ -16,20 +16,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.movieapp.R
 import com.example.movieapp.core.Constants
-import com.example.movieapp.presentation.theme.Typography
 import com.example.movieapp.presentation.theme.Black
 import com.example.movieapp.presentation.theme.White
 import com.example.movieapp.presentation.theme.toTextColor
-import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 
 @Composable
 fun ErrorScreen(
     errorMessage: String?,
-    screenMetrics: ScreenSizingViewModel.ScreenMetrics,
-    screenViewModel: ScreenSizingViewModel,
     showButton: Boolean = false,
     onRefresh: () -> Unit
 ) {
@@ -43,11 +38,9 @@ fun ErrorScreen(
             .background(MaterialTheme.colorScheme.onBackground),
         contentAlignment = Alignment.Center
     ) {
-        val titleSize = screenViewModel.calculateCustomWidth(baseSize = 20, screenMetrics).sp
-        val buttonSize = screenViewModel.calculateCustomWidth(baseSize = 15, screenMetrics).sp
         Column {
             Text(
-                style = Typography.titleLarge.copy(fontSize = titleSize),
+                style = MaterialTheme.typography.titleLarge,
                 text = message,
                 color = MaterialTheme.toTextColor(),
                 textAlign = TextAlign.Center
@@ -65,7 +58,7 @@ fun ErrorScreen(
                     )
                 ) {
                     Text(
-                        style = Typography.labelMedium.copy(fontSize = buttonSize),
+                        style = MaterialTheme.typography.labelMedium,
                         text = stringResource(R.string.refresh),
                         color = MaterialTheme.toTextColor(),
                         textAlign = TextAlign.Center
