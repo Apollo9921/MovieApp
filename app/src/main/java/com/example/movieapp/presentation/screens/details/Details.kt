@@ -3,6 +3,7 @@ package com.example.movieapp.presentation.screens.details
 import android.content.res.Configuration
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,7 +51,6 @@ import com.example.movieapp.presentation.components.LoadingScreen
 import com.example.movieapp.presentation.components.TopBar
 import com.example.movieapp.presentation.navigation.ResultStore
 import com.example.movieapp.presentation.theme.Black
-import com.example.movieapp.presentation.theme.BrightYellow
 import com.example.movieapp.presentation.theme.Typography
 import com.example.movieapp.presentation.theme.White
 import com.example.movieapp.presentation.theme.toTextColor
@@ -370,14 +370,13 @@ private fun SectionTitle(title: String, titleSize: TextUnit) {
 @Composable
 private fun SectionList(title: String, titleSize: TextUnit, list: List<String>, label: TextUnit) {
     if (list.isEmpty()) return
-    val isHighContrast = MaterialTheme.colorScheme.primary == BrightYellow
     SectionTitle(title, titleSize)
     Spacer(modifier = Modifier.height(3.dp))
     FlowRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         list.forEach { item ->
@@ -386,11 +385,16 @@ private fun SectionList(title: String, titleSize: TextUnit, list: List<String>, 
                     modifier = Modifier
                         .wrapContentSize()
                         .clip(RoundedCornerShape(5.dp))
-                        .background(if (isHighContrast) BrightYellow else Black)
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.secondary,
+                            shape = RoundedCornerShape(5.dp)
+                        )
+                        .background(Black)
                 ) {
                     Text(
                         text = item,
-                        color = if (isHighContrast) Black else White,
+                        color = White,
                         style = Typography.labelMedium.copy(fontSize = label),
                         modifier = Modifier.padding(
                             horizontal = 10.dp,

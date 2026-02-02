@@ -27,7 +27,8 @@ import com.example.movieapp.presentation.theme.BottomBarBackground
 import com.example.movieapp.presentation.theme.White
 import com.example.movieapp.presentation.navigation.BottomNavItem
 import com.example.movieapp.presentation.theme.Black
-import com.example.movieapp.presentation.theme.BrightYellow
+import com.example.movieapp.presentation.theme.TextHighContrast
+import com.example.movieapp.presentation.theme.YellowHighContrast
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 
 @Composable
@@ -46,7 +47,7 @@ fun BottomNavigationBar(
     val bottomBarHeight = 60.dp
     val bottomSize = screenViewModel.calculateCustomHeight(baseSize = 50, screenMetrics).dp
 
-    val isHighContrast = MaterialTheme.colorScheme.primary == BrightYellow
+    val isHighContrast = MaterialTheme.colorScheme.primary == TextHighContrast
 
     Row(
         modifier = Modifier
@@ -60,7 +61,7 @@ fun BottomNavigationBar(
             modifier = Modifier
                 .width(screenWidthDp)
                 .clip(CircleShape)
-                .background(if (isHighContrast) BrightYellow else BottomBarBackground),
+                .background(if (isHighContrast) YellowHighContrast else BottomBarBackground),
             contentAlignment = Alignment.BottomCenter
         ) {
             val navBackStackEntry by navController.currentBackStackEntryAsState()

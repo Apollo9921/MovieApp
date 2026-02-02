@@ -15,16 +15,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.movieapp.domain.model.genres.Genre
 import com.example.movieapp.presentation.theme.Black
-import com.example.movieapp.presentation.theme.BrightYellow
 import com.example.movieapp.presentation.theme.Selected
+import com.example.movieapp.presentation.theme.TextHighContrast
 import com.example.movieapp.presentation.theme.TopBarBackground
 import com.example.movieapp.presentation.theme.Typography
 import com.example.movieapp.presentation.theme.White
+import com.example.movieapp.presentation.theme.YellowHighContrast
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 
 @Composable
@@ -35,7 +37,7 @@ fun GenresListScreen(
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel
 ) {
-    val isHighContrast = MaterialTheme.colorScheme.primary == BrightYellow
+    val isHighContrast = MaterialTheme.colorScheme.primary == TextHighContrast
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -53,7 +55,7 @@ fun GenresListScreen(
                     },
                 colors = CardDefaults.cardColors(
                     containerColor = if (genreSelected == genre.id) {
-                        if (isHighContrast) BrightYellow else Selected
+                        if (isHighContrast) YellowHighContrast else Selected
                     } else {
                         if (isHighContrast) White else TopBarBackground
                     },
@@ -67,6 +69,7 @@ fun GenresListScreen(
                 Text(
                     style = Typography.labelMedium.copy(fontSize = label),
                     text = genre.name,
+                    fontWeight = FontWeight.Bold,
                     color = if (isHighContrast) Black else White,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(7.dp)

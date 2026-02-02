@@ -41,9 +41,9 @@ import com.example.movieapp.domain.model.movies.MovieData
 import com.example.movieapp.presentation.theme.Background
 import com.example.movieapp.presentation.theme.Black
 import com.example.movieapp.presentation.theme.BottomBarBackground
-import com.example.movieapp.presentation.theme.BrightYellow
+import com.example.movieapp.presentation.theme.TextHighContrast
+import com.example.movieapp.presentation.theme.YellowHighContrast
 import com.example.movieapp.presentation.theme.White
-import com.example.movieapp.presentation.theme.toTextColor
 import com.example.movieapp.presentation.viewModel.ScreenSizingViewModel
 
 @Composable
@@ -151,7 +151,7 @@ private fun DisplayMoviePosition(
     screenMetrics: ScreenSizingViewModel.ScreenMetrics,
     screenViewModel: ScreenSizingViewModel
 ) {
-    val isHighContrast = MaterialTheme.colorScheme.primary == BrightYellow
+    val isHighContrast = MaterialTheme.colorScheme.primary == TextHighContrast
     val bottomSize = screenViewModel.calculateCustomHeight(baseSize = 50, screenMetrics).dp
     Box(
         modifier = Modifier
@@ -161,7 +161,7 @@ private fun DisplayMoviePosition(
     ) {
         FloatingActionButton(
             onClick = { },
-            containerColor = if (isHighContrast) BrightYellow else BottomBarBackground,
+            containerColor = if (isHighContrast) YellowHighContrast else BottomBarBackground,
             contentColor = Background,
             shape = CircleShape,
             modifier = Modifier

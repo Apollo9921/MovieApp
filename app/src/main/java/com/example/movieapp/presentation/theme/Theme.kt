@@ -10,6 +10,7 @@ private val LightColorScheme = lightColorScheme(
     background = TopBarBackground,
     onBackground = Background,
     primary = White,
+    secondary = White,
     onError = Red
 )
 
@@ -17,14 +18,16 @@ private val DarkColorScheme = darkColorScheme(
     background = TopBarBackground,
     onBackground = Background,
     primary = White,
+    secondary = White,
     onError = Red
 )
 
 private val HighContrastColorScheme = darkColorScheme(
     background = Black,
-    onBackground = Black,
-    primary = BrightYellow,
-    onError = BrightYellow
+    onBackground = BlackHighContrast,
+    primary = TextHighContrast,
+    secondary = YellowHighContrast,
+    onError = IconHighContrast
 )
 
 @Composable
