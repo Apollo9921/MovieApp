@@ -5,9 +5,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.movieapp.presentation.screens.AccessibilityRoute
 import com.example.movieapp.presentation.screens.HomeRoute
 import com.example.movieapp.presentation.screens.MoreScreen
-import com.example.movieapp.presentation.screens.SettingsScreen
+import com.example.movieapp.presentation.screens.SettingsRoute
 import com.example.movieapp.presentation.screens.details.DetailsRoute
 import com.example.movieapp.presentation.screens.more.FavoritesRoute
 import com.example.movieapp.presentation.screens.more.SearchRoute
@@ -41,7 +42,7 @@ fun Navigation() {
             )
         }
         composable(route = BottomNavItem.Settings.route) {
-            SettingsScreen(
+            SettingsRoute(
                 navController = navController,
                 screenMetrics = screenMetrics,
                 screenViewModel = screenViewModel
@@ -75,6 +76,10 @@ fun Navigation() {
                 screenViewModel = screenViewModel,
                 resultStore = resultStore
             )
+        }
+
+        composable<Accessibility> {
+            AccessibilityRoute(navController = navController)
         }
     }
 }

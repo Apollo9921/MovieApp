@@ -14,7 +14,7 @@ import com.example.movieapp.presentation.navigation.Navigation
 import com.example.movieapp.presentation.theme.MovieAppTheme
 import com.example.movieapp.domain.repository.ConnectivityObserver
 import com.example.movieapp.data.repository.NetworkConnectivityObserver
-import com.example.movieapp.presentation.viewModel.SettingsViewModel
+import com.example.movieapp.presentation.viewModel.AccessibilityViewModel
 import org.koin.androidx.compose.KoinAndroidContext
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
@@ -28,9 +28,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             KoinAndroidContext {
-                val settingsViewModel = koinViewModel<SettingsViewModel>()
-                val isHighContrast = settingsViewModel.isHighContrastEnabled.collectAsState()
-                val fontScale = settingsViewModel.fontScale.collectAsState()
+                val accessibilityViewModel = koinViewModel<AccessibilityViewModel>()
+                val isHighContrast = accessibilityViewModel.isHighContrastEnabled.collectAsState()
+                val fontScale = accessibilityViewModel.fontScale.collectAsState()
                 MovieAppTheme(
                     highContrast = isHighContrast.value,
                     fontScale = fontScale.value

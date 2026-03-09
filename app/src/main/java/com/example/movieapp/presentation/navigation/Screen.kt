@@ -10,3 +10,6 @@ object Search
 
 @Serializable
 object Favorites
+
+@Serializable
+object Accessibility

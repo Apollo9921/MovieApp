@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.map
 
 private val Context.dataStore by preferencesDataStore(name = "settings")
 
-class SettingsRepositoryImpl(private val context: Context) {
+class AccessibilityRepositoryImpl(private val context: Context) {
     private val highContrastKey = booleanPreferencesKey("high_contrast_enabled")
     private val fontScaleKey = floatPreferencesKey("font_scale")
 

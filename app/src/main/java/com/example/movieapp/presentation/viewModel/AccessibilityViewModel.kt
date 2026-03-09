@@ -2,13 +2,13 @@ package com.example.movieapp.presentation.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.movieapp.data.repository.SettingsRepositoryImpl
+import com.example.movieapp.data.repository.AccessibilityRepositoryImpl
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class SettingsViewModel(private val repository: SettingsRepositoryImpl) : ViewModel() {
+class AccessibilityViewModel(private val repository: AccessibilityRepositoryImpl) : ViewModel() {
 
     val isHighContrastEnabled: StateFlow<Boolean> = repository.isHighContrastEnabled
         .stateIn(

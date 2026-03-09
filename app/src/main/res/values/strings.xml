@@ -7,6 +7,11 @@
     <string name="search">Search</string>
     <string name="details">Details</string>
     <string name="favourites">Favourites</string>
+    <string name="accessibility">Accessibility</string>
     <string name="search_hint">Search for a movie</string>
     <string name="refresh">Refresh</string>
+    <string name="accessibility_mode">Accessibility Mode</string>
+    <string name="high_contrast_mode">High Contrast Mode</string>
+    <string name="font_scale">Font Scale</string>
+    <string name="arrow_right">Arrow Right</string>
 </resources>
